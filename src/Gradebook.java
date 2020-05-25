@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
 import java.awt.*;
@@ -10,48 +11,49 @@ public class Gradebook extends JFrame {
 
 	private JTextArea textArea;
 	protected Container contentPane;
+	private static DefaultTableModel cdtm;
+	private static DefaultTableModel gdtm;
+	protected JFrame frame;
 
 
 	public Gradebook(){
 
-        JFrame f = new JFrame(); 
+		// Frame that holds everything
+        frame = new JFrame(); 
         
-        // Frame Title 
-        f.setTitle("JTable Example"); 
+        frame.setTitle("JTable Example"); 
+        
+        frame.setVisible(true); 
   
-        // Data to be displayed in the JTable 
-        String[][] data = { 
-            { "Principles of Economics I", "Yezer, Anthony", "MW 12:15-1:35", "56789", "3", "76.8", "CC", "C", "1"  }, 
-            { "French", "Anaye, Hadia", "TR 12:15-1:35", "52367", "3", "92.7", "CTP", "A-", "1"  },
-            { "Spanish", "Anaye, Hadia", "MW 12:15-1:35", "52367", "3", "82.7", "P/NP", "P", "1"  } 
-        }; 
-  
-        // Column Names 
-        String[] columnNames = { "Course Title", "Professor", "Day/Time", "Identifier", "Credits", "Numeric Grade", "Grade Mode", "Final Grade", "Year" }; 
-  
-        // Initializing the JTable 
-        JTable j = new JTable(data, columnNames);
-        j.setShowVerticalLines(true);
-        j.setColumnSelectionAllowed(false);
-        j.getTableHeader().setReorderingAllowed(false);
-        j.setEnabled(false);
+        // ------------------------Creating the table for the list of courses------------------------
+        JTable courseList = new JTable();
+        cdtm = new DefaultTableModel(0,0);
+        
+        String courseHeader[] = new String[] { "Course Title", "Professor", "Day/Time", "Identifier", "Credits", "Numeric Grade", "Grade Mode", "Final Grade", "Year" };
+        
+        cdtm.setColumnIdentifiers(courseHeader);
+        courseList.setModel(cdtm);
+        
+        courseList.setShowVerticalLines(true);
+        courseList.setColumnSelectionAllowed(false);
+        courseList.getTableHeader().setReorderingAllowed(false);
+        courseList.setEnabled(false);
   
         // adding it to JScrollPane 
-        JScrollPane sp = new JScrollPane(j); 
-        f.add(sp, BorderLayout.NORTH); 
-        j.getColumnModel().getColumn(0).setPreferredWidth(200);
-        j.getColumnModel().getColumn(1).setPreferredWidth(200);
-        j.getColumnModel().getColumn(2).setPreferredWidth(100);
-        j.getColumnModel().getColumn(3).setPreferredWidth(90);
-        j.getColumnModel().getColumn(4).setPreferredWidth(100);
-        j.getColumnModel().getColumn(5).setPreferredWidth(150);
-        j.getColumnModel().getColumn(6).setPreferredWidth(75);
-        j.getColumnModel().getColumn(7).setPreferredWidth(75);
-        j.getColumnModel().getColumn(8).setPreferredWidth(75);
-
-        // Frame Visible = true 
-        f.setVisible(true); 
+        JScrollPane spc = new JScrollPane(courseList); 
+        frame.add(spc, BorderLayout.NORTH); 
+        courseList.getColumnModel().getColumn(0).setPreferredWidth(200);
+        courseList.getColumnModel().getColumn(1).setPreferredWidth(200);
+        courseList.getColumnModel().getColumn(2).setPreferredWidth(100);
+        courseList.getColumnModel().getColumn(3).setPreferredWidth(90);
+        courseList.getColumnModel().getColumn(4).setPreferredWidth(100);
+        courseList.getColumnModel().getColumn(5).setPreferredWidth(150);
+        courseList.getColumnModel().getColumn(6).setPreferredWidth(75);
+        courseList.getColumnModel().getColumn(7).setPreferredWidth(75);
+        courseList.getColumnModel().getColumn(8).setPreferredWidth(75);
         
+        
+        // ------------------------Creating the panel for the buttons------------------------
         JPanel buttons = new JPanel();
         buttons.setVisible(true);
         JButton addCourse = new JButton("Add Course");
@@ -76,22 +78,31 @@ public class Gradebook extends JFrame {
         buttons.add(saveChanges);
         buttons.add(identifier);
         buttons.add(identifierInput);
-        f.add(buttons, BorderLayout.CENTER);
+        frame.add(buttons, BorderLayout.CENTER);
         
-        String[][] data2 = {{"Principles of Economics I", "56789","1111","Quizzes","15%","91.5%"}};
+        // ------------------------Creating the table for the list of grades/assignments------------------------
+        JTable gradeList = new JTable();
+        gdtm = new DefaultTableModel(0,0);
         
-        String[] columnNames2 = {"Course Title", "Identifier", "Assignment Code", "Category", "Category Weight", "Grade"};
+        String gradeHeader[] = new String[] { "Course Title", "Identifier", "Assignment Code", "Category", "Category Weight", "Grade" };
         
-        JTable grades = new JTable(data2, columnNames2);
-        grades.setShowVerticalLines(true);
-        grades.setColumnSelectionAllowed(false);
-        grades.getTableHeader().setReorderingAllowed(false);
-        grades.setEnabled(false);
-        JScrollPane sp2 = new JScrollPane(grades); 
-        f.add(sp2, BorderLayout.SOUTH);
+        gdtm.setColumnIdentifiers(gradeHeader);
+        gradeList.setModel(gdtm);
         
-        f.pack();
+        gradeList.setShowVerticalLines(true);
+        gradeList.setColumnSelectionAllowed(false);
+        gradeList.getTableHeader().setReorderingAllowed(false);
+        gradeList.setEnabled(false);
+        
+        JScrollPane spg = new JScrollPane(gradeList); 
+        frame.add(spg, BorderLayout.SOUTH);
+        
+        frame.pack();
 
+	}
+	
+	public void addCourse(String title, String prof, String time, String identifier, String credits, String numGrade, String gMode, String fGrade, String year) {
+		cdtm.addRow(new Object[] {title, prof, time, identifier, credits, numGrade, gMode, fGrade, year});
 	}
 
 	public static void main(String[] a) {
