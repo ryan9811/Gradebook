@@ -27,6 +27,10 @@ public class Gradebook extends JFrame implements ActionListener {
         frame.setTitle("Gradebook"); 
         
         frame.setVisible(true); 
+        
+        frame.setResizable(false);
+        
+        frame.setDefaultCloseOperation(EXIT_ON_CLOSE);;
   
         // ------------------------Creating the table for the list of courses------------------------
         JTable courseList = new JTable();
