@@ -232,7 +232,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 		}
 		if(((String) cdtm.getValueAt(cdtm.getRowCount() - 1, 9)).equalsIgnoreCase("Finalized")) {
-				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "GPA", ""});		
+				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});		
 				cdtm.addRow(new Object[] {"Term Credits", creditSum, "Term Quality Points", qualitySum, "", "", "", "", "GPA", qualitySum / creditSum});
 				
 				double allQualitySum = 0;
