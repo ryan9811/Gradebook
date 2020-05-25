@@ -32,7 +32,7 @@ public class Gradebook extends JFrame implements ActionListener {
         JTable courseList = new JTable();
         cdtm = new DefaultTableModel(0,0);
         
-        String courseHeader[] = new String[] { "Course Title", "Professor", "Day/Time", "Identifier", "Credits", "Numeric Grade", "Grade Mode", "Final Grade", "Year" };
+        String courseHeader[] = new String[] { "Course Title", "Professor", "Day/Time", "Identifier", "Credits", "Numeric Grade", "Grade Mode", "Final Grade", "Year", "Status" };
         
         cdtm.setColumnIdentifiers(courseHeader);
         courseList.setModel(cdtm);
@@ -47,14 +47,14 @@ public class Gradebook extends JFrame implements ActionListener {
         frame.add(spc, BorderLayout.NORTH); 
         courseList.getColumnModel().getColumn(0).setPreferredWidth(200);
         courseList.getColumnModel().getColumn(1).setPreferredWidth(200);
-        courseList.getColumnModel().getColumn(2).setPreferredWidth(100);
-        courseList.getColumnModel().getColumn(3).setPreferredWidth(90);
-        courseList.getColumnModel().getColumn(4).setPreferredWidth(100);
-        courseList.getColumnModel().getColumn(5).setPreferredWidth(150);
+        courseList.getColumnModel().getColumn(2).setPreferredWidth(150);
+        courseList.getColumnModel().getColumn(3).setPreferredWidth(100);
+        courseList.getColumnModel().getColumn(4).setPreferredWidth(50);
+        courseList.getColumnModel().getColumn(5).setPreferredWidth(100);
         courseList.getColumnModel().getColumn(6).setPreferredWidth(75);
         courseList.getColumnModel().getColumn(7).setPreferredWidth(75);
-        courseList.getColumnModel().getColumn(8).setPreferredWidth(75);
-        
+        courseList.getColumnModel().getColumn(8).setPreferredWidth(30);
+        courseList.getColumnModel().getColumn(9).setPreferredWidth(125);
         
         // ------------------------Creating the panel for the buttons------------------------
         JPanel buttons = new JPanel();
@@ -83,7 +83,7 @@ public class Gradebook extends JFrame implements ActionListener {
         manualOverride.addActionListener(this);
         
         // Create the textfield for allowing edits
-        JLabel identifier = new JLabel("Enter Identifier: ");
+        JLabel identifier = new JLabel("Identifier/Code: ");
         identifierInput = new JTextField();
         identifierInput.setPreferredSize(new Dimension(150,20));
         identifierInput.setEditable(true);
@@ -108,7 +108,7 @@ public class Gradebook extends JFrame implements ActionListener {
         JTable gradeList = new JTable();
         gdtm = new DefaultTableModel(0,0);
         
-        String gradeHeader[] = new String[] { "Course Title", "Identifier", "Assignment Code", "Category", "Category Weight", "Grade" };
+        String gradeHeader[] = new String[] { "Course Title", "Identifier", "Assignment Code", "Category", "Category Weight", "Points Earned", "Total Points", "Grade" };
         
         gdtm.setColumnIdentifiers(gradeHeader);
         gradeList.setModel(gdtm);
@@ -125,8 +125,7 @@ public class Gradebook extends JFrame implements ActionListener {
 
 	}
 	
-	public void addCourse() {
-		
+	public void addCourse() {	
 		String title = JOptionPane.showInputDialog("Enter Course Title");
 		
 		String prof = JOptionPane.showInputDialog("Enter Professor Name");
@@ -142,12 +141,23 @@ public class Gradebook extends JFrame implements ActionListener {
 		String[] gModeChoices = {"C", "P/NP"};
 		String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
 		
-		String fGrade = "n/a";
+		String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
+		String[] fGradeChoicesP = {"In Progress", "P", "NP"};
+		String fGrade;
+		if(gMode.equalsIgnoreCase("C"))
+			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
+		else
+			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
 		
 		String[] yearChoices = {"1", "2", "3", "4", "5"};
 		String year = (String) JOptionPane.showInputDialog(null, "Select Year", "Course Master", JOptionPane.QUESTION_MESSAGE, null, yearChoices, yearChoices[0]);
+		
+		String status;
+		if(fGrade.equalsIgnoreCase("In Progress")) 
+			status = "In Progress";
+		else status = "Finalized (Manual)";
 
-		cdtm.addRow(new Object[] {title, prof, time, identifier, credits, numGrade, gMode, fGrade, year});
+		cdtm.addRow(new Object[] {title, prof, time, identifier, credits, numGrade, gMode, fGrade, year, status});
 	}
 	
 	public void removeCourse() {
@@ -161,6 +171,71 @@ public class Gradebook extends JFrame implements ActionListener {
 				else return;
 			}
 		}
+	}
+	
+	public void finalizeGrades() {
+		double qualityPoints = 0;
+		
+		boolean year1f = true;
+		boolean year2f = true;
+		boolean year3f = true;
+		boolean year4f = true;
+		
+		for(int i = 0; i < cdtm.getRowCount(); i++) {
+			if(cdtm.getValueAt(i, 8).equals("1") && !cdtm.getValueAt(i, 8).equals("Finalized"))
+				year1f = false;
+			if(cdtm.getValueAt(i, 8).equals("2") && !cdtm.getValueAt(i, 8).equals("Finalized"))
+				year2f = false;
+			if(cdtm.getValueAt(i, 8).equals("3") && !cdtm.getValueAt(i, 8).equals("Finalized"))
+				year3f = false;
+			if(cdtm.getValueAt(i, 8).equals("4") && !cdtm.getValueAt(i, 8).equals("Finalized"))
+				year4f = false;
+		}
+		
+		int year = 0;
+		boolean[] yearsFinalized = {year1f, year2f, year3f, year4f};
+		for(int i = 0; i < yearsFinalized.length; i++)
+			if(!yearsFinalized[i])
+				year = i + 1;
+		
+		int creditSum = 0;
+		double qualitySum = 0;
+		for(int i = 0; i < cdtm.getRowCount(); i++) {
+			if(cdtm.getValueAt(i, 8).equals(year + "")) {
+				qualitySum += Integer.parseInt((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
+				creditSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
+				cdtm.setValueAt("Finalized", i, 9);
+			}
+		}
+		if(((String) cdtm.getValueAt(cdtm.getRowCount() - 1, 9)).equalsIgnoreCase("Finalized"))
+				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "GPA", qualitySum / creditSum});
+		
+	}
+	
+	public static double letToQual(String letterGrade) {
+		if(letterGrade.equalsIgnoreCase("A")) 
+			return 4;
+		if(letterGrade.equalsIgnoreCase("A-")) 
+			return 3.7;
+		if(letterGrade.equalsIgnoreCase("B+")) 
+			return 3.3;
+		if(letterGrade.equalsIgnoreCase("B")) 
+			return 3;
+		if(letterGrade.equalsIgnoreCase("B-")) 
+			return 2.7;
+		if(letterGrade.equalsIgnoreCase("C+")) 
+			return 2.3;
+		if(letterGrade.equalsIgnoreCase("C")) 
+			return 2;
+		if(letterGrade.equalsIgnoreCase("C-")) 
+			return 1.7;
+		if(letterGrade.equalsIgnoreCase("D+")) 
+			return 1.3;
+		if(letterGrade.equalsIgnoreCase("D")) 
+			return 1;
+		if(letterGrade.equalsIgnoreCase("D-")) 
+			return 0.7;
+		return 0;
 	}
 	
 	// removes grades associated with a deleted course
@@ -182,6 +257,10 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		if(s.equalsIgnoreCase("Remove Course")) {
 			removeCourse();
+		}
+		
+		if(s.equalsIgnoreCase("Finalize Grades")) {
+			finalizeGrades();
 		}
 		
 	}
