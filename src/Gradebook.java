@@ -21,7 +21,7 @@ public class Gradebook extends JFrame {
 		// Frame that holds everything
         frame = new JFrame(); 
         
-        frame.setTitle("JTable Example"); 
+        frame.setTitle("Gradebook"); 
         
         frame.setVisible(true); 
   
