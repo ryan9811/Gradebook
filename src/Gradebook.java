@@ -36,7 +36,7 @@ public class Gradebook extends JFrame implements ActionListener {
         JTable courseList = new JTable();
         cdtm = new DefaultTableModel(0,0);
         
-        String courseHeader[] = new String[] { "Course Title", "Professor", "Day/Time", "Identifier", "Credits", "Numeric Grade", "Grade Mode", "Final Grade", "Year", "Status" };
+        String courseHeader[] = new String[] { "Course Title", "Professor", "Day/Time", "Identifier", "Credits", "Numeric Grade", "Grade Mode", "Final Grade", "Term", "Status" };
         
         cdtm.setColumnIdentifiers(courseHeader);
         courseList.setModel(cdtm);
@@ -138,7 +138,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String identifier = JOptionPane.showInputDialog("Enter Course Identifier");
 		
-		String credits = JOptionPane.showInputDialog("Enter Number of Credits");
+		String[] creditsChoices = {"0", "1", "2", "3", "4", "5"};
+		String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[0]);
 		
 		String numGrade = "n/a";
 		
@@ -153,8 +154,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		else
 			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
 		
-		String[] yearChoices = {"1", "2", "3", "4", "5"};
-		String year = (String) JOptionPane.showInputDialog(null, "Select Year", "Course Master", JOptionPane.QUESTION_MESSAGE, null, yearChoices, yearChoices[0]);
+		String[] yearChoices = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+		String year = (String) JOptionPane.showInputDialog(null, "Select Term", "Course Master", JOptionPane.QUESTION_MESSAGE, null, yearChoices, yearChoices[0]);
 		
 		String status;
 		if(fGrade.equalsIgnoreCase("In Progress")) 
@@ -184,6 +185,13 @@ public class Gradebook extends JFrame implements ActionListener {
 		boolean year2f = true;
 		boolean year3f = true;
 		boolean year4f = true;
+		boolean year5f = true;
+		boolean year6f = true;
+		boolean year7f = true;
+		boolean year8f = true;
+		boolean year9f = true;
+		boolean year10f = true;
+		
 		
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
 			if(cdtm.getValueAt(i, 8).equals("1") && !cdtm.getValueAt(i, 8).equals("Finalized"))
@@ -194,10 +202,22 @@ public class Gradebook extends JFrame implements ActionListener {
 				year3f = false;
 			if(cdtm.getValueAt(i, 8).equals("4") && !cdtm.getValueAt(i, 8).equals("Finalized"))
 				year4f = false;
+			if(cdtm.getValueAt(i, 8).equals("5") && !cdtm.getValueAt(i, 8).equals("Finalized"))
+				year5f = false;
+			if(cdtm.getValueAt(i, 8).equals("6") && !cdtm.getValueAt(i, 8).equals("Finalized"))
+				year6f = false;
+			if(cdtm.getValueAt(i, 8).equals("7") && !cdtm.getValueAt(i, 8).equals("Finalized"))
+				year7f = false;
+			if(cdtm.getValueAt(i, 8).equals("8") && !cdtm.getValueAt(i, 8).equals("Finalized"))
+				year8f = false;
+			if(cdtm.getValueAt(i, 8).equals("9") && !cdtm.getValueAt(i, 8).equals("Finalized"))
+				year9f = false;
+			if(cdtm.getValueAt(i, 8).equals("10") && !cdtm.getValueAt(i, 8).equals("Finalized"))
+				year10f = false;
 		}
 		
 		int year = 0;
-		boolean[] yearsFinalized = {year1f, year2f, year3f, year4f};
+		boolean[] yearsFinalized = {year1f, year2f, year3f, year4f, year5f, year6f, year7f, year8f, year9f, year10f};
 		for(int i = 0; i < yearsFinalized.length; i++)
 			if(!yearsFinalized[i])
 				year = i + 1;
@@ -211,8 +231,20 @@ public class Gradebook extends JFrame implements ActionListener {
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 		}
-		if(((String) cdtm.getValueAt(cdtm.getRowCount() - 1, 9)).equalsIgnoreCase("Finalized"))
-				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "GPA", qualitySum / creditSum});
+		if(((String) cdtm.getValueAt(cdtm.getRowCount() - 1, 9)).equalsIgnoreCase("Finalized")) {
+				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "GPA", ""});		
+				cdtm.addRow(new Object[] {"Term Credits", creditSum, "Term Quality Points", qualitySum, "", "", "", "", "GPA", qualitySum / creditSum});
+				
+				double allQualitySum = 0;
+				int allCreditSum = 0;
+				for(int i = 0; i < cdtm.getRowCount(); i++)
+					if(((String) cdtm.getValueAt(i, 0)).equalsIgnoreCase("Term Credits")) {
+						allQualitySum += Double.parseDouble(cdtm.getValueAt(i, 3) + "");
+						allCreditSum += Integer.parseInt(cdtm.getValueAt(i, 1) + "");
+					}
+				
+				cdtm.addRow(new Object[] {"Total Credits", allCreditSum, "Total Quality Points", allQualitySum, "", "", "", "", "GPA", allQualitySum / allCreditSum});		
+		}
 		
 	}
 	
