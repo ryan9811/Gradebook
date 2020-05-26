@@ -16,6 +16,7 @@ public class Gradebook extends JFrame implements ActionListener {
 	protected Container contentPane;
 	private static DefaultTableModel cdtm;
 	private static DefaultTableModel gdtm;
+	private static JTable courseList;
 	protected JFrame frame;
 
 
@@ -33,7 +34,7 @@ public class Gradebook extends JFrame implements ActionListener {
         frame.setDefaultCloseOperation(EXIT_ON_CLOSE);;
   
         // ------------------------Creating the table for the list of courses------------------------
-        JTable courseList = new JTable();
+        courseList = new JTable();
         cdtm = new DefaultTableModel(0,0);
         
         String courseHeader[] = new String[] { "Course Title", "Professor", "Day/Time", "Identifier", "Credits", "Numeric Grade", "Grade Mode", "Final Grade", "Term", "Status" };
@@ -254,6 +255,60 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 	}
 	
+	public void editCourse() {
+		
+		int row = 0;
+		for(int i = 0; i < cdtm.getRowCount(); i++) {
+			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()))
+				row = i;
+		}
+		
+		String[] editChoices = {"Course Title", "Professor", "Day/Time", "Credits", "Grade Mode", "Final Grade", "Term"};
+		String edit = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Course Master", JOptionPane.QUESTION_MESSAGE, null, editChoices, editChoices[0]);
+		
+		if(edit.equalsIgnoreCase("Course Title")) {
+			cdtm.setValueAt(JOptionPane.showInputDialog("Enter Course Title"), row, 0);
+		}
+		
+		if(edit.equalsIgnoreCase("Professor")) {
+			cdtm.setValueAt(JOptionPane.showInputDialog("Enter Professor Name"), row, 1);
+		}
+		
+		if(edit.equalsIgnoreCase("Day/Time")) {
+			cdtm.setValueAt(JOptionPane.showInputDialog("Enter Day/Time"), row, 2);
+		}
+		
+		if(edit.equalsIgnoreCase("Credits")) {
+			String[] creditsChoices = {"0", "1", "2", "3", "4", "5"};
+			String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[0]);
+			cdtm.setValueAt(credits, row, 4);
+		}
+		
+		if(edit.equalsIgnoreCase("Grade Mode")) {
+			String[] gModeChoices = {"Letter", "P/NP"};
+			String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
+			cdtm.setValueAt(gMode, row, 6);
+		}
+		
+		if(edit.equalsIgnoreCase("Final Grade")) {
+			String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
+			String[] fGradeChoicesP = {"In Progress", "P", "NP"};
+			String fGrade;
+			if(cdtm.getValueAt(row, 6).equals("Letter"))
+				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
+			else
+				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
+			cdtm.setValueAt(fGrade, row, 7);
+			
+		}
+		
+		if(edit.equalsIgnoreCase("Term")) {
+			String[] yearChoices = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+			String year = (String) JOptionPane.showInputDialog(null, "Select Term", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, yearChoices, yearChoices[0]);
+			cdtm.setValueAt(year, row, 8);
+		}
+	}
+	
 	public static double letToQual(String letterGrade) {
 		if(letterGrade.equalsIgnoreCase("A")) 
 			return 4;
@@ -304,6 +359,24 @@ public class Gradebook extends JFrame implements ActionListener {
 		if(s.equalsIgnoreCase("Finalize Grades")) {
 			if(JOptionPane.showConfirmDialog(null, "Are you sure you want to finalize grades? This action cannot be reversed.") == 0)
 				finalizeGrades();
+		}
+		
+		if(s.equalsIgnoreCase("Manual Override")) {
+			if(!courseList.isEnabled()) {
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to enter Manual Override mode? \n"
+						+ "It is highly recommended to use the Edit Course function.\nNote: Click again to return to automatic.") == 0) {
+					courseList.setEnabled(true);
+				}
+			}
+			else {
+				courseList.setEnabled(false);
+				for(int i = 0; i < cdtm.getRowCount(); i++)
+					courseList.changeSelection(i, 0, true, false);
+			}
+		}
+		
+		if(s.equalsIgnoreCase("Edit Course")) {
+			editCourse();
 		}
 		
 	}
