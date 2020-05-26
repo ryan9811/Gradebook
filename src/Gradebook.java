@@ -5,6 +5,9 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Hashtable;
 
 /**
  * Ryan Hudson
@@ -13,12 +16,13 @@ public class Gradebook extends JFrame implements ActionListener {
 
 	private JTextArea textArea;
 	private static JTextField identifierInput;
-	protected Container contentPane;
+	private Container contentPane;
 	private static DefaultTableModel cdtm;
 	private static DefaultTableModel gdtm;
 	private static JTable courseList;
-	protected JFrame frame;
-
+	private static int assignmentCode;
+	private JFrame frame;
+	private static Hashtable<String, ArrayList<String>> categories;
 
 	public Gradebook(){
 
@@ -38,6 +42,7 @@ public class Gradebook extends JFrame implements ActionListener {
         cdtm = new DefaultTableModel(0,0);
         
         String courseHeader[] = new String[] { "Course Title", "Professor", "Day/Time", "Identifier", "Credits", "Numeric Grade", "Grade Mode", "Final Grade", "Term", "Status" };
+        categories = new Hashtable<String, ArrayList<String>>();
         
         cdtm.setColumnIdentifiers(courseHeader);
         courseList.setModel(cdtm);
@@ -113,6 +118,8 @@ public class Gradebook extends JFrame implements ActionListener {
         JTable gradeList = new JTable();
         gdtm = new DefaultTableModel(0,0);
         
+        assignmentCode = 11111;
+        
         String gradeHeader[] = new String[] { "Course Title", "Identifier", "Assignment Code", "Category", "Category Weight", "Points Earned", "Total Points", "Grade" };
         
         gdtm.setColumnIdentifiers(gradeHeader);
@@ -146,6 +153,17 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String[] gModeChoices = {"Letter", "P/NP"};
 		String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
+		
+		String category = "";
+		String catWeight = "";
+		ArrayList<String> catsAndWeights = new ArrayList<String>();
+		while(JOptionPane.showConfirmDialog(null, "Would you like to enter another category?") == 0) {
+			category = JOptionPane.showInputDialog("Enter Category Name");
+			catWeight = JOptionPane.showInputDialog("Enter Category Weight (ex. 15)");
+			catsAndWeights.add(category);
+			catsAndWeights.add(catWeight);
+		}
+		categories.put(identifier, catsAndWeights);
 		
 		String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
 		String[] fGradeChoicesP = {"In Progress", "P", "NP"};
@@ -335,6 +353,52 @@ public class Gradebook extends JFrame implements ActionListener {
 		return 0;
 	}
 	
+	public void enterGrade() {
+		ArrayList<String> identifiers = new ArrayList<String>();
+		for(int i = 0; i < cdtm.getRowCount(); i++)
+			if(cdtm.getValueAt(i, 9).equals("In Progress"))
+				identifiers.add(cdtm.getValueAt(i, 3) + "");
+		
+		String[] identifierChoices = new String[identifiers.size()];
+		for(int i = 0; i < identifiers.size(); i++)
+			identifierChoices[i] = identifiers.get(i);
+
+		String identifier = (String) JOptionPane.showInputDialog(null, "Select Identifier", "Grade Master", 
+				JOptionPane.QUESTION_MESSAGE, null, identifierChoices, identifierChoices[0]);
+		
+		String courseTitle = "";
+		for(int i = 0; i < cdtm.getRowCount(); i++)
+			if(identifier.equals(cdtm.getValueAt(i, 3)))
+				courseTitle = cdtm.getValueAt(i, 0) + "";
+		
+		assignmentCode += (int) (Math.random() * 50 + 1);
+		String code = assignmentCode + "";
+		
+		String[] categoryChoices = new String[categories.get(identifier).size() / 2];
+		for(int i = 0; i < categoryChoices.length; i++)
+			categoryChoices[i] = categories.get(identifier).get(i * 2);
+				
+		
+		String category = (String) JOptionPane.showInputDialog(null, "Select Category", "Grade Master", 
+				JOptionPane.QUESTION_MESSAGE, null, categoryChoices, categoryChoices[0]);
+		
+		int catIndex = 0;
+		for(int i = 0; i < categories.get(identifier).size(); i++)
+			if(categories.get(identifier).get(i).equals(category))
+				catIndex = i;
+		
+		String catWeight = categories.get(identifier).get(catIndex + 1);
+		
+		String pointsEarned = JOptionPane.showInputDialog("Enter Points Earned for Assignment");
+		
+		String totalPoints = JOptionPane.showInputDialog("Enter Total Points for Assignment");
+		
+		String grade = (Double.parseDouble(pointsEarned) / Double.parseDouble(totalPoints) * 100 + "");
+		
+		gdtm.addRow(new Object[] {courseTitle, identifier, code, category, catWeight, pointsEarned, totalPoints, grade});
+		
+	}
+	
 	// removes grades associated with a deleted course
 	public void removeAssociatedGrades() {
 		return;
@@ -378,6 +442,11 @@ public class Gradebook extends JFrame implements ActionListener {
 		if(s.equalsIgnoreCase("Edit Course")) {
 			editCourse();
 		}
+		
+		if(s.equalsIgnoreCase("Enter Grade")) {
+			enterGrade();
+		}
+	
 		
 	}
 
