@@ -5,9 +5,15 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * Ryan Hudson
@@ -15,14 +21,75 @@ import java.util.Hashtable;
 public class Gradebook extends JFrame implements ActionListener {
 
 	private JTextArea textArea;
-	private static JTextField identifierInput;
+	private JTextField identifierInput;
 	private Container contentPane;
 	private static DefaultTableModel cdtm;
 	private static DefaultTableModel gdtm;
-	private static JTable courseList;
-	private static int assignmentCode;
+	private JTable courseList, gradeList;
+	private int assignmentCode;
 	private JFrame frame;
-	private static Hashtable<String, ArrayList<String>> categories;
+	private Hashtable<String, ArrayList<String>> categories;
+	
+	private JFileChooser myJFileChooser = new JFileChooser(new File("."));
+	
+	public void saveTable() {
+		if(myJFileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+			saveTable(myJFileChooser.getSelectedFile());
+		}
+	}
+	
+	public void saveTable(File file) {
+		try {
+			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
+			out.writeObject(cdtm.getDataVector());
+			out.writeObject(getColumnNamesC());
+			out.writeObject(gdtm.getDataVector());
+			out.writeObject(getColumnNamesG());
+			out.close();		
+		}
+		
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public Vector<String> getColumnNamesC() {
+		Vector<String> columnNames = new Vector<String>();
+		for(int i = 0; i < courseList.getColumnCount(); i++)
+			columnNames.add(courseList.getColumnName(i) + "");
+		return columnNames;
+	}
+	
+	public Vector<String> getColumnNamesG() {
+		Vector<String> columnNames = new Vector<String>();
+		for(int i = 0; i < gradeList.getColumnCount(); i++)
+			columnNames.add(gradeList.getColumnName(i) + "");
+		return columnNames;
+	}
+	
+	public void loadTable() {
+		if(myJFileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+			loadTable(myJFileChooser.getSelectedFile());
+	}
+	
+	public void loadTable(File file) {
+		try {
+			ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
+			Vector rowDataC = (Vector) in.readObject();
+			Vector columnNamesC = (Vector) in.readObject();
+			Vector rowDataG = (Vector) in.readObject();
+			Vector columnNamesG = (Vector) in.readObject();
+			cdtm.setDataVector(rowDataC, columnNamesC);
+			gdtm.setDataVector(rowDataG, columnNamesG);
+			revertTableSettings();
+			in.close();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 
 	public Gradebook(){
 
@@ -50,6 +117,7 @@ public class Gradebook extends JFrame implements ActionListener {
         courseList.setShowVerticalLines(true);
         courseList.setColumnSelectionAllowed(false);
         courseList.getTableHeader().setReorderingAllowed(false);
+        courseList.getTableHeader().setResizingAllowed(false);
         courseList.setEnabled(false);
   
         // adding it to JScrollPane 
@@ -115,7 +183,7 @@ public class Gradebook extends JFrame implements ActionListener {
         frame.add(buttons, BorderLayout.CENTER);
         
         // ------------------------Creating the table for the list of grades/assignments------------------------
-        JTable gradeList = new JTable();
+        gradeList = new JTable();
         gdtm = new DefaultTableModel(0,0);
         
         assignmentCode = 11111;
@@ -128,6 +196,7 @@ public class Gradebook extends JFrame implements ActionListener {
         gradeList.setShowVerticalLines(true);
         gradeList.setColumnSelectionAllowed(false);
         gradeList.getTableHeader().setReorderingAllowed(false);
+        gradeList.getTableHeader().setResizingAllowed(false);
         gradeList.setEnabled(false);
         
         JScrollPane spg = new JScrollPane(gradeList); 
@@ -407,6 +476,28 @@ public class Gradebook extends JFrame implements ActionListener {
 	public static void main(String[] a) {
 		new Gradebook();
 	}
+	
+	public void revertTableSettings() {
+		courseList.getColumnModel().getColumn(0).setPreferredWidth(200);
+        courseList.getColumnModel().getColumn(1).setPreferredWidth(200);
+        courseList.getColumnModel().getColumn(2).setPreferredWidth(150);
+        courseList.getColumnModel().getColumn(3).setPreferredWidth(100);
+        courseList.getColumnModel().getColumn(4).setPreferredWidth(50);
+        courseList.getColumnModel().getColumn(5).setPreferredWidth(100);
+        courseList.getColumnModel().getColumn(6).setPreferredWidth(75);
+        courseList.getColumnModel().getColumn(7).setPreferredWidth(75);
+        courseList.getColumnModel().getColumn(8).setPreferredWidth(30);
+        courseList.getColumnModel().getColumn(9).setPreferredWidth(125);
+        courseList.setShowVerticalLines(true);
+        courseList.setColumnSelectionAllowed(false);
+        courseList.getTableHeader().setReorderingAllowed(false);
+        courseList.setEnabled(false);
+        
+        gradeList.setShowVerticalLines(true);
+        gradeList.setColumnSelectionAllowed(false);
+        gradeList.getTableHeader().setReorderingAllowed(false);
+        gradeList.setEnabled(false);
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -445,6 +536,14 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		if(s.equalsIgnoreCase("Enter Grade")) {
 			enterGrade();
+		}
+		
+		if(s.equalsIgnoreCase("Save Changes")) {
+			if(cdtm.getRowCount() == 0 && gdtm.getRowCount() == 0) {
+				loadTable();
+			}
+			else
+				saveTable();
 		}
 	
 		
