@@ -143,13 +143,13 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String numGrade = "n/a";
 		
-		String[] gModeChoices = {"C", "P/NP"};
+		String[] gModeChoices = {"Letter", "P/NP"};
 		String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
 		
 		String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
 		String[] fGradeChoicesP = {"In Progress", "P", "NP"};
 		String fGrade;
-		if(gMode.equalsIgnoreCase("C"))
+		if(gMode.equalsIgnoreCase("Letter"))
 			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
 		else
 			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
@@ -160,7 +160,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		String status;
 		if(fGrade.equalsIgnoreCase("In Progress")) 
 			status = "In Progress";
-		else status = "Finalized (Manual)";
+		else status = "Manual Entry";
 
 		cdtm.addRow(new Object[] {title, prof, time, identifier, credits, numGrade, gMode, fGrade, year, status});
 	}
@@ -224,16 +224,22 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		int creditSum = 0;
 		double qualitySum = 0;
+		int pnpSum = 0;
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
-			if(cdtm.getValueAt(i, 8).equals(year + "")) {
+			if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter")) {
 				qualitySum += Integer.parseInt((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
 				creditSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
+				cdtm.setValueAt("Finalized", i, 9);
+			}
+			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("P/NP")) {
+				creditSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
+				pnpSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 		}
 		if(((String) cdtm.getValueAt(cdtm.getRowCount() - 1, 9)).equalsIgnoreCase("Finalized")) {
 				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});		
-				cdtm.addRow(new Object[] {"Term Credits", creditSum, "Term Quality Points", qualitySum, "", "", "", "", "GPA", qualitySum / creditSum});
+				cdtm.addRow(new Object[] {"Term Credits", creditSum, "Term Quality Points", qualitySum, "", "", "", "", "GPA", qualitySum / (creditSum - pnpSum)});
 				
 				double allQualitySum = 0;
 				int allCreditSum = 0;
@@ -243,7 +249,7 @@ public class Gradebook extends JFrame implements ActionListener {
 						allCreditSum += Integer.parseInt(cdtm.getValueAt(i, 1) + "");
 					}
 				
-				cdtm.addRow(new Object[] {"Total Credits", allCreditSum, "Total Quality Points", allQualitySum, "", "", "", "", "GPA", allQualitySum / allCreditSum});		
+				cdtm.addRow(new Object[] {"Total Credits", allCreditSum, "Total Quality Points", allQualitySum, "", "", "", "", "GPA", allQualitySum / (allCreditSum - pnpSum)});		
 		}
 		
 	}
@@ -296,7 +302,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(s.equalsIgnoreCase("Finalize Grades")) {
-			finalizeGrades();
+			if(JOptionPane.showConfirmDialog(null, "Are you sure you want to finalize grades? This action cannot be reversed.") == 0)
+				finalizeGrades();
 		}
 		
 	}
