@@ -45,6 +45,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			out.writeObject(getColumnNamesC());
 			out.writeObject(gdtm.getDataVector());
 			out.writeObject(getColumnNamesG());
+			out.writeObject(categories);
 			out.close();		
 		}
 		
@@ -79,6 +80,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			Vector columnNamesC = (Vector) in.readObject();
 			Vector rowDataG = (Vector) in.readObject();
 			Vector columnNamesG = (Vector) in.readObject();
+			categories = (Hashtable<String, ArrayList<String>>) in.readObject();
 			cdtm.setDataVector(rowDataC, columnNamesC);
 			gdtm.setDataVector(rowDataG, columnNamesG);
 			revertTableSettings();
@@ -154,7 +156,7 @@ public class Gradebook extends JFrame implements ActionListener {
         JButton finalizeGrades = new JButton("Finalize Grades");
         finalizeGrades.addActionListener(this);
         
-        JButton saveChanges = new JButton("Save Changes");
+        JButton saveChanges = new JButton("Import/Export");
         saveChanges.addActionListener(this);
         
         JButton manualOverride = new JButton("Manual Override");
@@ -538,7 +540,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			enterGrade();
 		}
 		
-		if(s.equalsIgnoreCase("Save Changes")) {
+		if(s.equalsIgnoreCase("Import/Export")) {
 			if(cdtm.getRowCount() == 0 && gdtm.getRowCount() == 0) {
 				loadTable();
 			}
