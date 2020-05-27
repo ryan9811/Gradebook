@@ -17,6 +17,7 @@ import java.util.Vector;
 
 /**
  * Ryan Hudson
+ * Grade Calculator v5
  */
 public class Gradebook extends JFrame implements ActionListener {
 
@@ -515,7 +516,19 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		if(((String) cdtm.getValueAt(cdtm.getRowCount() - 1, 9)).equalsIgnoreCase("Finalized")) {
 				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});		
-				cdtm.addRow(new Object[] {"Term Credits", creditSum, "Term Quality Points", qualitySum, "", "", "", "", "GPA", qualitySum / (creditSum - pnpSum)});
+				String gpa = qualitySum / (creditSum - pnpSum) + "";
+				if(gpa.length() > 4)
+					gpa = gpa.substring(0,4);
+				
+				String cSum = creditSum + "";
+				if(cSum.length() > 5)
+					cSum = cSum.substring(0,5);
+				
+				String qSum = qualitySum + "";
+				if(qSum.length() > 5)
+					qSum = qSum.substring(0,5);
+				
+				cdtm.addRow(new Object[] {"Term Credits", cSum, "Term Quality Points", qualitySum, "", "", "", "", "GPA", gpa});
 				
 				double allQualitySum = 0;
 				int allCreditSum = 0;
@@ -525,8 +538,23 @@ public class Gradebook extends JFrame implements ActionListener {
 						allCreditSum += Integer.parseInt(cdtm.getValueAt(i, 1) + "");
 					}
 				
-				cdtm.addRow(new Object[] {"Total Credits", allCreditSum, "Total Quality Points", allQualitySum, "", "", "", "", "GPA", allQualitySum / (allCreditSum - pnpSum)});		
+				String allCreditSum1 = allCreditSum + "";
+				if(allCreditSum1.length() > 5)
+					allCreditSum1 = allCreditSum1.substring(0,5);
+				
+				String allQualitySum1 = allQualitySum + "";
+				if(allQualitySum1.length() > 5)
+					allQualitySum1 = allQualitySum1.substring(0,5);
+				
+				String totalGpa = allQualitySum / (allCreditSum - pnpSum) + "";
+				if(totalGpa.length() > 4)
+					totalGpa = totalGpa.substring(0,4);
+				
+				cdtm.addRow(new Object[] {"Total Credits", allCreditSum1, "Total Quality Points", allQualitySum1, "", "", "", "", "GPA", totalGpa});		
 		}
+		
+		while(gdtm.getRowCount() > 0)
+			gdtm.removeRow(0);
 		
 	}
 	
@@ -739,6 +767,9 @@ public class Gradebook extends JFrame implements ActionListener {
 			return;
 		}
 		
+		if(grade.length() > 5)
+			grade = grade.substring(0, 5);
+		
 		gdtm.addRow(new Object[] {courseTitle, identifier, code, category, catWeight, pointsEarned, totalPoints, grade});
 		
 		calculateGrade(identifier);
@@ -806,7 +837,8 @@ public class Gradebook extends JFrame implements ActionListener {
 				return;
 			}
 			
-			else if(JOptionPane.showConfirmDialog(null, "Are you sure you want to finalize grades? This action cannot be reversed.") == 0) {
+			else if(JOptionPane.showConfirmDialog(null, "Are you sure you want to finalize grades?\nThis action cannot be reversed.\n"
+					+ "Note: It is advised to export before finalizing.\nGrades will be cleared.") == 0) {
 				int counter = 0;
 				for(int i = 0; i < cdtm.getRowCount(); i++)
 					if(cdtm.getValueAt(i, 9).equals("In Progress") || cdtm.getValueAt(i, 9).equals("Manual Entry"))
