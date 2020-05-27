@@ -27,6 +27,7 @@ public class Gradebook extends JFrame implements ActionListener {
 	private static DefaultTableModel gdtm;
 	private JTable courseList, gradeList;
 	private int assignmentCode;
+	private int courseCode;
 	private JFrame frame;
 	private Hashtable<String, ArrayList<String>> categories;
 	
@@ -180,6 +181,7 @@ public class Gradebook extends JFrame implements ActionListener {
         
         cdtm.setColumnIdentifiers(courseHeader);
         courseList.setModel(cdtm);
+        courseCode = 11111;
         
         courseList.setShowVerticalLines(true);
         courseList.setColumnSelectionAllowed(false);
@@ -209,7 +211,7 @@ public class Gradebook extends JFrame implements ActionListener {
         JButton addCourse = new JButton("Add Course");
         addCourse.addActionListener(this);
         
-        JButton removeCourse = new JButton("Remove Course");
+        JButton removeCourse = new JButton("Remove Element");
         removeCourse.addActionListener(this);
         
         JButton editCourse = new JButton("Edit Course");
@@ -227,6 +229,13 @@ public class Gradebook extends JFrame implements ActionListener {
         JButton manualOverride = new JButton("Manual Override");
         manualOverride.addActionListener(this);
         
+        JButton login = new JButton("Login");
+//        login.setBackground(Color.BLUE);
+//        login.setOpaque(true);
+//        login.setBorderPainted(false);
+        login.addActionListener(this);
+        login.setSelected(true);
+        
         // Create the textfield for allowing edits
         JLabel identifier = new JLabel("Identifier/Code: ");
         identifierInput = new JTextField();
@@ -236,6 +245,7 @@ public class Gradebook extends JFrame implements ActionListener {
         identifierInput.setSize(200, 20);
         
         // Add the buttons to the panel
+        buttons.add(login);
         buttons.add(addCourse);
         buttons.add(removeCourse);
         buttons.add(editCourse);
@@ -274,21 +284,49 @@ public class Gradebook extends JFrame implements ActionListener {
 	}
 	
 	public void addCourse() {	
+		
 		String title = JOptionPane.showInputDialog("Enter Course Title");
+		if(title == null) {
+			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			return;
+		}
 		
 		String prof = JOptionPane.showInputDialog("Enter Professor Name");
+		if(prof == null) {
+			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			return;
+		}
 		
 		String time = JOptionPane.showInputDialog("Enter Course Day/Time");
+		if(time == null) {
+			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			return;
+		}
 		
-		String identifier = JOptionPane.showInputDialog("Enter Course Identifier");
+//		String identifier = JOptionPane.showInputDialog("Enter Course Identifier");
+//		if(identifier == null) {
+//			JOptionPane.showMessageDialog(null, "Action Cancelled");
+//			return;
+//		}
+		
+		courseCode += (int) (Math.random() * 50);
+		String identifier = "C" + courseCode;
 		
 		String[] creditsChoices = {"0", "1", "2", "3", "4", "5"};
 		String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[0]);
+		if(credits == null) {
+			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			return;
+		}
 		
 		String numGrade = "n/a";
 		
 		String[] gModeChoices = {"Letter", "P/NP"};
 		String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
+		if(gMode == null) {
+			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			return;
+		}
 		
 		String category = "";
 		String catWeight = "";
@@ -309,8 +347,17 @@ public class Gradebook extends JFrame implements ActionListener {
 		else
 			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
 		
+		if(fGrade == null) {
+			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			return;
+		}
+		
 		String[] yearChoices = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
 		String year = (String) JOptionPane.showInputDialog(null, "Select Term", "Course Master", JOptionPane.QUESTION_MESSAGE, null, yearChoices, yearChoices[0]);
+		if(year == null) {
+			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			return;
+		}
 		
 		String status;
 		if(fGrade.equalsIgnoreCase("In Progress")) 
@@ -320,17 +367,49 @@ public class Gradebook extends JFrame implements ActionListener {
 		cdtm.addRow(new Object[] {title, prof, time, identifier, credits, numGrade, gMode, fGrade, year, status});
 	}
 	
-	public void removeCourse() {
+	public void removeElement() {
+		
+		if(!isIdentifierFound() && !isCodeFound()) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nElement Does Not Exist");
+			return;
+		}
+		
+		for(int i = 0; i < cdtm.getRowCount(); i++) {
+			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()) && cdtm.getValueAt(i, 9).equals("Finalized")) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCannot Remove Finalized Course");
+				return;
+			}
+		}
+		
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
 			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText())) {
 				String courseName = (String) cdtm.getValueAt(i, 0);
-				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + courseName + "? This operation cannot be undone.") == 0) {
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + courseName + "? \nThis operation cannot be undone.") == 0) {
 					removeAssociatedGrades();
 					cdtm.removeRow(i);
 				}
-				else return;
+				else {
+					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					return;
+				}
 			}
 		}
+		
+		for(int i = 0; i < gdtm.getRowCount(); i++) {
+			if(gdtm.getValueAt(i, 2).equals(identifierInput.getText())) {
+				String assignmentCode = (String) gdtm.getValueAt(i, 2);
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete assignment " + assignmentCode + "? \nThis operation cannot be undone.") == 0) {
+					removeAssociatedGrades();
+					gdtm.removeRow(i);
+				}
+				else {
+					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					return;
+				}
+			}
+		}
+		
+		
 	}
 	
 	public void finalizeGrades() {
@@ -409,7 +488,31 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 	}
 	
+	public boolean isIdentifierFound() {
+		
+		if(identifierInput.getText().equals(""))
+			return false;
+		for(int i = 0; i < cdtm.getRowCount(); i++) {
+			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()))
+			    return true;
+		}
+		return false;
+	}
+	
+	public boolean isCodeFound() {
+		for(int i = 0; i < gdtm.getRowCount(); i++) {
+			if(gdtm.getValueAt(i, 2).equals(identifierInput.getText()))
+			    return true;
+		}
+		return false;
+	}
+	
 	public void editCourse() {
+		
+		if(!isIdentifierFound()) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nIdentifier Does Not Exist");
+			return;
+		}
 		
 		int row = 0;
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
@@ -419,29 +522,56 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String[] editChoices = {"Course Title", "Professor", "Day/Time", "Credits", "Grade Mode", "Final Grade", "Term"};
 		String edit = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Course Master", JOptionPane.QUESTION_MESSAGE, null, editChoices, editChoices[0]);
+		if(edit == null) {
+			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			return;
+		}
 		
 		if(edit.equalsIgnoreCase("Course Title")) {
-			cdtm.setValueAt(JOptionPane.showInputDialog("Enter Course Title"), row, 0);
+			String course = JOptionPane.showInputDialog("Enter Course Title");
+			if(course == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				return;
+			}
+			else cdtm.setValueAt(course, row, 0);
 		}
 		
 		if(edit.equalsIgnoreCase("Professor")) {
-			cdtm.setValueAt(JOptionPane.showInputDialog("Enter Professor Name"), row, 1);
+			String prof = JOptionPane.showInputDialog("Enter Professor Name");
+			if(prof == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				return;
+			}
+			else cdtm.setValueAt(prof, row, 1);
 		}
 		
 		if(edit.equalsIgnoreCase("Day/Time")) {
-			cdtm.setValueAt(JOptionPane.showInputDialog("Enter Day/Time"), row, 2);
+			String dayTime = JOptionPane.showInputDialog("Enter Day/Time");
+			if(dayTime == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				return;
+			}
+			else cdtm.setValueAt(dayTime, row, 2);
 		}
 		
 		if(edit.equalsIgnoreCase("Credits")) {
 			String[] creditsChoices = {"0", "1", "2", "3", "4", "5"};
 			String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[0]);
-			cdtm.setValueAt(credits, row, 4);
+			if(credits == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				return;
+			}
+			else cdtm.setValueAt(credits, row, 4);
 		}
 		
 		if(edit.equalsIgnoreCase("Grade Mode")) {
 			String[] gModeChoices = {"Letter", "P/NP"};
 			String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
-			cdtm.setValueAt(gMode, row, 6);
+			if(gMode == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				return;
+			}
+			else cdtm.setValueAt(gMode, row, 6);
 		}
 		
 		if(edit.equalsIgnoreCase("Final Grade")) {
@@ -452,14 +582,22 @@ public class Gradebook extends JFrame implements ActionListener {
 				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
 			else
 				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
-			cdtm.setValueAt(fGrade, row, 7);
+			if(fGrade == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				return;
+			}
+			else cdtm.setValueAt(fGrade, row, 7);
 			
 		}
 		
 		if(edit.equalsIgnoreCase("Term")) {
 			String[] yearChoices = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
 			String year = (String) JOptionPane.showInputDialog(null, "Select Term", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, yearChoices, yearChoices[0]);
-			cdtm.setValueAt(year, row, 8);
+			if(year == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				return;
+			}
+			else cdtm.setValueAt(year, row, 8);
 		}
 	}
 	
@@ -495,6 +633,11 @@ public class Gradebook extends JFrame implements ActionListener {
 			if(cdtm.getValueAt(i, 9).equals("In Progress"))
 				identifiers.add(cdtm.getValueAt(i, 3) + "");
 		
+		if(identifiers.size() == 0) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNo Courses Available");
+			return;
+		}
+		
 		String[] identifierChoices = new String[identifiers.size()];
 		for(int i = 0; i < identifiers.size(); i++)
 			identifierChoices[i] = identifiers.get(i);
@@ -502,21 +645,30 @@ public class Gradebook extends JFrame implements ActionListener {
 		String identifier = (String) JOptionPane.showInputDialog(null, "Select Identifier", "Grade Master", 
 				JOptionPane.QUESTION_MESSAGE, null, identifierChoices, identifierChoices[0]);
 		
+		if(identifier == null) {
+			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			return;
+		}
+		
 		String courseTitle = "";
 		for(int i = 0; i < cdtm.getRowCount(); i++)
 			if(identifier.equals(cdtm.getValueAt(i, 3)))
 				courseTitle = cdtm.getValueAt(i, 0) + "";
 		
 		assignmentCode += (int) (Math.random() * 50 + 1);
-		String code = assignmentCode + "";
+		String code = "A" + assignmentCode;
 		
 		String[] categoryChoices = new String[categories.get(identifier).size() / 2];
 		for(int i = 0; i < categoryChoices.length; i++)
 			categoryChoices[i] = categories.get(identifier).get(i * 2);
 				
-		
 		String category = (String) JOptionPane.showInputDialog(null, "Select Category", "Grade Master", 
 				JOptionPane.QUESTION_MESSAGE, null, categoryChoices, categoryChoices[0]);
+		
+		if(category == null) {
+			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			return;
+		}
 		
 		int catIndex = 0;
 		for(int i = 0; i < categories.get(identifier).size(); i++)
@@ -576,20 +728,28 @@ public class Gradebook extends JFrame implements ActionListener {
 			addCourse();
 		}
 		
-		if(s.equalsIgnoreCase("Remove Course")) {
-			removeCourse();
+		if(s.equalsIgnoreCase("Remove Element")) {
+			removeElement();
 		}
 		
 		if(s.equalsIgnoreCase("Finalize Grades")) {
 			if(JOptionPane.showConfirmDialog(null, "Are you sure you want to finalize grades? This action cannot be reversed.") == 0)
 				finalizeGrades();
+			else {
+				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				return;
+			}
 		}
 		
 		if(s.equalsIgnoreCase("Manual Override")) {
 			if(!courseList.isEnabled()) {
 				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to enter Manual Override mode? \n"
-						+ "It is highly recommended to use the Edit Course function.\nNote: Click again to return to automatic.") == 0) {
+						+ "It is highly recommended to use the Edit Course function.\nNote: Reclick Manual Override to return to Automatic.") == 0) {
 					courseList.setEnabled(true);
+				}
+				else {
+					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					return;
 				}
 			}
 			else {
