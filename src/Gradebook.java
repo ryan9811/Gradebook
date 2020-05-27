@@ -29,6 +29,7 @@ public class Gradebook extends JFrame implements ActionListener {
 	private JTable courseList, gradeList;
 	private int assignmentCode;
 	private int courseCode;
+	private int pnpTotal;
 	private int term;
 	private JFrame frame;
 	private Hashtable<String, ArrayList<String>> categories;
@@ -267,6 +268,7 @@ public class Gradebook extends JFrame implements ActionListener {
         gdtm = new DefaultTableModel(0,0);
         
         assignmentCode = 11111;
+        pnpTotal = 0;
         
         String gradeHeader[] = new String[] { "Course Title", "Identifier", "Assignment Code", "Category", "Category Weight", "Points Earned", "Total Points", "Grade", "Comment" };
         
@@ -313,17 +315,11 @@ public class Gradebook extends JFrame implements ActionListener {
 			return;
 		}
 		
-//		String identifier = JOptionPane.showInputDialog("Enter Course Identifier");
-//		if(identifier == null) {
-//			JOptionPane.showMessageDialog(null, "Action Cancelled");
-//			return;
-//		}
-		
-		courseCode += (int) (Math.random() * 50);
+		courseCode += (int) (Math.random() * 50 + 1);
 		String identifier = "C" + courseCode;
 		
-		String[] creditsChoices = {"0", "1", "2", "3", "4", "5"};
-		String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[0]);
+		String[] creditsChoices = {"0", "1", "2", "3", "4", "5","6"};
+		String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[3]);
 		if(credits == null) {
 			JOptionPane.showMessageDialog(null, "Action Cancelled");
 			return;
@@ -338,49 +334,6 @@ public class Gradebook extends JFrame implements ActionListener {
 			return;
 		}
 		
-		String category = "";
-		String catWeight = "";
-		ArrayList<String> catsAndWeights = new ArrayList<String>();
-		category = JOptionPane.showInputDialog("Enter a grade weight category.");
-		if(category == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled");
-			return;
-		}
-		catWeight = JOptionPane.showInputDialog("Enter Category Weight (ex. 15)");
-		if(catWeight == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled");
-			return;
-		}
-		try {
-			double testError = Double.parseDouble(catWeight);
-		} catch (NumberFormatException e) {
-			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
-			return;
-		}
-		catsAndWeights.add(category);
-		catsAndWeights.add(catWeight);
-		int yesNo = 0;
-		while(yesNo == 0) {
-			yesNo = JOptionPane.showConfirmDialog(null, "Would you like to enter another category?");
-			if(yesNo == 0) {
-				category = JOptionPane.showInputDialog("Enter Category Name");
-				catWeight = JOptionPane.showInputDialog("Enter Category Weight (ex. 15)");
-				try {
-					double testError = Double.parseDouble(catWeight);
-				} catch (NumberFormatException e) {
-					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
-					return;
-				}
-				catsAndWeights.add(category);
-				catsAndWeights.add(catWeight);
-			}
-			else if(yesNo == JOptionPane.CANCEL_OPTION){
-				JOptionPane.showMessageDialog(null, "Action Cancelled");
-				return;
-			}
-		}
-		categories.put(identifier, catsAndWeights);
-		
 		String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
 		String[] fGradeChoicesP = {"In Progress", "P", "NP"};
 		String[] notationChoices = {"TR","I","W","Z"};
@@ -391,10 +344,54 @@ public class Gradebook extends JFrame implements ActionListener {
 			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
 		else
 			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
-		
 		if(fGrade == null) {
 			JOptionPane.showMessageDialog(null, "Action Cancelled");
 			return;
+		}
+		
+		if(!gMode.equals("Notation") && fGrade.equals("In Progress")) {
+			String category = "";
+			String catWeight = "";
+			ArrayList<String> catsAndWeights = new ArrayList<String>();
+			category = JOptionPane.showInputDialog("Enter a grade weight category.");
+			if(category == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				return;
+			}
+			catWeight = JOptionPane.showInputDialog("Enter Category Weight (ex. 15)");
+			if(catWeight == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				return;
+			}
+			try {
+				double testError = Double.parseDouble(catWeight);
+			} catch (NumberFormatException e) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+				return;
+			}
+			catsAndWeights.add(category);
+			catsAndWeights.add(catWeight);
+			int yesNo = 0;
+			while(yesNo == 0) {
+				yesNo = JOptionPane.showConfirmDialog(null, "Would you like to enter another category?");
+				if(yesNo == 0) {
+					category = JOptionPane.showInputDialog("Enter Category Name");
+					catWeight = JOptionPane.showInputDialog("Enter Category Weight (ex. 15)");
+					try {
+						double testError = Double.parseDouble(catWeight);
+					} catch (NumberFormatException e) {
+						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+						return;
+					}
+					catsAndWeights.add(category);
+					catsAndWeights.add(catWeight);
+				}
+				else if(yesNo == JOptionPane.CANCEL_OPTION){
+					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					return;
+				}
+			}
+			categories.put(identifier, catsAndWeights);
 		}
 	
 		String year = JOptionPane.showInputDialog("Enter Term\n(Ex. Freshman Year = 1)");
@@ -524,11 +521,13 @@ public class Gradebook extends JFrame implements ActionListener {
 			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("P/NP") && cdtm.getValueAt(i, 7).equals("P")) {
 				creditSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
 				pnpSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
+				pnpTotal += Integer.parseInt((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Notation") && cdtm.getValueAt(i, 7).equals("TR")) {
 				creditSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
 				pnpSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
+				pnpTotal += Integer.parseInt((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 		}
@@ -564,11 +563,13 @@ public class Gradebook extends JFrame implements ActionListener {
 				if(allQualitySum1.length() > 5)
 					allQualitySum1 = allQualitySum1.substring(0,5);
 				
-				String totalGpa = allQualitySum / (allCreditSum - pnpSum) + "";
+				String totalGpa = allQualitySum / (allCreditSum - pnpTotal) + "";
 				if(totalGpa.length() > 4)
 					totalGpa = totalGpa.substring(0,4);
 				
-				cdtm.addRow(new Object[] {"Total Credits", allCreditSum1, "Total Quality Points", allQualitySum1, "", "", "", "", "GPA", totalGpa});		
+				cdtm.addRow(new Object[] {"Total Credits", allCreditSum1, "Total Quality Points", allQualitySum1, "", "", "", "", "GPA", totalGpa});	
+				
+				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});	
 		}
 		
 		while(gdtm.getRowCount() > 0)
@@ -660,7 +661,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(edit.equalsIgnoreCase("Grade Mode")) {
-			String[] gModeChoices = {"Letter", "P/NP"};
+			String[] gModeChoices = {"Letter", "P/NP", "Notation"};
 			String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
 			if(gMode == null) {
 				JOptionPane.showMessageDialog(null, "Action Cancelled");
@@ -672,11 +673,15 @@ public class Gradebook extends JFrame implements ActionListener {
 		if(edit.equalsIgnoreCase("Final Grade")) {
 			String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
 			String[] fGradeChoicesP = {"In Progress", "P", "NP"};
+			String[] notationChoices = {"TR","I","W","Z"};
 			String fGrade;
+			
 			if(cdtm.getValueAt(row, 6).equals("Letter"))
 				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
-			else
+			else if(cdtm.getValueAt(row, 6).equals("P/NP"))
 				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
+			else 
+				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
 			if(fGrade == null) {
 				JOptionPane.showMessageDialog(null, "Action Cancelled");
 				return;
