@@ -101,6 +101,15 @@ public class Gradebook extends JFrame implements ActionListener {
 		// For each category, sum up points earned and total points, multiply by categoryWeight/sumCategoryWeightsUsed
 		// Change the grade in the table
 		
+		if(!gradeExists(identifier))
+			for(int i = 0; i < cdtm.getRowCount(); i++)
+				if(cdtm.getValueAt(i, 3).equals(identifier)) {
+					cdtm.setValueAt("n/a", i, 5);
+					cdtm.setValueAt("In Progress", i, 7);
+					return;
+				}
+			
+		
 		double sumCategoryWeightsUsed = 0;
 		double categoryWeight = 0;
 		double sumPointsEarned = 0;
@@ -259,7 +268,7 @@ public class Gradebook extends JFrame implements ActionListener {
         
         assignmentCode = 11111;
         
-        String gradeHeader[] = new String[] { "Course Title", "Identifier", "Assignment Code", "Category", "Category Weight", "Points Earned", "Total Points", "Grade" };
+        String gradeHeader[] = new String[] { "Course Title", "Identifier", "Assignment Code", "Category", "Category Weight", "Points Earned", "Total Points", "Grade", "Comment" };
         
         gdtm.setColumnIdentifiers(gradeHeader);
         gradeList.setModel(gdtm);
@@ -275,6 +284,13 @@ public class Gradebook extends JFrame implements ActionListener {
         
         frame.pack();
 
+	}
+	
+	public boolean gradeExists(String identifier) {
+		for(int i = 0; i < gdtm.getRowCount(); i++)
+			if(gdtm.getValueAt(i, 1).equals(identifier))
+				return true;
+		return false;
 	}
 	
 	public void addCourse() {	
@@ -467,7 +483,9 @@ public class Gradebook extends JFrame implements ActionListener {
 			if(gdtm.getValueAt(i, 2).equals(identifierInput.getText())) {
 				String assignmentCode = (String) gdtm.getValueAt(i, 2);
 				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete assignment " + assignmentCode + "? \nThis operation cannot be undone.") == 0) {
+					String id = gdtm.getValueAt(i, 1) + "";
 					gdtm.removeRow(i);
+					calculateGrade(id);
 				}
 				else {
 					JOptionPane.showMessageDialog(null, "Action Cancelled");
@@ -767,10 +785,12 @@ public class Gradebook extends JFrame implements ActionListener {
 			return;
 		}
 		
+		String comment = JOptionPane.showInputDialog(null, "Enter a comment for this assignment.");
+		
 		if(grade.length() > 5)
 			grade = grade.substring(0, 5);
 		
-		gdtm.addRow(new Object[] {courseTitle, identifier, code, category, catWeight, pointsEarned, totalPoints, grade});
+		gdtm.addRow(new Object[] {courseTitle, identifier, code, category, catWeight, pointsEarned, totalPoints, grade, comment});
 		
 		calculateGrade(identifier);
 		
