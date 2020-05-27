@@ -108,10 +108,9 @@ public class Gradebook extends JFrame implements ActionListener {
 		String category = "";
 		for(int i = 0; i < gdtm.getRowCount(); i++)
 			if(gdtm.getValueAt(i,1).equals(identifier) && !finishedCats.contains(gdtm.getValueAt(i, 3))) {
-				System.out.println(true);
 				category = gdtm.getValueAt(i, 3) + "";
 				sumCategoryWeightsUsed += Double.parseDouble(gdtm.getValueAt(i, 4) + "");
-				System.out.println(sumCategoryWeightsUsed);
+				System.out.println("sumCategoryWeightsUsed: " + sumCategoryWeightsUsed);
 				finishedCats.add(category);
 			}
 		
@@ -119,17 +118,19 @@ public class Gradebook extends JFrame implements ActionListener {
 			for(int j = 0; j < gdtm.getRowCount(); j++) {
 				if(gdtm.getValueAt(j, 3).equals(finishedCats.get(i))) {
 					categoryWeight = Double.parseDouble(gdtm.getValueAt(j, 4) + "");
-					System.out.println(categoryWeight);
+					System.out.println("categoryWeight: " + categoryWeight);
 				}
 				if(gdtm.getValueAt(j,1).equals(identifier) && finishedCats.get(i).equals(gdtm.getValueAt(j, 3))) {
 					sumPointsEarned += Double.parseDouble(gdtm.getValueAt(j, 5) + "");
-					System.out.println(sumPointsEarned);
+					System.out.println("sumPointsEarned: " + sumPointsEarned);
 					sumTotalPoints += Double.parseDouble(gdtm.getValueAt(j, 6) + "");
-					System.out.println(sumTotalPoints);
+					System.out.println("sumTotalPoints: " + sumTotalPoints);
 				}
 			}	
 			finalGrade += (sumPointsEarned / sumTotalPoints) * (categoryWeight / sumCategoryWeightsUsed) * 100;
 			System.out.println(finalGrade);
+			sumPointsEarned = 0;
+			sumTotalPoints = 0;
 		}
 
 		String letGrade = numToLet(finalGrade);
