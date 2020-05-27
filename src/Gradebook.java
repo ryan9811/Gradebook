@@ -733,8 +733,18 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(s.equalsIgnoreCase("Finalize Grades")) {
-			if(JOptionPane.showConfirmDialog(null, "Are you sure you want to finalize grades? This action cannot be reversed.") == 0)
-				finalizeGrades();
+			if(JOptionPane.showConfirmDialog(null, "Are you sure you want to finalize grades? This action cannot be reversed.") == 0) {
+				int counter = 0;
+				for(int i = 0; i < cdtm.getRowCount(); i++)
+					if(cdtm.getValueAt(i, 9).equals("In Progress") || cdtm.getValueAt(i, 9).equals("Manual Entry"))
+						counter++;
+				if(counter > 0)
+					finalizeGrades();
+				else {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nAll Courses Finalized");
+					return;
+				}
+			}
 			else {
 				JOptionPane.showMessageDialog(null, "Action Cancelled");
 				return;
