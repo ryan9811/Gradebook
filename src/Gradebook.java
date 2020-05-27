@@ -28,6 +28,7 @@ public class Gradebook extends JFrame implements ActionListener {
 	private JTable courseList, gradeList;
 	private int assignmentCode;
 	private int courseCode;
+	private int term;
 	private JFrame frame;
 	private Hashtable<String, ArrayList<String>> categories;
 	
@@ -229,13 +230,6 @@ public class Gradebook extends JFrame implements ActionListener {
         JButton manualOverride = new JButton("Manual Override");
         manualOverride.addActionListener(this);
         
-        JButton login = new JButton("Login");
-//        login.setBackground(Color.BLUE);
-//        login.setOpaque(true);
-//        login.setBorderPainted(false);
-        login.addActionListener(this);
-        login.setSelected(true);
-        
         // Create the textfield for allowing edits
         JLabel identifier = new JLabel("Identifier/Code: ");
         identifierInput = new JTextField();
@@ -245,7 +239,6 @@ public class Gradebook extends JFrame implements ActionListener {
         identifierInput.setSize(200, 20);
         
         // Add the buttons to the panel
-        buttons.add(login);
         buttons.add(addCourse);
         buttons.add(removeCourse);
         buttons.add(editCourse);
@@ -386,9 +379,26 @@ public class Gradebook extends JFrame implements ActionListener {
 			JOptionPane.showMessageDialog(null, "Action Cancelled");
 			return;
 		}
+	
+		String year = JOptionPane.showInputDialog("Enter Term\n(Ex. Freshman Year = 1)");
 		
-		String[] yearChoices = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-		String year = (String) JOptionPane.showInputDialog(null, "Select Term", "Course Master", JOptionPane.QUESTION_MESSAGE, null, yearChoices, yearChoices[0]);
+		try {
+			double testError = Double.parseDouble(year);
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+			return;
+		}
+		
+		if(isTermFinalized(year)) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nEntered Term is Finalized");
+			return;
+		}
+		
+		if(!unfinalizedTerm().equals(year) && existsUnfinalizedTerm()) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMust Finalize Previous Term");
+			return;
+		}
+		
 		if(year == null) {
 			JOptionPane.showMessageDialog(null, "Action Cancelled");
 			return;
@@ -400,6 +410,28 @@ public class Gradebook extends JFrame implements ActionListener {
 		else status = "Manual Entry";
 
 		cdtm.addRow(new Object[] {title, prof, time, identifier, credits, numGrade, gMode, fGrade, year, status});
+	}
+	
+	public boolean existsUnfinalizedTerm() {
+		for(int i = 0; i < cdtm.getRowCount(); i++)
+			if(cdtm.getValueAt(i, 9).equals("Manual Entry") || cdtm.getValueAt(i, 9).equals("In Progress"))
+				return true;
+		return false;
+	}
+	
+	public boolean isTermFinalized(String term) {
+		for(int i = 0; i < cdtm.getRowCount(); i++)
+			if(cdtm.getValueAt(i, 8).equals(term) && cdtm.getValueAt(i, 9).equals("Finalized"))
+				return true;
+		return false;
+	}
+	
+	public String unfinalizedTerm() {
+		for(int i = 0; i < cdtm.getRowCount(); i++) {
+			if(cdtm.getValueAt(i, 9).equals("Manual Entry") || cdtm.getValueAt(i, 9).equals("In Progress"))
+				return cdtm.getValueAt(i, 8) + "";
+		}
+		return "";
 	}
 	
 	public void removeElement() {
@@ -446,49 +478,16 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 	}
 	
+	public boolean existsUnfinalizedCourses() {
+		for(int i = 0; i < cdtm.getRowCount(); i++)
+			if(cdtm.getValueAt(i, 9).equals("Manual Entry") || cdtm.getValueAt(i, 9).equals("In Progress"))
+				return true;
+		return false;
+	}
+	
 	public void finalizeGrades() {
-		double qualityPoints = 0;
 		
-		boolean year1f = true;
-		boolean year2f = true;
-		boolean year3f = true;
-		boolean year4f = true;
-		boolean year5f = true;
-		boolean year6f = true;
-		boolean year7f = true;
-		boolean year8f = true;
-		boolean year9f = true;
-		boolean year10f = true;
-		
-		
-		for(int i = 0; i < cdtm.getRowCount(); i++) {
-			if(cdtm.getValueAt(i, 8).equals("1") && !cdtm.getValueAt(i, 8).equals("Finalized"))
-				year1f = false;
-			if(cdtm.getValueAt(i, 8).equals("2") && !cdtm.getValueAt(i, 8).equals("Finalized"))
-				year2f = false;
-			if(cdtm.getValueAt(i, 8).equals("3") && !cdtm.getValueAt(i, 8).equals("Finalized"))
-				year3f = false;
-			if(cdtm.getValueAt(i, 8).equals("4") && !cdtm.getValueAt(i, 8).equals("Finalized"))
-				year4f = false;
-			if(cdtm.getValueAt(i, 8).equals("5") && !cdtm.getValueAt(i, 8).equals("Finalized"))
-				year5f = false;
-			if(cdtm.getValueAt(i, 8).equals("6") && !cdtm.getValueAt(i, 8).equals("Finalized"))
-				year6f = false;
-			if(cdtm.getValueAt(i, 8).equals("7") && !cdtm.getValueAt(i, 8).equals("Finalized"))
-				year7f = false;
-			if(cdtm.getValueAt(i, 8).equals("8") && !cdtm.getValueAt(i, 8).equals("Finalized"))
-				year8f = false;
-			if(cdtm.getValueAt(i, 8).equals("9") && !cdtm.getValueAt(i, 8).equals("Finalized"))
-				year9f = false;
-			if(cdtm.getValueAt(i, 8).equals("10") && !cdtm.getValueAt(i, 8).equals("Finalized"))
-				year10f = false;
-		}
-		
-		int year = 0;
-		boolean[] yearsFinalized = {year1f, year2f, year3f, year4f, year5f, year6f, year7f, year8f, year9f, year10f};
-		for(int i = 0; i < yearsFinalized.length; i++)
-			if(!yearsFinalized[i])
-				year = i + 1;
+		String year = unfinalizedTerm();
 		
 		int creditSum = 0;
 		double qualitySum = 0;
@@ -555,6 +554,13 @@ public class Gradebook extends JFrame implements ActionListener {
 		if(!isIdentifierFound()) {
 			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nIdentifier Does Not Exist");
 			return;
+		}
+		
+		for(int i = 0; i < cdtm.getRowCount(); i++) {
+			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()) && cdtm.getValueAt(i, 9).equals("Finalized")) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCannot Edit Finalized Course");
+				return;
+			}
 		}
 		
 		int row = 0;
@@ -787,7 +793,20 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(s.equalsIgnoreCase("Finalize Grades")) {
-			if(JOptionPane.showConfirmDialog(null, "Are you sure you want to finalize grades? This action cannot be reversed.") == 0) {
+			
+			for(int i = 0; i < cdtm.getRowCount(); i++) {
+				if(cdtm.getValueAt(i, 7).equals("In Progress")) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCannot Finalize with\nFinal Grade = In Progress");
+					return;
+				}
+			}
+			
+			if(!existsUnfinalizedCourses() || cdtm.getRowCount() == 0) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nAll Courses Finalized");
+				return;
+			}
+			
+			else if(JOptionPane.showConfirmDialog(null, "Are you sure you want to finalize grades? This action cannot be reversed.") == 0) {
 				int counter = 0;
 				for(int i = 0; i < cdtm.getRowCount(); i++)
 					if(cdtm.getValueAt(i, 9).equals("In Progress") || cdtm.getValueAt(i, 9).equals("Manual Entry"))
@@ -810,6 +829,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to enter Manual Override mode? \n"
 						+ "It is highly recommended to use the Edit Course function.\nNote: Reclick Manual Override to return to Automatic.") == 0) {
 					courseList.setEnabled(true);
+					gradeList.setEnabled(true);
 				}
 				else {
 					JOptionPane.showMessageDialog(null, "Action Cancelled");
@@ -817,9 +837,12 @@ public class Gradebook extends JFrame implements ActionListener {
 				}
 			}
 			else {
+				JOptionPane.showMessageDialog(null, "Returned to Automatic Mode");
 				courseList.setEnabled(false);
-				for(int i = 0; i < cdtm.getRowCount(); i++)
-					courseList.changeSelection(i, 0, true, false);
+				for(int i = 0; i < cdtm.getRowCount(); i++) {
+					courseList.getSelectionModel().clearSelection();
+					gradeList.getSelectionModel().clearSelection();
+				}
 			}
 		}
 		
