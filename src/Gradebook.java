@@ -321,7 +321,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String numGrade = "n/a";
 		
-		String[] gModeChoices = {"Letter", "P/NP"};
+		String[] gModeChoices = {"Letter", "P/NP", "Notation"};
 		String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
 		if(gMode == null) {
 			JOptionPane.showMessageDialog(null, "Action Cancelled");
@@ -331,21 +331,44 @@ public class Gradebook extends JFrame implements ActionListener {
 		String category = "";
 		String catWeight = "";
 		ArrayList<String> catsAndWeights = new ArrayList<String>();
-		while(JOptionPane.showConfirmDialog(null, "Would you like to enter another category?") == 0) {
-			category = JOptionPane.showInputDialog("Enter Category Name");
-			catWeight = JOptionPane.showInputDialog("Enter Category Weight (ex. 15)");
-			catsAndWeights.add(category);
-			catsAndWeights.add(catWeight);
+		category = JOptionPane.showInputDialog("Enter a grade weight category.");
+		if(category == null) {
+			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			return;
+		}
+		catWeight = JOptionPane.showInputDialog("Enter Category Weight (ex. 15)");
+		if(catWeight == null) {
+			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			return;
+		}
+		catsAndWeights.add(category);
+		catsAndWeights.add(catWeight);
+		int yesNo = 0;
+		while(yesNo == 0) {
+			yesNo = JOptionPane.showConfirmDialog(null, "Would you like to enter another category?");
+			if(yesNo == 0) {
+				category = JOptionPane.showInputDialog("Enter Category Name");
+				catWeight = JOptionPane.showInputDialog("Enter Category Weight (ex. 15)");
+				catsAndWeights.add(category);
+				catsAndWeights.add(catWeight);
+			}
+			else {
+				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				return;
+			}
 		}
 		categories.put(identifier, catsAndWeights);
 		
 		String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
 		String[] fGradeChoicesP = {"In Progress", "P", "NP"};
+		String[] notationChoices = {"TR","I","W","Z"};
 		String fGrade;
 		if(gMode.equalsIgnoreCase("Letter"))
 			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
-		else
+		else if(gMode.equalsIgnoreCase("P/NP"))
 			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
+		else
+			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
 		
 		if(fGrade == null) {
 			JOptionPane.showMessageDialog(null, "Action Cancelled");
@@ -460,12 +483,21 @@ public class Gradebook extends JFrame implements ActionListener {
 		double qualitySum = 0;
 		int pnpSum = 0;
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
-			if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter")) {
+			if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && !cdtm.getValueAt(i, 7).equals("F")) {
 				qualitySum += Integer.parseInt((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
 				creditSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
-			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("P/NP")) {
+			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && cdtm.getValueAt(i, 7).equals("F")) {
+				qualitySum += Integer.parseInt((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
+				cdtm.setValueAt("Finalized", i, 9);
+			}
+			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("P/NP") && cdtm.getValueAt(i, 7).equals("P")) {
+				creditSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
+				pnpSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
+				cdtm.setValueAt("Finalized", i, 9);
+			}
+			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Notation") && cdtm.getValueAt(i, 7).equals("TR")) {
 				creditSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
 				pnpSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
