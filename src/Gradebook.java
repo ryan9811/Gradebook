@@ -91,7 +91,71 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 	}
 	
+	public void calculateGrade(String identifier) {
+		// For a class
+		// Figure out which categories have grades so far
+		// Total up those categories weights
+		// For each category, sum up points earned and total points, multiply by categoryWeight/sumCategoryWeightsUsed
+		// Change the grade in the table
+		
+		double sumCategoryWeightsUsed = 0;
+		double categoryWeight = 0;
+		double sumPointsEarned = 0;
+		double sumTotalPoints = 0;
+		double finalGrade = 0;
+		
+		ArrayList<String> finishedCats = new ArrayList<String>();
+		String category = "";
+		for(int i = 0; i < gdtm.getRowCount(); i++)
+			if(gdtm.getValueAt(i,1).equals(identifier) && !finishedCats.contains(gdtm.getValueAt(i, 3))) {
+				System.out.println(true);
+				category = gdtm.getValueAt(i, 3) + "";
+				sumCategoryWeightsUsed += Double.parseDouble(gdtm.getValueAt(i, 4) + "");
+				System.out.println(sumCategoryWeightsUsed);
+				finishedCats.add(category);
+			}
+		
+		for(int i = 0; i < finishedCats.size(); i++) {
+			for(int j = 0; j < gdtm.getRowCount(); j++) {
+				if(gdtm.getValueAt(j, 3).equals(finishedCats.get(i))) {
+					categoryWeight = Double.parseDouble(gdtm.getValueAt(j, 4) + "");
+					System.out.println(categoryWeight);
+				}
+				if(gdtm.getValueAt(j,1).equals(identifier) && finishedCats.get(i).equals(gdtm.getValueAt(j, 3))) {
+					sumPointsEarned += Double.parseDouble(gdtm.getValueAt(j, 5) + "");
+					System.out.println(sumPointsEarned);
+					sumTotalPoints += Double.parseDouble(gdtm.getValueAt(j, 6) + "");
+					System.out.println(sumTotalPoints);
+				}
+			}	
+			finalGrade += (sumPointsEarned / sumTotalPoints) * (categoryWeight / sumCategoryWeightsUsed) * 100;
+			System.out.println(finalGrade);
+		}
+
+		String letGrade = numToLet(finalGrade);
+		
+		for(int i = 0; i < cdtm.getRowCount(); i++)
+			if(cdtm.getValueAt(i, 3).equals(identifier)) {
+				cdtm.setValueAt(finalGrade + "", i, 5);
+				cdtm.setValueAt(letGrade, i, 7);
+			}
+	}
 	
+	public String numToLet(double grade) {
+		
+		if(grade >= 94) return "A";
+		else if(grade >= 90) return "A-";
+		else if(grade >= 87) return "B+";
+		else if(grade >= 84) return "B";
+		else if(grade >= 80) return "B-";
+		else if(grade >= 77) return "C+";
+		else if(grade >= 74) return "C";
+		else if(grade >= 70) return "C-";
+		else if(grade >= 67) return "D+";
+		else if(grade >= 64) return "D";
+		else if(grade >= 60) return "D-";
+		else return "F";
+	}
 
 	public Gradebook(){
 
@@ -467,6 +531,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		String grade = (Double.parseDouble(pointsEarned) / Double.parseDouble(totalPoints) * 100 + "");
 		
 		gdtm.addRow(new Object[] {courseTitle, identifier, code, category, catWeight, pointsEarned, totalPoints, grade});
+		
+		calculateGrade(identifier);
 		
 	}
 	
