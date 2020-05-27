@@ -341,6 +341,12 @@ public class Gradebook extends JFrame implements ActionListener {
 			JOptionPane.showMessageDialog(null, "Action Cancelled");
 			return;
 		}
+		try {
+			double testError = Double.parseDouble(catWeight);
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+			return;
+		}
 		catsAndWeights.add(category);
 		catsAndWeights.add(catWeight);
 		int yesNo = 0;
@@ -349,6 +355,12 @@ public class Gradebook extends JFrame implements ActionListener {
 			if(yesNo == 0) {
 				category = JOptionPane.showInputDialog("Enter Category Name");
 				catWeight = JOptionPane.showInputDialog("Enter Category Weight (ex. 15)");
+				try {
+					double testError = Double.parseDouble(catWeight);
+				} catch (NumberFormatException e) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+					return;
+				}
 				catsAndWeights.add(category);
 				catsAndWeights.add(catWeight);
 			}
@@ -713,7 +725,14 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String totalPoints = JOptionPane.showInputDialog("Enter Total Points for Assignment");
 		
-		String grade = (Double.parseDouble(pointsEarned) / Double.parseDouble(totalPoints) * 100 + "");
+		String grade;
+		
+		try {
+			grade = (Double.parseDouble(pointsEarned) / Double.parseDouble(totalPoints) * 100 + "");
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+			return;
+		}
 		
 		gdtm.addRow(new Object[] {courseTitle, identifier, code, category, catWeight, pointsEarned, totalPoints, grade});
 		
