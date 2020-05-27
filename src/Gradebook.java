@@ -164,7 +164,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		// Frame that holds everything
         frame = new JFrame(); 
         
-        frame.setTitle("Gradebook"); 
+        frame.setTitle("Grade Calculator v5"); 
         
         frame.setVisible(true); 
         
@@ -364,7 +364,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				catsAndWeights.add(category);
 				catsAndWeights.add(catWeight);
 			}
-			else {
+			else if(yesNo == JOptionPane.CANCEL_OPTION){
 				JOptionPane.showMessageDialog(null, "Action Cancelled");
 				return;
 			}
@@ -420,7 +420,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText())) {
 				String courseName = (String) cdtm.getValueAt(i, 0);
 				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + courseName + "? \nThis operation cannot be undone.") == 0) {
-					removeAssociatedGrades();
+					removeAssociatedGrades(identifierInput.getText());
 					cdtm.removeRow(i);
 				}
 				else {
@@ -434,7 +434,6 @@ public class Gradebook extends JFrame implements ActionListener {
 			if(gdtm.getValueAt(i, 2).equals(identifierInput.getText())) {
 				String assignmentCode = (String) gdtm.getValueAt(i, 2);
 				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete assignment " + assignmentCode + "? \nThis operation cannot be undone.") == 0) {
-					removeAssociatedGrades();
 					gdtm.removeRow(i);
 				}
 				else {
@@ -741,8 +740,12 @@ public class Gradebook extends JFrame implements ActionListener {
 	}
 	
 	// removes grades associated with a deleted course
-	public void removeAssociatedGrades() {
-		return;
+	public void removeAssociatedGrades(String identifier) {
+		for(int i = 0; i < gdtm.getRowCount(); i++)
+			if(gdtm.getValueAt(i, 1).equals(identifier)) {
+				gdtm.removeRow(i);
+				i--;
+			}
 	}
 
 	public static void main(String[] a) {
