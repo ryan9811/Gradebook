@@ -702,7 +702,12 @@ public class Gradebook extends JFrame implements ActionListener {
 		return false;
 	}
 	
+	/**
+	 * Tells whether or not an assignment code can be found in the grades table that matches the text field
+	 * @return whether or not an assignment code can be found
+	 */
 	public boolean isCodeFound() {
+		
 		for(int i = 0; i < gdtm.getRowCount(); i++) {
 			if(gdtm.getValueAt(i, 2).equals(identifierInput.getText()))
 			    return true;
@@ -710,6 +715,9 @@ public class Gradebook extends JFrame implements ActionListener {
 		return false;
 	}
 	
+	/**
+	 * Edits a course in the course table based on user selection.
+	 */
 	public void editCourse() {
 		
 		if(!isIdentifierFound()) {
@@ -903,8 +911,6 @@ public class Gradebook extends JFrame implements ActionListener {
 				return;
 			}
 			
-			//else cdtm.setValueAt(gMode, row, 6);
-			
 			String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
 			String[] fGradeChoicesP = {"In Progress", "P", "NP"};
 			String[] notationChoices = {"TR","I","W","Z"};
@@ -979,7 +985,13 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 	}
 	
+	/**
+	 * Gets the category names of a course's category weights
+	 * @param categoryWeights a course's category weights (from the hash table)
+	 * @return a list of the category names of a course's category weights
+	 */
 	public ArrayList<String> getCategoryNames(ArrayList<String> categoryWeights) {
+		
 		ArrayList<String> names = new ArrayList<String>();
 		for(int i = 0; i < categoryWeights.size(); i++)
 			if(i % 2 == 0)
@@ -987,7 +999,13 @@ public class Gradebook extends JFrame implements ActionListener {
 		return names;
 	}
 	
+	/**
+	 * Tells whether or not a word contains any numbers
+	 * @param word the word to be checked for numbers
+	 * @return whether or not the word contains any numbers
+	 */
 	public boolean containsNumbers(String word) {
+		
 		String[] nums = {"0","1","2","3","4","5","6","7","8","9","10"};
 		for(int i = 0; i < nums.length; i++)
 			if(word.contains(nums[i]))
@@ -995,7 +1013,13 @@ public class Gradebook extends JFrame implements ActionListener {
 		return false;
 	}
 	
+	/**
+	 * Gets the category values of a course's category weights
+	 * @param categoryWeights a course's category values (from the hash table)
+	 * @return a list of the category names of a course's category values
+	 */
 	public ArrayList<String> getCategoryValues(ArrayList<String> categoryWeights) {
+		
 		ArrayList<String> values = new ArrayList<String>();
 		for(int i = 0; i < categoryWeights.size(); i++)
 			if(i % 2 != 0)
@@ -1003,7 +1027,13 @@ public class Gradebook extends JFrame implements ActionListener {
 		return values;
 	}
 	
+	/**
+	 * Converts a letter grade to quality points
+	 * @param letterGrade the letter grade to calculate the quality points
+	 * @return the number of quality points earned
+	 */
 	public static double letToQual(String letterGrade) {
+		
 		if(letterGrade.equalsIgnoreCase("A")) 
 			return 4;
 		if(letterGrade.equalsIgnoreCase("A-")) 
@@ -1029,7 +1059,12 @@ public class Gradebook extends JFrame implements ActionListener {
 		return 0;
 	}
 	
+	/**
+	 * Prompts user to enter a grade for any available course in progress. Upon entering the grade,
+	 * the course grade will be recalculated.
+	 */
 	public void enterGrade() {
+		
 		ArrayList<String> identifiers = new ArrayList<String>();
 		for(int i = 0; i < cdtm.getRowCount(); i++)
 			if(cdtm.getValueAt(i, 9).equals("In Progress"))
@@ -1103,20 +1138,24 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 	}
 	
-	// removes grades associated with a deleted course
+	/**
+	 * Removes grades associated with a specified course.
+	 * @param identifier the unique ID of the course
+	 */
 	public void removeAssociatedGrades(String identifier) {
+		
 		for(int i = 0; i < gdtm.getRowCount(); i++)
 			if(gdtm.getValueAt(i, 1).equals(identifier)) {
 				gdtm.removeRow(i);
 				i--;
 			}
 	}
-
-	public static void main(String[] a) {
-		new Gradebook();
-	}
 	
+	/**
+	 * Resets the table settings so that it cannot be edited except through the buttons.
+	 */
 	public void revertTableSettings() {
+		
 		courseList.getColumnModel().getColumn(0).setPreferredWidth(200);
         courseList.getColumnModel().getColumn(1).setPreferredWidth(200);
         courseList.getColumnModel().getColumn(2).setPreferredWidth(150);
@@ -1140,6 +1179,7 @@ public class Gradebook extends JFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
 		String s = e.getActionCommand();
 		
 		if(s.equalsIgnoreCase("Add Course")) {
@@ -1221,5 +1261,9 @@ public class Gradebook extends JFrame implements ActionListener {
 				saveTable();
 		}
 	}
-
+	
+	public static void main(String[] a) {
+		
+		new Gradebook();
+	}
 }
