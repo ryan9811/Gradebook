@@ -645,8 +645,8 @@ public class Gradebook extends JFrame implements ActionListener {
 				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});		
 				String gpa = qualitySum / (creditSum - nonGpaSum) + "";
 				
-				if(gpa.length() > 4)
-					gpa = gpa.substring(0,4);
+				if(gpa.length() > 5)
+					gpa = gpa.substring(0,5);
 				
 				String creditSumString = creditSum + "";
 				if(creditSumString.length() > 5)
@@ -675,8 +675,8 @@ public class Gradebook extends JFrame implements ActionListener {
 					allQualitySum1 = allQualitySum1.substring(0,5);
 				
 				String totalGpa = allQualitySum / (allCreditSum - nonGpaCreditTotal) + "";
-				if(totalGpa.length() > 4)
-					totalGpa = totalGpa.substring(0,4);
+				if(totalGpa.length() > 5)
+					totalGpa = totalGpa.substring(0,5);
 				
 				cdtm.addRow(new Object[] {"Total Credits", allCreditSum1, "Total Quality Points", allQualitySum1, "", "", "", "", "GPA", totalGpa});	
 				
