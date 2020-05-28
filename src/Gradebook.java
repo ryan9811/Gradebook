@@ -21,169 +21,25 @@ import java.util.Vector;
  */
 public class Gradebook extends JFrame implements ActionListener {
 
-	private JTextArea textArea;
-	private JTextField identifierInput;
-	private Container contentPane;
-	private static DefaultTableModel cdtm;
-	private static DefaultTableModel gdtm;
-	private JTable courseList, gradeList;
-	private int assignmentCode;
-	private int courseCode;
-	private int pnpTotal;
-	private int term;
-	private JFrame frame;
-	private Hashtable<String, ArrayList<String>> categories;
+	private JTextField identifierInput; // The text field
+	
+	private static DefaultTableModel cdtm; // Course Default Table Model
+	private static DefaultTableModel gdtm; // Grade Default Table Model
+	
+	private JTable courseList, gradeList; // JTables containing grades and courses
+	
+	private int assignmentCode; // Code unique to each grade/assignment
+	private int courseCode; // Code unique to each course (AKA identifier)
+	
+	private int nonGpaCreditTotal; // The total amount of credits not applied to the gpa
+	
+	private JFrame frame; // The frame that holds the tables and buttons
+	
+	private Hashtable<String, ArrayList<String>> categories; // Contains the category weights of each course
 	
 	private JFileChooser myJFileChooser = new JFileChooser(new File("."));
 	
-	public void saveTable() {
-		if(myJFileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-			saveTable(myJFileChooser.getSelectedFile());
-		}
-	}
-	
-	public void saveTable(File file) {
-		try {
-			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
-			out.writeObject(cdtm.getDataVector());
-			out.writeObject(getColumnNamesC());
-			out.writeObject(gdtm.getDataVector());
-			out.writeObject(getColumnNamesG());
-			out.writeObject(categories);
-			out.close();		
-		}
-		
-		catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public Vector<String> getColumnNamesC() {
-		Vector<String> columnNames = new Vector<String>();
-		for(int i = 0; i < courseList.getColumnCount(); i++)
-			columnNames.add(courseList.getColumnName(i) + "");
-		return columnNames;
-	}
-	
-	public Vector<String> getColumnNamesG() {
-		Vector<String> columnNames = new Vector<String>();
-		for(int i = 0; i < gradeList.getColumnCount(); i++)
-			columnNames.add(gradeList.getColumnName(i) + "");
-		return columnNames;
-	}
-	
-	public void loadTable() {
-		if(myJFileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
-			loadTable(myJFileChooser.getSelectedFile());
-	}
-	
-	public void loadTable(File file) {
-		try {
-			ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
-			Vector rowDataC = (Vector) in.readObject();
-			Vector columnNamesC = (Vector) in.readObject();
-			Vector rowDataG = (Vector) in.readObject();
-			Vector columnNamesG = (Vector) in.readObject();
-			categories = (Hashtable<String, ArrayList<String>>) in.readObject();
-			cdtm.setDataVector(rowDataC, columnNamesC);
-			gdtm.setDataVector(rowDataG, columnNamesG);
-			revertTableSettings();
-			in.close();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void calculateGrade(String identifier) {
-		// For a class
-		// Figure out which categories have grades so far
-		// Total up those categories weights
-		// For each category, sum up points earned and total points, multiply by categoryWeight/sumCategoryWeightsUsed
-		// Change the grade in the table
-		
-		if(!gradeExists(identifier))
-			for(int i = 0; i < cdtm.getRowCount(); i++)
-				if(cdtm.getValueAt(i, 3).equals(identifier)) {
-					cdtm.setValueAt("n/a", i, 5);
-					cdtm.setValueAt("In Progress", i, 7);
-					return;
-				}
-			
-		
-		double sumCategoryWeightsUsed = 0;
-		double categoryWeight = 0;
-		double sumPointsEarned = 0;
-		double sumTotalPoints = 0;
-		double finalGrade = 0;
-		
-		ArrayList<String> finishedCats = new ArrayList<String>();
-		String category = "";
-		for(int i = 0; i < gdtm.getRowCount(); i++)
-			if(gdtm.getValueAt(i,1).equals(identifier) && !finishedCats.contains(gdtm.getValueAt(i, 3))) {
-				category = gdtm.getValueAt(i, 3) + "";
-				sumCategoryWeightsUsed += Double.parseDouble(gdtm.getValueAt(i, 4) + "");
-				System.out.println("sumCategoryWeightsUsed: " + sumCategoryWeightsUsed);
-				finishedCats.add(category);
-			}
-		
-		for(int i = 0; i < finishedCats.size(); i++) {
-			for(int j = 0; j < gdtm.getRowCount(); j++) {
-				if(gdtm.getValueAt(j, 3).equals(finishedCats.get(i))) {
-					categoryWeight = Double.parseDouble(gdtm.getValueAt(j, 4) + "");
-					System.out.println("categoryWeight: " + categoryWeight);
-				}
-				if(gdtm.getValueAt(j,1).equals(identifier) && finishedCats.get(i).equals(gdtm.getValueAt(j, 3))) {
-					sumPointsEarned += Double.parseDouble(gdtm.getValueAt(j, 5) + "");
-					System.out.println("sumPointsEarned: " + sumPointsEarned);
-					sumTotalPoints += Double.parseDouble(gdtm.getValueAt(j, 6) + "");
-					System.out.println("sumTotalPoints: " + sumTotalPoints);
-				}
-			}	
-			finalGrade += (sumPointsEarned / sumTotalPoints) * (categoryWeight / sumCategoryWeightsUsed) * 100;
-			System.out.println(finalGrade);
-			sumPointsEarned = 0;
-			sumTotalPoints = 0;
-		}
-
-		String gMode = "";
-		for(int i = 0; i < cdtm.getRowCount(); i++)
-			if(cdtm.getValueAt(i, 3).equals(identifier))
-				gMode = cdtm.getValueAt(i, 6) + "";
-		
-		String letGrade = numToLet(finalGrade, gMode);
-		
-		for(int i = 0; i < cdtm.getRowCount(); i++)
-			if(cdtm.getValueAt(i, 3).equals(identifier)) {
-				cdtm.setValueAt(finalGrade + "", i, 5);
-				cdtm.setValueAt(letGrade, i, 7);
-			}
-	}
-	
-	public String numToLet(double grade, String gMode) {
-		
-		if(gMode.equals("Letter")) {
-			if(grade >= 94) return "A";
-			else if(grade >= 90) return "A-";
-			else if(grade >= 87) return "B+";
-			else if(grade >= 84) return "B";
-			else if(grade >= 80) return "B-";
-			else if(grade >= 77) return "C+";
-			else if(grade >= 74) return "C";
-			else if(grade >= 70) return "C-";
-			else if(grade >= 67) return "D+";
-			else if(grade >= 64) return "D";
-			else if(grade >= 60) return "D-";
-			else return "F";
-		}
-		else if(gMode.equals("P/NP")) {
-			if(grade >= 60) return "P";
-			else return "NP";
-		}
-		return "";
-	}
-
-	public Gradebook(){
+	public Gradebook() {
 
 		// Frame that holds everything
         frame = new JFrame(); 
@@ -280,7 +136,7 @@ public class Gradebook extends JFrame implements ActionListener {
         gdtm = new DefaultTableModel(0,0);
         
         assignmentCode = 11111;
-        pnpTotal = 0;
+        nonGpaCreditTotal = 0;
         
         String gradeHeader[] = new String[] { "Course Title", "Identifier", "Assignment Code", "Category", "Category Weight", "Points Earned", "Total Points", "Grade", "Comment" };
         
@@ -300,13 +156,208 @@ public class Gradebook extends JFrame implements ActionListener {
 
 	}
 	
+	/**
+	 * Prompts the JFileChooser where files can be selected by the user for export
+	 */
+	public void saveTable() {
+		
+		if(myJFileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+			saveTable(myJFileChooser.getSelectedFile());
+		}
+	}
+	
+	/**
+	 * Writes the data in the JTables to a file
+	 * @param file the file to be written to/exported to
+	 */
+	public void saveTable(File file) {
+		
+		try {
+			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
+			out.writeObject(cdtm.getDataVector()); // Write the data from the course table
+			out.writeObject(getColumnNamesC());
+			out.writeObject(gdtm.getDataVector()); // Write the data from the grade table
+			out.writeObject(getColumnNamesG());
+			out.writeObject(categories); // Write the category weightings hash table
+			out.close();		
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Gets the column names of the course table into a vector format so it can be written
+	 * to a file.
+	 * @return a string vector containing the column names of the course table
+	 */
+	public Vector<String> getColumnNamesC() {
+		
+		Vector<String> columnNames = new Vector<String>();
+		for(int i = 0; i < courseList.getColumnCount(); i++)
+			columnNames.add(courseList.getColumnName(i) + "");
+		return columnNames;
+	}
+	
+	/**
+	 * Gets the column names of the grades table into a vector format so it can be written
+	 * to a file.
+	 * @return a string vector containing the column names of the grades table
+	 */
+	public Vector<String> getColumnNamesG() {
+		
+		Vector<String> columnNames = new Vector<String>();
+		for(int i = 0; i < gradeList.getColumnCount(); i++)
+			columnNames.add(gradeList.getColumnName(i) + "");
+		return columnNames;
+	}
+	
+	/**
+	 * Prompts the JFileChooser where files can be selected by the user for import
+	 */
+	public void loadTable() {
+		
+		if(myJFileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+			loadTable(myJFileChooser.getSelectedFile());
+	}
+	
+	/**
+	 * Reads the data into the JTables from a file
+	 * @param file the file to be read from/imported from
+	 */
+	public void loadTable(File file) {
+		
+		try {
+			ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
+			Vector rowDataC = (Vector) in.readObject();
+			Vector columnNamesC = (Vector) in.readObject();
+			Vector rowDataG = (Vector) in.readObject();
+			Vector columnNamesG = (Vector) in.readObject();
+			categories = (Hashtable<String, ArrayList<String>>) in.readObject();
+			cdtm.setDataVector(rowDataC, columnNamesC);
+			gdtm.setDataVector(rowDataG, columnNamesG);
+			revertTableSettings();
+			in.close();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Calculates the final grade for a specified course from the grades table and changes the Numeric Grade
+	 * and Final Grade fields in the course table
+	 * @param identifier the unique ID of the course
+	 */
+	public void calculateGrade(String identifier) {
+		// For a class
+		// Figure out which categories have grades so far
+		// Total up those categories weights
+		// For each category, sum up points earned and total points, multiply by categoryWeight/sumCategoryWeightsUsed
+		// Change the grade in the table
+		
+		if(!gradeExists(identifier))
+			for(int i = 0; i < cdtm.getRowCount(); i++)
+				if(cdtm.getValueAt(i, 3).equals(identifier)) {
+					cdtm.setValueAt("n/a", i, 5);
+					cdtm.setValueAt("In Progress", i, 7);
+					return;
+				}
+			
+		double sumCategoryWeightsUsed = 0;
+		double categoryWeight = 0;
+		double sumPointsEarned = 0;
+		double sumTotalPoints = 0;
+		double finalGrade = 0;
+		
+		ArrayList<String> finishedCats = new ArrayList<String>();
+		String category = "";
+		for(int i = 0; i < gdtm.getRowCount(); i++)
+			if(gdtm.getValueAt(i,1).equals(identifier) && !finishedCats.contains(gdtm.getValueAt(i, 3))) {
+				category = gdtm.getValueAt(i, 3) + "";
+				sumCategoryWeightsUsed += Double.parseDouble(gdtm.getValueAt(i, 4) + "");
+				System.out.println("sumCategoryWeightsUsed: " + sumCategoryWeightsUsed);
+				finishedCats.add(category);
+			}
+		
+		for(int i = 0; i < finishedCats.size(); i++) {
+			for(int j = 0; j < gdtm.getRowCount(); j++) {
+				if(gdtm.getValueAt(j, 3).equals(finishedCats.get(i))) {
+					categoryWeight = Double.parseDouble(gdtm.getValueAt(j, 4) + "");
+					System.out.println("categoryWeight: " + categoryWeight);
+				}
+				if(gdtm.getValueAt(j,1).equals(identifier) && finishedCats.get(i).equals(gdtm.getValueAt(j, 3))) {
+					sumPointsEarned += Double.parseDouble(gdtm.getValueAt(j, 5) + "");
+					System.out.println("sumPointsEarned: " + sumPointsEarned);
+					sumTotalPoints += Double.parseDouble(gdtm.getValueAt(j, 6) + "");
+					System.out.println("sumTotalPoints: " + sumTotalPoints);
+				}
+			}	
+			finalGrade += (sumPointsEarned / sumTotalPoints) * (categoryWeight / sumCategoryWeightsUsed) * 100;
+			System.out.println(finalGrade);
+			sumPointsEarned = 0;
+			sumTotalPoints = 0;
+		}
+
+		String gMode = "";
+		for(int i = 0; i < cdtm.getRowCount(); i++)
+			if(cdtm.getValueAt(i, 3).equals(identifier))
+				gMode = cdtm.getValueAt(i, 6) + "";
+		
+		String letGrade = numToLet(finalGrade, gMode);
+		
+		for(int i = 0; i < cdtm.getRowCount(); i++)
+			if(cdtm.getValueAt(i, 3).equals(identifier)) {
+				cdtm.setValueAt(finalGrade + "", i, 5);
+				cdtm.setValueAt(letGrade, i, 7);
+			}
+	}
+	
+	/**
+	 * Helper method to convert a numeric grade to a letter grade
+	 * @param grade the grade to be converted
+	 * @param gMode the grade mode
+	 * @return the letter equivalent of the grade
+	 */
+	public String numToLet(double grade, String gMode) {
+		
+		if(gMode.equals("Letter")) {
+			if(grade >= 94) return "A";
+			else if(grade >= 90) return "A-";
+			else if(grade >= 87) return "B+";
+			else if(grade >= 84) return "B";
+			else if(grade >= 80) return "B-";
+			else if(grade >= 77) return "C+";
+			else if(grade >= 74) return "C";
+			else if(grade >= 70) return "C-";
+			else if(grade >= 67) return "D+";
+			else if(grade >= 64) return "D";
+			else if(grade >= 60) return "D-";
+			else return "F";
+		}
+		else if(gMode.equals("P/NP")) {
+			if(grade >= 60) return "P";
+			else return "NP";
+		}
+		return "";
+	}
+	
+	/**
+	 * Tells whether or not there are any grades associated with a given course
+	 * @param identifier the unique ID of the course
+	 * @return whether or not there are any grades associated with a given course
+	 */
 	public boolean gradeExists(String identifier) {
+		
 		for(int i = 0; i < gdtm.getRowCount(); i++)
 			if(gdtm.getValueAt(i, 1).equals(identifier))
 				return true;
 		return false;
 	}
 	
+	/**
+	 * Adds a new course to the course table
+	 */
 	public void addCourse() {	
 		
 		String title = JOptionPane.showInputDialog("Enter Course Title");
@@ -432,7 +483,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			return;
 		}
 		
-		if(!unfinalizedTerm().equals(year) && existsUnfinalizedTerm()) {
+		if(!getUnfinalizedTerm().equals(year) && existsUnfinalizedTerm()) {
 			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMust Finalize Previous Term");
 			return;
 		}
@@ -450,21 +501,39 @@ public class Gradebook extends JFrame implements ActionListener {
 		cdtm.addRow(new Object[] {title, prof, time, identifier, credits, numGrade, gMode, fGrade, year, status});
 	}
 	
+	/**
+	 * Tells whether or not there is an unfinalized term. If there is, grades can be finalized and a new course
+	 * can be added for THAT TERM ONLY
+	 * @return whether or not there is an unfinalized term
+	 */
 	public boolean existsUnfinalizedTerm() {
+		
 		for(int i = 0; i < cdtm.getRowCount(); i++)
 			if(cdtm.getValueAt(i, 9).equals("Manual Entry") || cdtm.getValueAt(i, 9).equals("In Progress"))
 				return true;
 		return false;
 	}
 	
+	/**
+	 * Tells whether or not a term is finalized. If it is, a new course should not be able to be added to that term.
+	 * @param term the term being checked for finalization
+	 * @return whether or not the term is finalized
+	 */
 	public boolean isTermFinalized(String term) {
+		
 		for(int i = 0; i < cdtm.getRowCount(); i++)
 			if(cdtm.getValueAt(i, 8).equals(term) && cdtm.getValueAt(i, 9).equals("Finalized"))
 				return true;
 		return false;
 	}
 	
-	public String unfinalizedTerm() {
+	/**
+	 * Gets the unfinalized term of which there can only be 1. Grades cannot be entered for new terms
+	 * until all previous terms have been finalized.
+	 * @return the unfinalized term
+	 */
+	public String getUnfinalizedTerm() {
+		
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
 			if(cdtm.getValueAt(i, 9).equals("Manual Entry") || cdtm.getValueAt(i, 9).equals("In Progress"))
 				return cdtm.getValueAt(i, 8) + "";
@@ -472,6 +541,10 @@ public class Gradebook extends JFrame implements ActionListener {
 		return "";
 	}
 	
+	/**
+	 * Removes an element from the course table or grades table based on the assignment code or course
+	 * identifier entered into the text field.
+	 */
 	public void removeElement() {
 		
 		if(!isIdentifierFound() && !isCodeFound()) {
@@ -514,62 +587,76 @@ public class Gradebook extends JFrame implements ActionListener {
 				}
 			}
 		}
-		
-		
 	}
 	
+	/**
+	 * Tells whether or not there are any unfinalized courses. If there are none, there will not be 
+	 * any grades to finalize.
+	 * @return whether or not there are any unfinalized courses
+	 */
 	public boolean existsUnfinalizedCourses() {
+		
 		for(int i = 0; i < cdtm.getRowCount(); i++)
 			if(cdtm.getValueAt(i, 9).equals("Manual Entry") || cdtm.getValueAt(i, 9).equals("In Progress"))
 				return true;
 		return false;
 	}
 	
+	/**
+	 * Finalizes grades by setting the status of each course to finalized and calculating the GPA
+	 * for the current term being finalized and the total GPA based on all terms.
+	 */
 	public void finalizeGrades() {
 		
-		String year = unfinalizedTerm();
+		String year = getUnfinalizedTerm();
 		
 		int creditSum = 0;
 		double qualitySum = 0;
-		int pnpSum = 0;
+		int nonGpaSum = 0;
+		
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
 			if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && !cdtm.getValueAt(i, 7).equals("F")) {
 				qualitySum += Integer.parseInt((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
 				creditSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
+			
 			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && cdtm.getValueAt(i, 7).equals("F")) {
 				qualitySum += Integer.parseInt((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
+			
 			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("P/NP") && cdtm.getValueAt(i, 7).equals("P")) {
 				creditSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
-				pnpSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
-				pnpTotal += Integer.parseInt((String)cdtm.getValueAt(i, 4));
+				nonGpaSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
+				nonGpaCreditTotal += Integer.parseInt((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
+			
 			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Notation") && cdtm.getValueAt(i, 7).equals("TR")) {
 				creditSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
-				pnpSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
-				pnpTotal += Integer.parseInt((String)cdtm.getValueAt(i, 4));
+				nonGpaSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
+				nonGpaCreditTotal += Integer.parseInt((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 		}
+		
 		if(((String) cdtm.getValueAt(cdtm.getRowCount() - 1, 9)).equalsIgnoreCase("Finalized")) {
 				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});		
-				String gpa = qualitySum / (creditSum - pnpSum) + "";
+				String gpa = qualitySum / (creditSum - nonGpaSum) + "";
+				
 				if(gpa.length() > 4)
 					gpa = gpa.substring(0,4);
 				
-				String cSum = creditSum + "";
-				if(cSum.length() > 5)
-					cSum = cSum.substring(0,5);
+				String creditSumString = creditSum + "";
+				if(creditSumString.length() > 5)
+					creditSumString = creditSumString.substring(0,5);
 				
-				String qSum = qualitySum + "";
-				if(qSum.length() > 5)
-					qSum = qSum.substring(0,5);
+				String qualitySumString = qualitySum + "";
+				if(qualitySumString.length() > 5)
+					qualitySumString = qualitySumString.substring(0,5);
 				
-				cdtm.addRow(new Object[] {"Term Credits", cSum, "Term Quality Points", qualitySum, "", "", "", "", "GPA", gpa});
+				cdtm.addRow(new Object[] {"Term Credits", creditSumString, "Term Quality Points", qualitySum, "", "", "", "", "GPA", gpa});
 				
 				double allQualitySum = 0;
 				int allCreditSum = 0;
@@ -587,7 +674,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				if(allQualitySum1.length() > 5)
 					allQualitySum1 = allQualitySum1.substring(0,5);
 				
-				String totalGpa = allQualitySum / (allCreditSum - pnpTotal) + "";
+				String totalGpa = allQualitySum / (allCreditSum - nonGpaCreditTotal) + "";
 				if(totalGpa.length() > 4)
 					totalGpa = totalGpa.substring(0,4);
 				
@@ -598,9 +685,12 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		while(gdtm.getRowCount() > 0)
 			gdtm.removeRow(0);
-		
 	}
 	
+	/**
+	 * Tells whether or not an identifier can be found in the course table that matches the text field
+	 * @return whether or not an identifier can be found
+	 */
 	public boolean isIdentifierFound() {
 		
 		if(identifierInput.getText().equals(""))
