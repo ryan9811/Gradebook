@@ -366,6 +366,12 @@ public class Gradebook extends JFrame implements ActionListener {
 			String catWeight = "";
 			ArrayList<String> catsAndWeights = new ArrayList<String>();
 			category = JOptionPane.showInputDialog("Enter a grade weight category.");
+			
+			if(containsNumbers(category)) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers");
+				return;
+			}
+				
 			if(category == null) {
 				JOptionPane.showMessageDialog(null, "Action Cancelled");
 				return;
@@ -388,6 +394,12 @@ public class Gradebook extends JFrame implements ActionListener {
 				yesNo = JOptionPane.showConfirmDialog(null, "Would you like to enter another category?");
 				if(yesNo == 0) {
 					category = JOptionPane.showInputDialog("Enter Category Name");
+					
+					if(containsNumbers(category)) {
+						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers");
+						return;
+					}
+					
 					catWeight = JOptionPane.showInputDialog("Enter Category Weight (ex. 15)");
 					try {
 						double testError = Double.parseDouble(catWeight);
@@ -628,8 +640,8 @@ public class Gradebook extends JFrame implements ActionListener {
 				row = i;
 		}
 		
-		String[] editChoices = {"Course Title", "Professor", "Day/Time", "Credits", "Grade Mode", "Final Grade", "Term"};
-		String[] editChoices2 = {"Course Title", "Professor", "Day/Time", "Credits", "Final Grade", "Term"};
+		String[] editChoices = {"Course Title", "Professor", "Day/Time", "Credits", "Category Weightings", "Grade Mode", "Final Grade", "Term"};
+		String[] editChoices2 = {"Course Title", "Professor", "Day/Time", "Credits", "Category Weightings", "Final Grade", "Term"};
 		String edit = "";
 		
 		for(int i = 0; i < cdtm.getRowCount(); i++)
@@ -656,6 +668,113 @@ public class Gradebook extends JFrame implements ActionListener {
 				return;
 			}
 			else cdtm.setValueAt(course, row, 0);
+		}
+		
+		if(edit.equalsIgnoreCase("Category Weightings")) {
+			ArrayList<String> courseWeightings = categories.get(identifierInput.getText());
+			
+			String[] options = {"Add Category", "Remove Category", "Change Weighting"};
+			String selection = (String) JOptionPane.showInputDialog(null, "Select Action to Perform", "Course Master", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+			
+			if(selection == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				return;
+			}
+			
+			if(selection.equals("Add Category")) {
+				String categoryName = JOptionPane.showInputDialog("Enter Category Name");
+				
+				if(containsNumbers(categoryName)) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers");
+					return;
+				}
+				
+				
+				if(courseWeightings.contains(categoryName)) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Already Exists");
+					return;
+				}
+				String categoryWeight = JOptionPane.showInputDialog("Enter Category Weight");
+				try {
+					double testError = Double.parseDouble(categoryWeight);
+				} catch (NumberFormatException e) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+					return;
+				}
+				courseWeightings.add(categoryName);
+				courseWeightings.add(categoryWeight);
+			}
+			
+			else if(selection.equals("Remove Category")) {
+				ArrayList<String> categoryNames = getCategoryNames(courseWeightings);
+				String[] nameChoices = new String[categoryNames.size()];
+				for(int i = 0; i < nameChoices.length; i++)
+					nameChoices[i] = categoryNames.get(i);
+				
+				String nameSelection = (String) JOptionPane.showInputDialog(null, "Select Category to Remove", "Course Master", 
+						JOptionPane.QUESTION_MESSAGE, null, nameChoices, nameChoices[0]);
+				
+				if(nameSelection == null) {
+					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					return;
+				}
+				
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you wish to delete the category [" + nameSelection + "]?\nThis action cannot be reversed.") != 0) {
+					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					return;
+				}
+				
+				int remIndex = courseWeightings.indexOf(nameSelection);
+				courseWeightings.remove(remIndex);
+				courseWeightings.remove(remIndex);
+				
+				for(int i = 0; i < gdtm.getRowCount(); i++) {
+					if(gdtm.getValueAt(i, 3).equals(nameSelection)) {
+						gdtm.removeRow(i);
+						i--;
+					}
+				}
+				
+				calculateGrade(identifierInput.getText());
+			}
+			
+			else {
+				ArrayList<String> categoryNames = getCategoryNames(courseWeightings);
+				String[] nameChoices = new String[categoryNames.size()];
+				for(int i = 0; i < nameChoices.length; i++)
+					nameChoices[i] = categoryNames.get(i);
+				
+				String nameSelection = (String) JOptionPane.showInputDialog(null, "Select Category to Change Weight", "Course Master", 
+						JOptionPane.QUESTION_MESSAGE, null, nameChoices, nameChoices[0]);
+				
+				if(nameSelection == null) {
+					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					return;
+				}
+				
+				String newWeight = JOptionPane.showInputDialog("Enter New Weight");
+				
+				try {
+					double testError = Double.parseDouble(newWeight);
+				} catch (NumberFormatException e) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+					return;
+				}
+				
+				if(newWeight == null) {
+					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					return;
+				}
+				
+				int changeIndex = courseWeightings.indexOf(nameSelection) + 1;
+				courseWeightings.set(changeIndex, newWeight);
+				
+				for(int i = 0; i < gdtm.getRowCount(); i++)
+					if(gdtm.getValueAt(i, 1).equals(identifierInput.getText()) && gdtm.getValueAt(i, 3).equals(nameSelection))
+						gdtm.setValueAt(newWeight, i, 4);
+				
+				calculateGrade(identifierInput.getText());
+			}
 		}
 		
 		if(edit.equalsIgnoreCase("Professor")) {
@@ -768,6 +887,30 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			else cdtm.setValueAt(term, row, 8);
 		}
+	}
+	
+	public ArrayList<String> getCategoryNames(ArrayList<String> categoryWeights) {
+		ArrayList<String> names = new ArrayList<String>();
+		for(int i = 0; i < categoryWeights.size(); i++)
+			if(i % 2 == 0)
+				names.add(categoryWeights.get(i));
+		return names;
+	}
+	
+	public boolean containsNumbers(String word) {
+		String[] nums = {"0","1","2","3","4","5","6","7","8","9","10"};
+		for(int i = 0; i < nums.length; i++)
+			if(word.contains(nums[i]))
+				return true;
+		return false;
+	}
+	
+	public ArrayList<String> getCategoryValues(ArrayList<String> categoryWeights) {
+		ArrayList<String> values = new ArrayList<String>();
+		for(int i = 0; i < categoryWeights.size(); i++)
+			if(i % 2 != 0)
+				values.add(categoryWeights.get(i));
+		return values;
 	}
 	
 	public static double letToQual(String letterGrade) {
@@ -987,8 +1130,6 @@ public class Gradebook extends JFrame implements ActionListener {
 			else
 				saveTable();
 		}
-	
-		
 	}
 
 }
