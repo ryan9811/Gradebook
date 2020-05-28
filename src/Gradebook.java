@@ -146,7 +146,12 @@ public class Gradebook extends JFrame implements ActionListener {
 			sumTotalPoints = 0;
 		}
 
-		String letGrade = numToLet(finalGrade);
+		String gMode = "";
+		for(int i = 0; i < cdtm.getRowCount(); i++)
+			if(cdtm.getValueAt(i, 3).equals(identifier))
+				gMode = cdtm.getValueAt(i, 6) + "";
+		
+		String letGrade = numToLet(finalGrade, gMode);
 		
 		for(int i = 0; i < cdtm.getRowCount(); i++)
 			if(cdtm.getValueAt(i, 3).equals(identifier)) {
@@ -155,20 +160,27 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 	}
 	
-	public String numToLet(double grade) {
+	public String numToLet(double grade, String gMode) {
 		
-		if(grade >= 94) return "A";
-		else if(grade >= 90) return "A-";
-		else if(grade >= 87) return "B+";
-		else if(grade >= 84) return "B";
-		else if(grade >= 80) return "B-";
-		else if(grade >= 77) return "C+";
-		else if(grade >= 74) return "C";
-		else if(grade >= 70) return "C-";
-		else if(grade >= 67) return "D+";
-		else if(grade >= 64) return "D";
-		else if(grade >= 60) return "D-";
-		else return "F";
+		if(gMode.equals("Letter")) {
+			if(grade >= 94) return "A";
+			else if(grade >= 90) return "A-";
+			else if(grade >= 87) return "B+";
+			else if(grade >= 84) return "B";
+			else if(grade >= 80) return "B-";
+			else if(grade >= 77) return "C+";
+			else if(grade >= 74) return "C";
+			else if(grade >= 70) return "C-";
+			else if(grade >= 67) return "D+";
+			else if(grade >= 64) return "D";
+			else if(grade >= 60) return "D-";
+			else return "F";
+		}
+		else if(gMode.equals("P/NP")) {
+			if(grade >= 60) return "P";
+			else return "NP";
+		}
+		return "";
 	}
 
 	public Gradebook(){
@@ -394,7 +406,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			categories.put(identifier, catsAndWeights);
 		}
 	
-		String year = JOptionPane.showInputDialog("Enter Term\n(Ex. Freshman Year = 1)");
+		String year = JOptionPane.showInputDialog("Enter Term Number");
 		
 		try {
 			double testError = Double.parseDouble(year);
@@ -617,7 +629,21 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		String[] editChoices = {"Course Title", "Professor", "Day/Time", "Credits", "Grade Mode", "Final Grade", "Term"};
-		String edit = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Course Master", JOptionPane.QUESTION_MESSAGE, null, editChoices, editChoices[0]);
+		String[] editChoices2 = {"Course Title", "Professor", "Day/Time", "Credits", "Final Grade", "Term"};
+		String edit = "";
+		
+		for(int i = 0; i < cdtm.getRowCount(); i++)
+			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()) && cdtm.getValueAt(i, 9).equals("Manual Entry")) {
+				edit = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Course Master", JOptionPane.QUESTION_MESSAGE, null, editChoices2, editChoices2[0]);
+				if(edit == null) {
+					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					return;
+				}
+			}
+		
+		if(edit.equals(""))
+			edit = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Course Master", JOptionPane.QUESTION_MESSAGE, null, editChoices, editChoices[0]);
+		
 		if(edit == null) {
 			JOptionPane.showMessageDialog(null, "Action Cancelled");
 			return;
@@ -667,7 +693,44 @@ public class Gradebook extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Action Cancelled");
 				return;
 			}
-			else cdtm.setValueAt(gMode, row, 6);
+			
+			//else cdtm.setValueAt(gMode, row, 6);
+			
+			String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
+			String[] fGradeChoicesP = {"In Progress", "P", "NP"};
+			String[] notationChoices = {"TR","I","W","Z"};
+			String fGrade = "";
+			
+			if(gMode.equals("Letter")) {
+				cdtm.setValueAt(gMode, row, 6);
+				cdtm.setValueAt(numToLet(Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
+				return;
+			}
+			else if(gMode.equals("P/NP")) {
+				cdtm.setValueAt(gMode, row, 6);
+				cdtm.setValueAt(numToLet(Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
+				return;
+			}
+			else {
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you wish\nto change Grade Mode to Notation?\nNote: Grade Mode Notation cannot be changed back.") == 0) {
+					fGrade = (String) JOptionPane.showInputDialog(null, "Select Notation", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
+					if(fGrade == null) {
+						JOptionPane.showMessageDialog(null, "Action Cancelled");
+						return;
+					}
+					else {
+						cdtm.setValueAt(gMode, row, 6);
+						removeAssociatedGrades(identifierInput.getText());
+						cdtm.setValueAt("Manual Entry", row, 9);
+						cdtm.setValueAt("n/a", row, 5);
+						cdtm.setValueAt(fGrade, row, 7);
+					}
+				}
+				else {
+					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					return;
+				}
+			}
 		}
 		
 		if(edit.equalsIgnoreCase("Final Grade")) {
@@ -692,12 +755,18 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		if(edit.equalsIgnoreCase("Term")) {
 			String[] yearChoices = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-			String year = (String) JOptionPane.showInputDialog(null, "Select Term", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, yearChoices, yearChoices[0]);
-			if(year == null) {
+			String term = JOptionPane.showInputDialog(null, "Enter Term Number");
+			try {
+				double testError = Double.parseDouble(term);
+			} catch (NumberFormatException e) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+				return;
+			}
+			if(term == null) {
 				JOptionPane.showMessageDialog(null, "Action Cancelled");
 				return;
 			}
-			else cdtm.setValueAt(year, row, 8);
+			else cdtm.setValueAt(term, row, 8);
 		}
 	}
 	
