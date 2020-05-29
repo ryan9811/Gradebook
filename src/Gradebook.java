@@ -298,6 +298,10 @@ public class Gradebook extends JFrame implements ActionListener {
 			sumPointsEarned = 0;
 			sumTotalPoints = 0;
 		}
+		
+		String finalGradeString = finalGrade + "";
+		if(finalGradeString.length() > 5)
+			finalGradeString = finalGradeString.substring(0, 6);
 
 		String gMode = "";
 		for(int i = 0; i < cdtm.getRowCount(); i++)
@@ -308,7 +312,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		for(int i = 0; i < cdtm.getRowCount(); i++)
 			if(cdtm.getValueAt(i, 3).equals(identifier)) {
-				cdtm.setValueAt(finalGrade + "", i, 5);
+				cdtm.setValueAt(finalGradeString, i, 5);
 				cdtm.setValueAt(letGrade, i, 7);
 			}
 	}
@@ -362,19 +366,19 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String title = JOptionPane.showInputDialog("Enter Course Title");
 		if(title == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
 		String prof = JOptionPane.showInputDialog("Enter Professor Name");
 		if(prof == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
 		String time = JOptionPane.showInputDialog("Enter Course Day/Time");
 		if(time == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
@@ -384,7 +388,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		String[] creditsChoices = {"0", "1", "2", "3", "4", "5","6"};
 		String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[3]);
 		if(credits == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
@@ -393,7 +397,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		String[] gModeChoices = {"Letter", "P/NP", "Notation"};
 		String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
 		if(gMode == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
@@ -408,7 +412,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		else
 			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
 		if(fGrade == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
@@ -419,35 +423,35 @@ public class Gradebook extends JFrame implements ActionListener {
 			category = JOptionPane.showInputDialog("Enter a grade weight category.");
 			
 			if(containsNumbers(category)) {
-				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers");
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers", "System Notification", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 				
 			if(category == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 			catWeight = JOptionPane.showInputDialog("Enter Category Weight (ex. 15)");
 			if(catWeight == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 			try {
 				double testError = Double.parseDouble(catWeight);
 			} catch (NumberFormatException e) {
-				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			catsAndWeights.add(category);
 			catsAndWeights.add(catWeight);
 			int yesNo = 0;
 			while(yesNo == 0) {
-				yesNo = JOptionPane.showConfirmDialog(null, "Would you like to enter another category?");
+				yesNo = JOptionPane.showConfirmDialog(null, "Enter Another Category?", "System Notification", JOptionPane.WARNING_MESSAGE);
 				if(yesNo == 0) {
 					category = JOptionPane.showInputDialog("Enter Category Name");
 					
 					if(containsNumbers(category)) {
-						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers");
+						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers", "System Notification", JOptionPane.ERROR_MESSAGE);
 						return;
 					}
 					
@@ -455,14 +459,14 @@ public class Gradebook extends JFrame implements ActionListener {
 					try {
 						double testError = Double.parseDouble(catWeight);
 					} catch (NumberFormatException e) {
-						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
 						return;
 					}
 					catsAndWeights.add(category);
 					catsAndWeights.add(catWeight);
 				}
 				else if(yesNo == JOptionPane.CANCEL_OPTION){
-					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
 			}
@@ -474,22 +478,22 @@ public class Gradebook extends JFrame implements ActionListener {
 		try {
 			double testError = Double.parseDouble(year);
 		} catch (NumberFormatException e) {
-			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
 		if(isTermFinalized(year)) {
-			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nEntered Term is Finalized");
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nEntered Term is Finalized", "System Notification", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
 		if(!getUnfinalizedTerm().equals(year) && existsUnfinalizedTerm()) {
-			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMust Finalize Previous Term");
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMust Finalize Previous Term", "System Notification", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
 		if(year == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
@@ -499,6 +503,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		else status = "Manual Entry";
 
 		cdtm.addRow(new Object[] {title, prof, time, identifier, credits, numGrade, gMode, fGrade, year, status});
+		
+		JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
 	/**
@@ -548,13 +554,13 @@ public class Gradebook extends JFrame implements ActionListener {
 	public void removeElement() {
 		
 		if(!isIdentifierFound() && !isCodeFound()) {
-			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nElement Does Not Exist");
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nElement Does Not Exist", "System Notification", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
 			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()) && cdtm.getValueAt(i, 9).equals("Finalized")) {
-				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCannot Remove Finalized Course");
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCannot Remove Finalized Course", "System Notification", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 		}
@@ -562,12 +568,14 @@ public class Gradebook extends JFrame implements ActionListener {
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
 			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText())) {
 				String courseName = (String) cdtm.getValueAt(i, 0);
-				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + courseName + "? \nThis operation cannot be undone.") == 0) {
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete [" + courseName + "]? \nThis action cannot be reversed.", 
+						"System Notification", JOptionPane.WARNING_MESSAGE) == 0) {
 					removeAssociatedGrades(identifierInput.getText());
 					cdtm.removeRow(i);
+					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				}
 				else {
-					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
 			}
@@ -576,13 +584,15 @@ public class Gradebook extends JFrame implements ActionListener {
 		for(int i = 0; i < gdtm.getRowCount(); i++) {
 			if(gdtm.getValueAt(i, 2).equals(identifierInput.getText())) {
 				String assignmentCode = (String) gdtm.getValueAt(i, 2);
-				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete assignment " + assignmentCode + "? \nThis operation cannot be undone.") == 0) {
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete assignment [" + assignmentCode + "]? \nThis action cannot be reversed.", 
+						"System Notification", JOptionPane.WARNING_MESSAGE) == 0) {
 					String id = gdtm.getValueAt(i, 1) + "";
 					gdtm.removeRow(i);
 					calculateGrade(id);
+					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				}
 				else {
-					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
 			}
@@ -681,6 +691,8 @@ public class Gradebook extends JFrame implements ActionListener {
 				cdtm.addRow(new Object[] {"Total Credits", allCreditSum1, "Total Quality Points", allQualitySum1, "", "", "", "", "GPA", totalGpa});	
 				
 				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});	
+				
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 		}
 		
 		while(gdtm.getRowCount() > 0)
@@ -721,13 +733,13 @@ public class Gradebook extends JFrame implements ActionListener {
 	public void editCourse() {
 		
 		if(!isIdentifierFound()) {
-			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nIdentifier Does Not Exist");
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nIdentifier Does Not Exist", "System Notification", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
 			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()) && cdtm.getValueAt(i, 9).equals("Finalized")) {
-				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCannot Edit Finalized Course");
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCannot Edit Finalized Course", "System Notification", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 		}
@@ -746,7 +758,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()) && cdtm.getValueAt(i, 9).equals("Manual Entry")) {
 				edit = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Course Master", JOptionPane.QUESTION_MESSAGE, null, editChoices2, editChoices2[0]);
 				if(edit == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
 			}
@@ -755,17 +767,18 @@ public class Gradebook extends JFrame implements ActionListener {
 			edit = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Course Master", JOptionPane.QUESTION_MESSAGE, null, editChoices, editChoices[0]);
 		
 		if(edit == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
 		if(edit.equalsIgnoreCase("Course Title")) {
 			String course = JOptionPane.showInputDialog("Enter Course Title");
 			if(course == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 			else cdtm.setValueAt(course, row, 0);
+			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 		}
 		
 		if(edit.equalsIgnoreCase("Category Weightings")) {
@@ -775,7 +788,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			String selection = (String) JOptionPane.showInputDialog(null, "Select Action to Perform", "Course Master", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 			
 			if(selection == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 			
@@ -783,24 +796,25 @@ public class Gradebook extends JFrame implements ActionListener {
 				String categoryName = JOptionPane.showInputDialog("Enter Category Name");
 				
 				if(containsNumbers(categoryName)) {
-					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers");
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers", "System Notification", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-				
 				
 				if(courseWeightings.contains(categoryName)) {
-					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Already Exists");
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Already Exists", "System Notification", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
+				
 				String categoryWeight = JOptionPane.showInputDialog("Enter Category Weight");
 				try {
 					double testError = Double.parseDouble(categoryWeight);
 				} catch (NumberFormatException e) {
-					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				courseWeightings.add(categoryName);
 				courseWeightings.add(categoryWeight);
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
 			else if(selection.equals("Remove Category")) {
@@ -813,12 +827,13 @@ public class Gradebook extends JFrame implements ActionListener {
 						JOptionPane.QUESTION_MESSAGE, null, nameChoices, nameChoices[0]);
 				
 				if(nameSelection == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
 				
-				if(JOptionPane.showConfirmDialog(null, "Are you sure you wish to delete the category [" + nameSelection + "]?\nThis action cannot be reversed.") != 0) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled");
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you wish to delete the category [" + nameSelection + "]?\nThis action cannot be reversed.", 
+						"System Notification", JOptionPane.WARNING_MESSAGE) != 0) {
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
 				
@@ -833,10 +848,12 @@ public class Gradebook extends JFrame implements ActionListener {
 					}
 				}
 				
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				
 				calculateGrade(identifierInput.getText());
 			}
 			
-			else {
+			else if(selection.equals("Change Weighting")) {
 				ArrayList<String> categoryNames = getCategoryNames(courseWeightings);
 				String[] nameChoices = new String[categoryNames.size()];
 				for(int i = 0; i < nameChoices.length; i++)
@@ -846,7 +863,7 @@ public class Gradebook extends JFrame implements ActionListener {
 						JOptionPane.QUESTION_MESSAGE, null, nameChoices, nameChoices[0]);
 				
 				if(nameSelection == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
 				
@@ -855,12 +872,12 @@ public class Gradebook extends JFrame implements ActionListener {
 				try {
 					double testError = Double.parseDouble(newWeight);
 				} catch (NumberFormatException e) {
-					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				
 				if(newWeight == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
 				
@@ -872,42 +889,47 @@ public class Gradebook extends JFrame implements ActionListener {
 						gdtm.setValueAt(newWeight, i, 4);
 				
 				calculateGrade(identifierInput.getText());
+				
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
 		
 		if(edit.equalsIgnoreCase("Professor")) {
 			String prof = JOptionPane.showInputDialog("Enter Professor Name");
 			if(prof == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 			else cdtm.setValueAt(prof, row, 1);
+			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 		}
 		
 		if(edit.equalsIgnoreCase("Day/Time")) {
 			String dayTime = JOptionPane.showInputDialog("Enter Day/Time");
 			if(dayTime == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 			else cdtm.setValueAt(dayTime, row, 2);
+			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 		}
 		
 		if(edit.equalsIgnoreCase("Credits")) {
 			String[] creditsChoices = {"0", "1", "2", "3", "4", "5"};
 			String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[0]);
 			if(credits == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 			else cdtm.setValueAt(credits, row, 4);
+			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 		}
 		
 		if(edit.equalsIgnoreCase("Grade Mode")) {
 			String[] gModeChoices = {"Letter", "P/NP", "Notation"};
 			String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
 			if(gMode == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 			
@@ -919,18 +941,21 @@ public class Gradebook extends JFrame implements ActionListener {
 			if(gMode.equals("Letter")) {
 				cdtm.setValueAt(gMode, row, 6);
 				cdtm.setValueAt(numToLet(Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 			else if(gMode.equals("P/NP")) {
 				cdtm.setValueAt(gMode, row, 6);
 				cdtm.setValueAt(numToLet(Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
-			else {
-				if(JOptionPane.showConfirmDialog(null, "Are you sure you wish\nto change Grade Mode to Notation?\nNote: Grade Mode Notation cannot be changed back.") == 0) {
+			else if(gMode.equals("Notation")) {
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you wish\nto change Grade Mode to Notation?\nNote: Grade Mode Notation cannot be changed back.",
+						"System Notification", JOptionPane.WARNING_MESSAGE) == 0) {
 					fGrade = (String) JOptionPane.showInputDialog(null, "Select Notation", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
 					if(fGrade == null) {
-						JOptionPane.showMessageDialog(null, "Action Cancelled");
+						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 						return;
 					}
 					else {
@@ -939,10 +964,11 @@ public class Gradebook extends JFrame implements ActionListener {
 						cdtm.setValueAt("Manual Entry", row, 9);
 						cdtm.setValueAt("n/a", row, 5);
 						cdtm.setValueAt(fGrade, row, 7);
+						JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					}
 				}
 				else {
-					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
 			}
@@ -959,13 +985,13 @@ public class Gradebook extends JFrame implements ActionListener {
 			else if(cdtm.getValueAt(row, 6).equals("P/NP"))
 				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
 			else 
-				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
+				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
 			if(fGrade == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 			else cdtm.setValueAt(fGrade, row, 7);
-			
+			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 		}
 		
 		if(edit.equalsIgnoreCase("Term")) {
@@ -974,14 +1000,15 @@ public class Gradebook extends JFrame implements ActionListener {
 			try {
 				double testError = Double.parseDouble(term);
 			} catch (NumberFormatException e) {
-				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			if(term == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 			else cdtm.setValueAt(term, row, 8);
+			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 	
@@ -1071,7 +1098,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				identifiers.add(cdtm.getValueAt(i, 3) + "");
 		
 		if(identifiers.size() == 0) {
-			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNo Courses Available");
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNo Courses Available", "System Notification", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
@@ -1083,7 +1110,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				JOptionPane.QUESTION_MESSAGE, null, identifierChoices, identifierChoices[0]);
 		
 		if(identifier == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
@@ -1103,7 +1130,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				JOptionPane.QUESTION_MESSAGE, null, categoryChoices, categoryChoices[0]);
 		
 		if(category == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled");
+			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
@@ -1116,6 +1143,9 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String pointsEarned = JOptionPane.showInputDialog("Enter Points Earned for Assignment");
 		
+		if(pointsEarned.length() > 5)
+			pointsEarned = pointsEarned.substring(0, 6);
+		
 		String totalPoints = JOptionPane.showInputDialog("Enter Total Points for Assignment");
 		
 		String grade;
@@ -1123,19 +1153,35 @@ public class Gradebook extends JFrame implements ActionListener {
 		try {
 			grade = (Double.parseDouble(pointsEarned) / Double.parseDouble(totalPoints) * 100 + "");
 		} catch (NumberFormatException e) {
-			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception");
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
-		String comment = JOptionPane.showInputDialog(null, "Enter a comment for this assignment.");
+		if(Double.parseDouble(pointsEarned) > 2000) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMaximum Points Earned Exceeded", "System Notification", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		if(Double.parseDouble(totalPoints) > 1000) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMaximum Total Points Exceeded", "System Notification", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		if(Double.parseDouble(pointsEarned) < 0 || Double.parseDouble(totalPoints) < 0) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNegative Values Not Accepted", "System Notification", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		String comment = JOptionPane.showInputDialog(null, "Enter Comment for Assignment");
 		
 		if(grade.length() > 5)
-			grade = grade.substring(0, 5);
+			grade = grade.substring(0, 6);
 		
 		gdtm.addRow(new Object[] {courseTitle, identifier, code, category, catWeight, pointsEarned, totalPoints, grade, comment});
 		
 		calculateGrade(identifier);
 		
+		JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
 	/**
@@ -1194,18 +1240,18 @@ public class Gradebook extends JFrame implements ActionListener {
 			
 			for(int i = 0; i < cdtm.getRowCount(); i++) {
 				if(cdtm.getValueAt(i, 7).equals("In Progress")) {
-					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCannot Finalize with\nFinal Grade = In Progress");
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCannot Finalize with\nFinal Grade = In Progress", "System Notification", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 			}
 			
 			if(!existsUnfinalizedCourses() || cdtm.getRowCount() == 0) {
-				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nAll Courses Finalized");
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nAll Courses Finalized", "System Notification", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			
 			else if(JOptionPane.showConfirmDialog(null, "Are you sure you want to finalize grades?\nThis action cannot be reversed.\n"
-					+ "Note: It is advised to export before finalizing.\nGrades will be cleared.") == 0) {
+					+ "Note: It is advised to export before finalizing.\nGrades will be cleared.", "System Notification", JOptionPane.WARNING_MESSAGE) == 0) {
 				int counter = 0;
 				for(int i = 0; i < cdtm.getRowCount(); i++)
 					if(cdtm.getValueAt(i, 9).equals("In Progress") || cdtm.getValueAt(i, 9).equals("Manual Entry"))
@@ -1213,12 +1259,12 @@ public class Gradebook extends JFrame implements ActionListener {
 				if(counter > 0)
 					finalizeGrades();
 				else {
-					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nAll Courses Finalized");
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nAll Courses Finalized", "System Notification", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 			}
 			else {
-				JOptionPane.showMessageDialog(null, "Action Cancelled");
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 		}
@@ -1226,12 +1272,13 @@ public class Gradebook extends JFrame implements ActionListener {
 		if(s.equalsIgnoreCase("Manual Override")) {
 			if(!courseList.isEnabled()) {
 				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to enter Manual Override mode? \n"
-						+ "It is highly recommended to use the Edit Course function.\nNote: Reclick Manual Override to return to Automatic.") == 0) {
+						+ "It is highly recommended to use the Edit Course function.\nNote: Reclick Manual Override to return to Automatic.", 
+						"System Notification", JOptionPane.WARNING_MESSAGE) == 0) {
 					courseList.setEnabled(true);
 					gradeList.setEnabled(true);
 				}
 				else {
-					JOptionPane.showMessageDialog(null, "Action Cancelled");
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
 			}
