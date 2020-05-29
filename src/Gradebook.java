@@ -94,7 +94,7 @@ public class Gradebook extends JFrame implements ActionListener {
         JButton removeCourse = new JButton("Remove Element");
         removeCourse.addActionListener(this);
         
-        JButton editCourse = new JButton("Edit Course");
+        JButton editCourse = new JButton("Edit Element");
         editCourse.addActionListener(this);
         
         JButton enterGrade = new JButton("Enter Grade");
@@ -731,281 +731,356 @@ public class Gradebook extends JFrame implements ActionListener {
 	 */
 	public void editCourse() {
 		
-		if(!isIdentifierFound()) {
-			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nIdentifier Does Not Exist", "System Notification", JOptionPane.ERROR_MESSAGE);
+		if(!isIdentifierFound() && !isCodeFound()) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nElement Does Not Exist", "System Notification", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
-		for(int i = 0; i < cdtm.getRowCount(); i++) {
-			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()) && cdtm.getValueAt(i, 9).equals("Finalized")) {
-				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCannot Edit Finalized Course", "System Notification", JOptionPane.ERROR_MESSAGE);
-				return;
-			}
-		}
+		if(identifierInput.getText().contains("C")) {
 		
-		int row = 0;
-		for(int i = 0; i < cdtm.getRowCount(); i++) {
-			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()))
-				row = i;
-		}
-		
-		String[] editChoices = {"Course Title", "Professor", "Day/Time", "Credits", "Category Weightings", "Grade Mode", "Final Grade", "Term"};
-		String[] editChoices2 = {"Course Title", "Professor", "Day/Time", "Credits", "Category Weightings", "Final Grade", "Term"};
-		String edit = "";
-		
-		for(int i = 0; i < cdtm.getRowCount(); i++)
-			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()) && cdtm.getValueAt(i, 9).equals("Manual Entry")) {
-				edit = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Course Master", JOptionPane.QUESTION_MESSAGE, null, editChoices2, editChoices2[0]);
-				if(edit == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			for(int i = 0; i < cdtm.getRowCount(); i++) {
+				if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()) && cdtm.getValueAt(i, 9).equals("Finalized")) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCannot Edit Finalized Course", "System Notification", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-			}
-		
-		if(edit.equals(""))
-			edit = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Course Master", JOptionPane.QUESTION_MESSAGE, null, editChoices, editChoices[0]);
-		
-		if(edit == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-			return;
-		}
-		
-		if(edit.equalsIgnoreCase("Course Title")) {
-			String course = JOptionPane.showInputDialog(null, "Enter Course Title", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-			if(course == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				return;
-			}
-			else cdtm.setValueAt(course, row, 0);
-			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-		}
-		
-		if(edit.equalsIgnoreCase("Category Weightings")) {
-			ArrayList<String> courseWeightings = categories.get(identifierInput.getText());
-			
-			String[] options = {"Add Category", "Remove Category", "Change Weighting"};
-			String selection = (String) JOptionPane.showInputDialog(null, "Select Action to Perform", "Course Master", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-			
-			if(selection == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				return;
 			}
 			
-			if(selection.equals("Add Category")) {
-				String categoryName = JOptionPane.showInputDialog(null, "Enter Category Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-				
-				if(containsNumbers(categoryName)) {
-					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers", "System Notification", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				
-				if(courseWeightings.contains(categoryName)) {
-					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Already Exists", "System Notification", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				
-				String categoryWeight = JOptionPane.showInputDialog(null, "Enter Category Weight", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-				try {
-					double testError = Double.parseDouble(categoryWeight);
-				} catch (NumberFormatException e) {
-					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				courseWeightings.add(categoryName);
-				courseWeightings.add(categoryWeight);
-				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			int row = 0;
+			for(int i = 0; i < cdtm.getRowCount(); i++) {
+				if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()))
+					row = i;
 			}
 			
-			else if(selection.equals("Remove Category")) {
-				ArrayList<String> categoryNames = getCategoryNames(courseWeightings);
-				String[] nameChoices = new String[categoryNames.size()];
-				for(int i = 0; i < nameChoices.length; i++)
-					nameChoices[i] = categoryNames.get(i);
-				
-				String nameSelection = (String) JOptionPane.showInputDialog(null, "Select Category to Remove", "Course Master", 
-						JOptionPane.QUESTION_MESSAGE, null, nameChoices, nameChoices[0]);
-				
-				if(nameSelection == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-					return;
-				}
-				
-				if(JOptionPane.showConfirmDialog(null, "Are you sure you wish to delete the category [" + nameSelection + "]?\nThis action cannot be reversed.") != 0) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-					return;
-				}
-				
-				int remIndex = courseWeightings.indexOf(nameSelection);
-				courseWeightings.remove(remIndex);
-				courseWeightings.remove(remIndex);
-				
-				for(int i = 0; i < gdtm.getRowCount(); i++) {
-					if(gdtm.getValueAt(i, 3).equals(nameSelection)) {
-						gdtm.removeRow(i);
-						i--;
-					}
-				}
-				
-				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				
-				calculateGrade(identifierInput.getText());
-			}
+			String[] editChoices = {"Course Title", "Professor", "Day/Time", "Credits", "Category Weightings", "Grade Mode", "Final Grade", "Term"};
+			String[] editChoices2 = {"Course Title", "Professor", "Day/Time", "Credits", "Category Weightings", "Final Grade", "Term"};
+			String edit = "";
 			
-			else if(selection.equals("Change Weighting")) {
-				ArrayList<String> categoryNames = getCategoryNames(courseWeightings);
-				String[] nameChoices = new String[categoryNames.size()];
-				for(int i = 0; i < nameChoices.length; i++)
-					nameChoices[i] = categoryNames.get(i);
-				
-				String nameSelection = (String) JOptionPane.showInputDialog(null, "Select Category to Change Weight", "Course Master", 
-						JOptionPane.QUESTION_MESSAGE, null, nameChoices, nameChoices[0]);
-				
-				if(nameSelection == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-					return;
-				}
-				
-				String newWeight = JOptionPane.showInputDialog(null, "Enter New Weight", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-				
-				try {
-					double testError = Double.parseDouble(newWeight);
-				} catch (NumberFormatException e) {
-					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				
-				if(newWeight == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-					return;
-				}
-				
-				int changeIndex = courseWeightings.indexOf(nameSelection) + 1;
-				courseWeightings.set(changeIndex, newWeight);
-				
-				for(int i = 0; i < gdtm.getRowCount(); i++)
-					if(gdtm.getValueAt(i, 1).equals(identifierInput.getText()) && gdtm.getValueAt(i, 3).equals(nameSelection))
-						gdtm.setValueAt(newWeight, i, 4);
-				
-				calculateGrade(identifierInput.getText());
-				
-				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-			}
-		}
-		
-		if(edit.equalsIgnoreCase("Professor")) {
-			String prof = JOptionPane.showInputDialog(null, "Enter Professor Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-			if(prof == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				return;
-			}
-			else cdtm.setValueAt(prof, row, 1);
-			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-		}
-		
-		if(edit.equalsIgnoreCase("Day/Time")) {
-			String dayTime = JOptionPane.showInputDialog(null, "Enter Day/Time", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-			if(dayTime == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				return;
-			}
-			else cdtm.setValueAt(dayTime, row, 2);
-			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-		}
-		
-		if(edit.equalsIgnoreCase("Credits")) {
-			String[] creditsChoices = {"0", "1", "2", "3", "4", "5"};
-			String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[0]);
-			if(credits == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				return;
-			}
-			else cdtm.setValueAt(credits, row, 4);
-			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-		}
-		
-		if(edit.equalsIgnoreCase("Grade Mode")) {
-			String[] gModeChoices = {"Letter", "P/NP", "Notation"};
-			String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
-			if(gMode == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				return;
-			}
-			
-			String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
-			String[] fGradeChoicesP = {"In Progress", "P", "NP"};
-			String[] notationChoices = {"TR","I","W","Z"};
-			String fGrade = "";
-			
-			if(gMode.equals("Letter")) {
-				cdtm.setValueAt(gMode, row, 6);
-				cdtm.setValueAt(numToLet(Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
-				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				return;
-			}
-			else if(gMode.equals("P/NP")) {
-				cdtm.setValueAt(gMode, row, 6);
-				cdtm.setValueAt(numToLet(Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
-				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				return;
-			}
-			else if(gMode.equals("Notation")) {
-				if(JOptionPane.showConfirmDialog(null, "Are you sure you wish\nto change Grade Mode to Notation?\nNote: Grade Mode Notation cannot be changed back.") == 0) {
-					fGrade = (String) JOptionPane.showInputDialog(null, "Select Notation", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
-					if(fGrade == null) {
+			for(int i = 0; i < cdtm.getRowCount(); i++)
+				if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()) && cdtm.getValueAt(i, 9).equals("Manual Entry")) {
+					edit = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Course Master", JOptionPane.QUESTION_MESSAGE, null, editChoices2, editChoices2[0]);
+					if(edit == null) {
 						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 						return;
 					}
-					else {
-						cdtm.setValueAt(gMode, row, 6);
-						removeAssociatedGrades(identifierInput.getText());
-						cdtm.setValueAt("Manual Entry", row, 9);
-						cdtm.setValueAt("n/a", row, 5);
-						cdtm.setValueAt(fGrade, row, 7);
-						JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-					}
 				}
-				else {
+			
+			if(edit.equals(""))
+				edit = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Course Master", JOptionPane.QUESTION_MESSAGE, null, editChoices, editChoices[0]);
+			
+			if(edit == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
+			
+			if(edit.equalsIgnoreCase("Course Title")) {
+				String course = JOptionPane.showInputDialog(null, "Enter Course Title", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+				if(course == null) {
 					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
+				else cdtm.setValueAt(course, row, 0);
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
-		}
-		
-		if(edit.equalsIgnoreCase("Final Grade")) {
-			String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
-			String[] fGradeChoicesP = {"In Progress", "P", "NP"};
-			String[] notationChoices = {"TR","I","W","Z"};
-			String fGrade;
 			
-			if(cdtm.getValueAt(row, 6).equals("Letter"))
-				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
-			else if(cdtm.getValueAt(row, 6).equals("P/NP"))
-				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
-			else 
-				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
-			if(fGrade == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				return;
+			if(edit.equalsIgnoreCase("Category Weightings")) {
+				ArrayList<String> courseWeightings = categories.get(identifierInput.getText());
+				
+				String[] options = {"Add Category", "Remove Category", "Change Weighting"};
+				String selection = (String) JOptionPane.showInputDialog(null, "Select Action to Perform", "Course Master", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+				
+				if(selection == null) {
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				
+				if(selection.equals("Add Category")) {
+					String categoryName = JOptionPane.showInputDialog(null, "Enter Category Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+					
+					if(containsNumbers(categoryName)) {
+						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers", "System Notification", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+					
+					if(courseWeightings.contains(categoryName)) {
+						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Already Exists", "System Notification", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+					
+					String categoryWeight = JOptionPane.showInputDialog(null, "Enter Category Weight", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+					try {
+						double testError = Double.parseDouble(categoryWeight);
+					} catch (NumberFormatException e) {
+						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+					courseWeightings.add(categoryName);
+					courseWeightings.add(categoryWeight);
+					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				}
+				
+				else if(selection.equals("Remove Category")) {
+					ArrayList<String> categoryNames = getCategoryNames(courseWeightings);
+					String[] nameChoices = new String[categoryNames.size()];
+					for(int i = 0; i < nameChoices.length; i++)
+						nameChoices[i] = categoryNames.get(i);
+					
+					String nameSelection = (String) JOptionPane.showInputDialog(null, "Select Category to Remove", "Course Master", 
+							JOptionPane.QUESTION_MESSAGE, null, nameChoices, nameChoices[0]);
+					
+					if(nameSelection == null) {
+						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+						return;
+					}
+					
+					if(JOptionPane.showConfirmDialog(null, "Are you sure you wish to delete the category [" + nameSelection + "]?\nThis action cannot be reversed.") != 0) {
+						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+						return;
+					}
+					
+					int remIndex = courseWeightings.indexOf(nameSelection);
+					courseWeightings.remove(remIndex);
+					courseWeightings.remove(remIndex);
+					
+					for(int i = 0; i < gdtm.getRowCount(); i++) {
+						if(gdtm.getValueAt(i, 3).equals(nameSelection)) {
+							gdtm.removeRow(i);
+							i--;
+						}
+					}
+					
+					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					
+					calculateGrade(identifierInput.getText());
+				}
+				
+				else if(selection.equals("Change Weighting")) {
+					ArrayList<String> categoryNames = getCategoryNames(courseWeightings);
+					String[] nameChoices = new String[categoryNames.size()];
+					for(int i = 0; i < nameChoices.length; i++)
+						nameChoices[i] = categoryNames.get(i);
+					
+					String nameSelection = (String) JOptionPane.showInputDialog(null, "Select Category to Change Weight", "Course Master", 
+							JOptionPane.QUESTION_MESSAGE, null, nameChoices, nameChoices[0]);
+					
+					if(nameSelection == null) {
+						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+						return;
+					}
+					
+					String newWeight = JOptionPane.showInputDialog(null, "Enter New Weight", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+					
+					try {
+						double testError = Double.parseDouble(newWeight);
+					} catch (NumberFormatException e) {
+						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+					
+					if(newWeight == null) {
+						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+						return;
+					}
+					
+					int changeIndex = courseWeightings.indexOf(nameSelection) + 1;
+					courseWeightings.set(changeIndex, newWeight);
+					
+					for(int i = 0; i < gdtm.getRowCount(); i++)
+						if(gdtm.getValueAt(i, 1).equals(identifierInput.getText()) && gdtm.getValueAt(i, 3).equals(nameSelection))
+							gdtm.setValueAt(newWeight, i, 4);
+					
+					calculateGrade(identifierInput.getText());
+					
+					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				}
 			}
-			else cdtm.setValueAt(fGrade, row, 7);
-			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			
+			if(edit.equalsIgnoreCase("Professor")) {
+				String prof = JOptionPane.showInputDialog(null, "Enter Professor Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+				if(prof == null) {
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				else cdtm.setValueAt(prof, row, 1);
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			}
+			
+			if(edit.equalsIgnoreCase("Day/Time")) {
+				String dayTime = JOptionPane.showInputDialog(null, "Enter Day/Time", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+				if(dayTime == null) {
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				else cdtm.setValueAt(dayTime, row, 2);
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			}
+			
+			if(edit.equalsIgnoreCase("Credits")) {
+				String[] creditsChoices = {"0", "1", "2", "3", "4", "5"};
+				String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[0]);
+				if(credits == null) {
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				else cdtm.setValueAt(credits, row, 4);
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			}
+			
+			if(edit.equalsIgnoreCase("Grade Mode")) {
+				String[] gModeChoices = {"Letter", "P/NP", "Notation"};
+				String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
+				if(gMode == null) {
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				
+				String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
+				String[] fGradeChoicesP = {"In Progress", "P", "NP"};
+				String[] notationChoices = {"TR","I","W","Z"};
+				String fGrade = "";
+				
+				if(gMode.equals("Letter")) {
+					cdtm.setValueAt(gMode, row, 6);
+					cdtm.setValueAt(numToLet(Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
+					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				else if(gMode.equals("P/NP")) {
+					cdtm.setValueAt(gMode, row, 6);
+					cdtm.setValueAt(numToLet(Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
+					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				else if(gMode.equals("Notation")) {
+					if(JOptionPane.showConfirmDialog(null, "Are you sure you wish\nto change Grade Mode to Notation?\nNote: Grade Mode Notation cannot be changed back.") == 0) {
+						fGrade = (String) JOptionPane.showInputDialog(null, "Select Notation", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
+						if(fGrade == null) {
+							JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+							return;
+						}
+						else {
+							cdtm.setValueAt(gMode, row, 6);
+							removeAssociatedGrades(identifierInput.getText());
+							cdtm.setValueAt("Manual Entry", row, 9);
+							cdtm.setValueAt("n/a", row, 5);
+							cdtm.setValueAt(fGrade, row, 7);
+							JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+						}
+					}
+					else {
+						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+						return;
+					}
+				}
+			}
+			
+			if(edit.equalsIgnoreCase("Final Grade")) {
+				String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
+				String[] fGradeChoicesP = {"In Progress", "P", "NP"};
+				String[] notationChoices = {"TR","I","W","Z"};
+				String fGrade;
+				
+				if(cdtm.getValueAt(row, 6).equals("Letter"))
+					fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
+				else if(cdtm.getValueAt(row, 6).equals("P/NP"))
+					fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
+				else 
+					fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
+				if(fGrade == null) {
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				else cdtm.setValueAt(fGrade, row, 7);
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			}
+			
+			if(edit.equalsIgnoreCase("Term")) {
+				String[] yearChoices = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+				String term = JOptionPane.showInputDialog(null, "Enter Term Number", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+				try {
+					double testError = Double.parseDouble(term);
+				} catch (NumberFormatException e) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				if(term == null) {
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				else cdtm.setValueAt(term, row, 8);
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			}
 		}
 		
-		if(edit.equalsIgnoreCase("Term")) {
-			String[] yearChoices = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-			String term = JOptionPane.showInputDialog(null, "Enter Term Number", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-			try {
-				double testError = Double.parseDouble(term);
-			} catch (NumberFormatException e) {
-				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
-				return;
+		else {
+			
+			int row = 0;
+			for(int i = 0; i < gdtm.getRowCount(); i++) 
+				if(gdtm.getValueAt(i, 2).equals(identifierInput.getText()))
+					row = i;
+			
+			String id = gdtm.getValueAt(row, 1) + "";
+					
+			String[] options = {"Category", "Grade"};
+			String choice = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Grade Master", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+					
+			if(choice.equals("Category")) {
+				ArrayList<String> names = getCategoryNames(categories.get(id));
+				String[] categoryNames = new String[names.size()];
+				for(int i = 0; i < categoryNames.length; i++)
+					categoryNames[i] = names.get(i);
+						
+				String category = (String) JOptionPane.showInputDialog(null, "Select New Category", "Grade Master", 
+						JOptionPane.QUESTION_MESSAGE, null, categoryNames, categoryNames[0]);
+				
+				gdtm.setValueAt(category, row, 3);
+				gdtm.setValueAt(categories.get(id).get(categories.get(id).indexOf(category) + 1), row, 4);
+				
+				calculateGrade(id);
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
-			if(term == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				return;
+			
+			else if(choice.equals("Grade")) {
+				String pointsEarned = JOptionPane.showInputDialog(null, "Enter Points Earned for Assignment", "Grade Master", JOptionPane.INFORMATION_MESSAGE);
+				
+				if(pointsEarned.length() > 5)
+					pointsEarned = pointsEarned.substring(0, 6);
+				
+				String totalPoints = JOptionPane.showInputDialog(null, "Enter Total Points for Assignment", "Grade Master", JOptionPane.INFORMATION_MESSAGE);
+				
+				String grade;
+				
+				try {
+					grade = (Double.parseDouble(pointsEarned) / Double.parseDouble(totalPoints) * 100 + "");
+				} catch (NumberFormatException e) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
+				if(Double.parseDouble(pointsEarned) > 2000) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMaximum Points Earned Exceeded", "System Notification", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
+				if(Double.parseDouble(totalPoints) > 1000) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMaximum Total Points Exceeded", "System Notification", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
+				if(Double.parseDouble(pointsEarned) < 0 || Double.parseDouble(totalPoints) < 0) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNegative Values Not Accepted", "System Notification", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				
+				if(grade.length() > 5)
+					grade = grade.substring(0, 6);
+				
+				gdtm.setValueAt(pointsEarned, row, 5);
+				gdtm.setValueAt(totalPoints, row, 6);
+				gdtm.setValueAt(grade, row, 7);
+				
+				calculateGrade(id);
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
-			else cdtm.setValueAt(term, row, 8);
-			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 	
@@ -1288,7 +1363,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 		}
 		
-		if(s.equalsIgnoreCase("Edit Course")) {
+		if(s.equalsIgnoreCase("Edit Element")) {
 			editCourse();
 		}
 		
