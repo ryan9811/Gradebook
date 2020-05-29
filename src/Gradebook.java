@@ -729,7 +729,7 @@ public class Gradebook extends JFrame implements ActionListener {
 	/**
 	 * Edits a course in the course table based on user selection.
 	 */
-	public void editCourse() {
+	public void editElement() {
 		
 		if(!isIdentifierFound() && !isCodeFound()) {
 			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nElement Does Not Exist", "System Notification", JOptionPane.ERROR_MESSAGE);
@@ -1020,7 +1020,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			
 			String id = gdtm.getValueAt(row, 1) + "";
 					
-			String[] options = {"Category", "Grade"};
+			String[] options = {"Category", "Grade", "Comment"};
 			String choice = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Grade Master", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 					
 			if(choice.equals("Category")) {
@@ -1079,6 +1079,12 @@ public class Gradebook extends JFrame implements ActionListener {
 				gdtm.setValueAt(grade, row, 7);
 				
 				calculateGrade(id);
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			}
+			
+			else if(choice.equals("Comment")) {
+				String comment = JOptionPane.showInputDialog(null, "Enter New Comment", "Grade Master", JOptionPane.INFORMATION_MESSAGE);
+				gdtm.setValueAt(comment, row, 8);
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
@@ -1364,7 +1370,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(s.equalsIgnoreCase("Edit Element")) {
-			editCourse();
+			editElement();
 		}
 		
 		if(s.equalsIgnoreCase("Enter Grade")) {
