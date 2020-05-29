@@ -364,19 +364,19 @@ public class Gradebook extends JFrame implements ActionListener {
 	 */
 	public void addCourse() {	
 		
-		String title = JOptionPane.showInputDialog("Enter Course Title");
+		String title = JOptionPane.showInputDialog(null, "Enter Course Title", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 		if(title == null) {
 			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
-		String prof = JOptionPane.showInputDialog("Enter Professor Name");
+		String prof = JOptionPane.showInputDialog(null, "Enter Professor Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 		if(prof == null) {
 			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
-		String time = JOptionPane.showInputDialog("Enter Course Day/Time");
+		String time = JOptionPane.showInputDialog(null, "Enter Course Day/Time", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 		if(time == null) {
 			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
@@ -420,18 +420,19 @@ public class Gradebook extends JFrame implements ActionListener {
 			String category = "";
 			String catWeight = "";
 			ArrayList<String> catsAndWeights = new ArrayList<String>();
-			category = JOptionPane.showInputDialog("Enter a grade weight category.");
+			category = JOptionPane.showInputDialog(null, "Enter Grade Weight Category Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+			
+			if(category == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
 			
 			if(containsNumbers(category)) {
 				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers", "System Notification", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
-				
-			if(category == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				return;
-			}
-			catWeight = JOptionPane.showInputDialog("Enter Category Weight (ex. 15)");
+
+			catWeight = JOptionPane.showInputDialog(null, "Enter Category Weight (Ex. 15)", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 			if(catWeight == null) {
 				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
@@ -446,16 +447,16 @@ public class Gradebook extends JFrame implements ActionListener {
 			catsAndWeights.add(catWeight);
 			int yesNo = 0;
 			while(yesNo == 0) {
-				yesNo = JOptionPane.showConfirmDialog(null, "Enter Another Category?", "System Notification", JOptionPane.WARNING_MESSAGE);
+				yesNo = JOptionPane.showConfirmDialog(null, "Enter Another Category?");
 				if(yesNo == 0) {
-					category = JOptionPane.showInputDialog("Enter Category Name");
+					category = JOptionPane.showInputDialog(null, "Enter Category Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 					
 					if(containsNumbers(category)) {
 						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers", "System Notification", JOptionPane.ERROR_MESSAGE);
 						return;
 					}
 					
-					catWeight = JOptionPane.showInputDialog("Enter Category Weight (ex. 15)");
+					catWeight = JOptionPane.showInputDialog(null, "Enter Category Weight (ex. 15)", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 					try {
 						double testError = Double.parseDouble(catWeight);
 					} catch (NumberFormatException e) {
@@ -473,7 +474,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			categories.put(identifier, catsAndWeights);
 		}
 	
-		String year = JOptionPane.showInputDialog("Enter Term Number");
+		String year = JOptionPane.showInputDialog(null, "Enter Term Number", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 		
 		try {
 			double testError = Double.parseDouble(year);
@@ -568,8 +569,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
 			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText())) {
 				String courseName = (String) cdtm.getValueAt(i, 0);
-				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete [" + courseName + "]? \nThis action cannot be reversed.", 
-						"System Notification", JOptionPane.WARNING_MESSAGE) == 0) {
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete [" + courseName + "]? \nThis action cannot be reversed.") == 0) {
 					removeAssociatedGrades(identifierInput.getText());
 					cdtm.removeRow(i);
 					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
@@ -584,8 +584,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		for(int i = 0; i < gdtm.getRowCount(); i++) {
 			if(gdtm.getValueAt(i, 2).equals(identifierInput.getText())) {
 				String assignmentCode = (String) gdtm.getValueAt(i, 2);
-				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete assignment [" + assignmentCode + "]? \nThis action cannot be reversed.", 
-						"System Notification", JOptionPane.WARNING_MESSAGE) == 0) {
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete assignment [" + assignmentCode + "]? \nThis action cannot be reversed.") == 0) {
 					String id = gdtm.getValueAt(i, 1) + "";
 					gdtm.removeRow(i);
 					calculateGrade(id);
@@ -772,7 +771,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(edit.equalsIgnoreCase("Course Title")) {
-			String course = JOptionPane.showInputDialog("Enter Course Title");
+			String course = JOptionPane.showInputDialog(null, "Enter Course Title", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 			if(course == null) {
 				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
@@ -793,7 +792,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			
 			if(selection.equals("Add Category")) {
-				String categoryName = JOptionPane.showInputDialog("Enter Category Name");
+				String categoryName = JOptionPane.showInputDialog(null, "Enter Category Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 				
 				if(containsNumbers(categoryName)) {
 					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers", "System Notification", JOptionPane.ERROR_MESSAGE);
@@ -805,7 +804,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					return;
 				}
 				
-				String categoryWeight = JOptionPane.showInputDialog("Enter Category Weight");
+				String categoryWeight = JOptionPane.showInputDialog(null, "Enter Category Weight", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 				try {
 					double testError = Double.parseDouble(categoryWeight);
 				} catch (NumberFormatException e) {
@@ -831,8 +830,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					return;
 				}
 				
-				if(JOptionPane.showConfirmDialog(null, "Are you sure you wish to delete the category [" + nameSelection + "]?\nThis action cannot be reversed.", 
-						"System Notification", JOptionPane.WARNING_MESSAGE) != 0) {
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you wish to delete the category [" + nameSelection + "]?\nThis action cannot be reversed.") != 0) {
 					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
@@ -867,7 +865,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					return;
 				}
 				
-				String newWeight = JOptionPane.showInputDialog("Enter New Weight");
+				String newWeight = JOptionPane.showInputDialog(null, "Enter New Weight", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 				
 				try {
 					double testError = Double.parseDouble(newWeight);
@@ -895,7 +893,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(edit.equalsIgnoreCase("Professor")) {
-			String prof = JOptionPane.showInputDialog("Enter Professor Name");
+			String prof = JOptionPane.showInputDialog(null, "Enter Professor Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 			if(prof == null) {
 				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
@@ -905,7 +903,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(edit.equalsIgnoreCase("Day/Time")) {
-			String dayTime = JOptionPane.showInputDialog("Enter Day/Time");
+			String dayTime = JOptionPane.showInputDialog(null, "Enter Day/Time", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 			if(dayTime == null) {
 				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
@@ -951,8 +949,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				return;
 			}
 			else if(gMode.equals("Notation")) {
-				if(JOptionPane.showConfirmDialog(null, "Are you sure you wish\nto change Grade Mode to Notation?\nNote: Grade Mode Notation cannot be changed back.",
-						"System Notification", JOptionPane.WARNING_MESSAGE) == 0) {
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you wish\nto change Grade Mode to Notation?\nNote: Grade Mode Notation cannot be changed back.") == 0) {
 					fGrade = (String) JOptionPane.showInputDialog(null, "Select Notation", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
 					if(fGrade == null) {
 						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
@@ -981,11 +978,11 @@ public class Gradebook extends JFrame implements ActionListener {
 			String fGrade;
 			
 			if(cdtm.getValueAt(row, 6).equals("Letter"))
-				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
+				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
 			else if(cdtm.getValueAt(row, 6).equals("P/NP"))
-				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
+				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
 			else 
-				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
+				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
 			if(fGrade == null) {
 				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
@@ -996,7 +993,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		if(edit.equalsIgnoreCase("Term")) {
 			String[] yearChoices = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-			String term = JOptionPane.showInputDialog(null, "Enter Term Number");
+			String term = JOptionPane.showInputDialog(null, "Enter Term Number", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 			try {
 				double testError = Double.parseDouble(term);
 			} catch (NumberFormatException e) {
@@ -1141,12 +1138,12 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String catWeight = categories.get(identifier).get(catIndex + 1);
 		
-		String pointsEarned = JOptionPane.showInputDialog("Enter Points Earned for Assignment");
+		String pointsEarned = JOptionPane.showInputDialog(null, "Enter Points Earned for Assignment", "Grade Master", JOptionPane.INFORMATION_MESSAGE);
 		
 		if(pointsEarned.length() > 5)
 			pointsEarned = pointsEarned.substring(0, 6);
 		
-		String totalPoints = JOptionPane.showInputDialog("Enter Total Points for Assignment");
+		String totalPoints = JOptionPane.showInputDialog(null, "Enter Total Points for Assignment", "Grade Master", JOptionPane.INFORMATION_MESSAGE);
 		
 		String grade;
 		
@@ -1172,7 +1169,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			return;
 		}
 		
-		String comment = JOptionPane.showInputDialog(null, "Enter Comment for Assignment");
+		String comment = JOptionPane.showInputDialog(null, "Enter Comment for Assignment", "Grade Master", JOptionPane.INFORMATION_MESSAGE);
 		
 		if(grade.length() > 5)
 			grade = grade.substring(0, 6);
@@ -1251,7 +1248,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			
 			else if(JOptionPane.showConfirmDialog(null, "Are you sure you want to finalize grades?\nThis action cannot be reversed.\n"
-					+ "Note: It is advised to export before finalizing.\nGrades will be cleared.", "System Notification", JOptionPane.WARNING_MESSAGE) == 0) {
+					+ "Note: It is advised to export before finalizing.\nGrades will be cleared.") == 0) {
 				int counter = 0;
 				for(int i = 0; i < cdtm.getRowCount(); i++)
 					if(cdtm.getValueAt(i, 9).equals("In Progress") || cdtm.getValueAt(i, 9).equals("Manual Entry"))
@@ -1272,8 +1269,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		if(s.equalsIgnoreCase("Manual Override")) {
 			if(!courseList.isEnabled()) {
 				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to enter Manual Override mode? \n"
-						+ "It is highly recommended to use the Edit Course function.\nNote: Reclick Manual Override to return to Automatic.", 
-						"System Notification", JOptionPane.WARNING_MESSAGE) == 0) {
+						+ "It is highly recommended to use the Edit Course function.\nNote: Reclick Manual Override to return to Automatic.") == 0) {
 					courseList.setEnabled(true);
 					gradeList.setEnabled(true);
 				}
