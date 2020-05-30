@@ -37,6 +37,8 @@ public class Gradebook extends JFrame implements ActionListener {
 	
 	private Hashtable<String, ArrayList<String>> categories; // Contains the category weights of each course
 	
+	private JButton viewBreakdown;
+	
 	private JFileChooser myJFileChooser = new JFileChooser(new File("."));
 	
 	public Gradebook() {
@@ -94,17 +96,20 @@ public class Gradebook extends JFrame implements ActionListener {
         JButton removeCourse = new JButton("Remove Element");
         removeCourse.addActionListener(this);
         
-        JButton editCourse = new JButton("Edit Element");
-        editCourse.addActionListener(this);
+        JButton editElement = new JButton("Edit Element");
+        editElement.addActionListener(this);
         
         JButton enterGrade = new JButton("Enter Grade");
         enterGrade.addActionListener(this);
         
+        viewBreakdown = new JButton("View Breakdown");
+        viewBreakdown.addActionListener(this);
+        
         JButton finalizeGrades = new JButton("Finalize Grades");
         finalizeGrades.addActionListener(this);
         
-        JButton saveChanges = new JButton("Import/Export");
-        saveChanges.addActionListener(this);
+        JButton importExport = new JButton("Import/Export");
+        importExport.addActionListener(this);
         
         JButton manualOverride = new JButton("Manual Override");
         manualOverride.addActionListener(this);
@@ -120,11 +125,12 @@ public class Gradebook extends JFrame implements ActionListener {
         // Add the buttons to the panel
         buttons.add(addCourse);
         buttons.add(removeCourse);
-        buttons.add(editCourse);
+        buttons.add(editElement);
         buttons.add(enterGrade);
+        buttons.add(viewBreakdown);
         buttons.add(finalizeGrades);
         buttons.add(manualOverride);
-        buttons.add(saveChanges);
+        buttons.add(importExport);
         buttons.add(identifier);
         buttons.add(identifierInput);
         
@@ -994,7 +1000,6 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			
 			if(edit.equalsIgnoreCase("Term")) {
-				String[] yearChoices = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
 				String term = JOptionPane.showInputDialog(null, "Enter Term Number", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 				try {
 					double testError = Double.parseDouble(term);
@@ -1194,8 +1199,11 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String courseTitle = "";
 		for(int i = 0; i < cdtm.getRowCount(); i++)
-			if(identifier.equals(cdtm.getValueAt(i, 3)))
-				courseTitle = cdtm.getValueAt(i, 0) + "";
+			if(identifier.equals(cdtm.getValueAt(i, 3))) {
+				courseTitle = cdtm.getValueAt(i, 1) + "";
+				if(courseTitle.equals(""))
+					courseTitle = cdtm.getValueAt(i, 0) + "";
+			}
 		
 		assignmentCode += (int) (Math.random() * 50 + 1);
 		String code = "A" + assignmentCode;
@@ -1300,6 +1308,63 @@ public class Gradebook extends JFrame implements ActionListener {
         gradeList.getTableHeader().setReorderingAllowed(false);
         gradeList.setEnabled(false);
 	}
+	
+	public void viewBreakdown() {
+		
+		if(existsUnfinalizedTerm()) {
+			gdtm.addRow(new Object[] {"","","","","","","","",""});
+			gdtm.addRow(new Object[] {"Breakdown Viewed:","","","","","","","",""});
+			gdtm.addRow(new Object[] {"","","","","","","","",""});
+			ArrayList<String> identifiers = new ArrayList<String>();
+			ArrayList<String> titles = new ArrayList<String>();
+			ArrayList<String> weights = new ArrayList<String>();
+			ArrayList<String> courseTitles = new ArrayList<String>();
+			String term = getUnfinalizedTerm();
+			for(int i = 0; i < cdtm.getRowCount(); i++) {
+				if(cdtm.getValueAt(i, 9).equals("In Progress")) {
+					identifiers.add(cdtm.getValueAt(i, 3) + "");
+					if(!cdtm.getValueAt(i, 1).equals(""))
+						courseTitles.add(cdtm.getValueAt(i, 1) + "");
+					else
+						courseTitles.add(cdtm.getValueAt(i, 0) + "");
+				}
+			}
+			for(int i = 0; i < identifiers.size(); i++) {
+				String courseTitle = courseTitles.get(i);
+				String identifier = identifiers.get(i);
+				double pointsEarned = 0;
+				double totalPoints = 0;
+				titles = getCategoryNames(categories.get(identifiers.get(i)));
+				weights = getCategoryValues(categories.get(identifiers.get(i)));
+				
+				for(int j = 0; j < titles.size(); j++) {
+					for(int k = 0; k < gdtm.getRowCount(); k++) 
+						if(gdtm.getValueAt(k, 1).equals(identifier) && gdtm.getValueAt(k, 3).equals(titles.get(j))) {
+							pointsEarned += Double.parseDouble(gdtm.getValueAt(k, 5) + "");
+							totalPoints += Double.parseDouble(gdtm.getValueAt(k, 6) + "");
+						}
+					double grade = pointsEarned / totalPoints * 100;
+					String sGrade = grade + "";
+					if(sGrade.length() > 6)
+						sGrade = sGrade.substring(0, 6);
+					gdtm.addRow(new Object[] {courseTitle,identifier,"",titles.get(j),weights.get(j),pointsEarned,totalPoints,sGrade,""});
+					pointsEarned = 0;
+					totalPoints = 0;
+				}
+				
+				gdtm.addRow(new Object[] {"","","","","","","","",""});
+			}
+			
+		}
+	}
+	
+	public void hideBreakdown() {
+		for(int i = 0; i < gdtm.getRowCount(); i++)
+			if(gdtm.getValueAt(i, 2).equals("")) {
+				gdtm.removeRow(i);
+				i--;
+			}
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -1375,6 +1440,16 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		if(s.equalsIgnoreCase("Enter Grade")) {
 			enterGrade();
+		}
+		
+		if(s.equalsIgnoreCase("View Breakdown")) {
+			viewBreakdown();
+			viewBreakdown.setText("Hide Breakdown");
+		}
+		
+		if(s.equalsIgnoreCase("Hide Breakdown")) {
+			hideBreakdown();
+			viewBreakdown.setText("View Breakdown");
 		}
 		
 		if(s.equalsIgnoreCase("Import/Export")) {
