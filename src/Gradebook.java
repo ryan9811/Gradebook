@@ -636,6 +636,11 @@ public class Gradebook extends JFrame implements ActionListener {
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 			
+			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && cdtm.getValueAt(i, 7).equals("NP")) {
+				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
+				cdtm.setValueAt("Finalized", i, 9);
+			}
+			
 			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && cdtm.getValueAt(i, 7).equals("F")) {
 				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
 				cdtm.setValueAt("Finalized", i, 9);
@@ -1309,9 +1314,16 @@ public class Gradebook extends JFrame implements ActionListener {
         gradeList.setEnabled(false);
 	}
 	
+	public boolean existsInProgressCourse() {
+		for(int i = 0; i < cdtm.getRowCount(); i++)
+			if(cdtm.getValueAt(i, 9).equals("In Progress"))
+				return true;
+		return false;
+	}
+	
 	public void viewBreakdown() {
 		
-		if(existsUnfinalizedTerm()) {
+		if(existsUnfinalizedTerm() && existsInProgressCourse()) {
 			gdtm.addRow(new Object[] {"","","","","","","","",""});
 			gdtm.addRow(new Object[] {"Breakdown Viewed:","","","","","","","",""});
 			gdtm.addRow(new Object[] {"","","","","","","","",""});
@@ -1354,7 +1366,10 @@ public class Gradebook extends JFrame implements ActionListener {
 				
 				gdtm.addRow(new Object[] {"","","","","","","","",""});
 			}
-			
+		}
+		else {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNo Courses In Progress", "System Notification", JOptionPane.ERROR_MESSAGE);
+			return;
 		}
 	}
 	
@@ -1444,7 +1459,6 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		if(s.equalsIgnoreCase("View Breakdown")) {
 			viewBreakdown();
-			viewBreakdown.setText("Hide Breakdown");
 		}
 		
 		if(s.equalsIgnoreCase("Hide Breakdown")) {
