@@ -31,7 +31,7 @@ public class Gradebook extends JFrame implements ActionListener {
 	private int assignmentCode; // Code unique to each grade/assignment
 	private int courseCode; // Code unique to each course (AKA identifier)
 	
-	private int nonGpaCreditTotal; // The total amount of credits not applied to the gpa
+	private double nonGpaCreditTotal; // The total amount of credits not applied to the gpa
 	
 	private JFrame frame; // The frame that holds the tables and buttons
 	
@@ -56,7 +56,7 @@ public class Gradebook extends JFrame implements ActionListener {
         courseList = new JTable();
         cdtm = new DefaultTableModel(0,0);
         
-        String courseHeader[] = new String[] { "Course Title", "Professor", "Day/Time", "Identifier", "Credits", "Numeric Grade", "Grade Mode", "Final Grade", "Term", "Status" };
+        String courseHeader[] = new String[] { "Subject/Course Number", "Course Title", "Comment", "Identifier", "Credits", "Numeric Grade", "Grade Mode", "Final Grade", "Term", "Status" };
         categories = new Hashtable<String, ArrayList<String>>();
         
         cdtm.setColumnIdentifiers(courseHeader);
@@ -72,9 +72,9 @@ public class Gradebook extends JFrame implements ActionListener {
         // adding it to JScrollPane 
         JScrollPane spc = new JScrollPane(courseList); 
         frame.add(spc, BorderLayout.NORTH); 
-        courseList.getColumnModel().getColumn(0).setPreferredWidth(200);
+        courseList.getColumnModel().getColumn(0).setPreferredWidth(150);
         courseList.getColumnModel().getColumn(1).setPreferredWidth(200);
-        courseList.getColumnModel().getColumn(2).setPreferredWidth(150);
+        courseList.getColumnModel().getColumn(2).setPreferredWidth(200);
         courseList.getColumnModel().getColumn(3).setPreferredWidth(100);
         courseList.getColumnModel().getColumn(4).setPreferredWidth(50);
         courseList.getColumnModel().getColumn(5).setPreferredWidth(100);
@@ -364,19 +364,19 @@ public class Gradebook extends JFrame implements ActionListener {
 	 */
 	public void addCourse() {	
 		
-		String title = JOptionPane.showInputDialog(null, "Enter Course Title", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+		String title = JOptionPane.showInputDialog(null, "Enter Subject/Course Number", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 		if(title == null) {
 			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
-		String prof = JOptionPane.showInputDialog(null, "Enter Professor Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+		String prof = JOptionPane.showInputDialog(null, "Enter Course Title", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 		if(prof == null) {
 			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
-		String time = JOptionPane.showInputDialog(null, "Enter Course Day/Time", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+		String time = JOptionPane.showInputDialog(null, "Enter Comment", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 		if(time == null) {
 			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
@@ -385,8 +385,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		courseCode += (int) (Math.random() * 50 + 1);
 		String identifier = "C" + courseCode;
 		
-		String[] creditsChoices = {"0", "1", "2", "3", "4", "5","6"};
-		String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[3]);
+		String[] creditsChoices = {"0", "0.5", "1", "1.5", "2", "2.5", "3", "4", "5", "6"};
+		String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[6]);
 		if(credits == null) {
 			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
@@ -619,33 +619,33 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String year = getUnfinalizedTerm();
 		
-		int creditSum = 0;
+		double creditSum = 0;
 		double qualitySum = 0;
-		int nonGpaSum = 0;
+		double nonGpaSum = 0;
 		
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
 			if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && !cdtm.getValueAt(i, 7).equals("F")) {
-				qualitySum += Integer.parseInt((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
-				creditSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
+				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
+				creditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 			
 			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && cdtm.getValueAt(i, 7).equals("F")) {
-				qualitySum += Integer.parseInt((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
+				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 			
 			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("P/NP") && cdtm.getValueAt(i, 7).equals("P")) {
-				creditSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
-				nonGpaSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
-				nonGpaCreditTotal += Integer.parseInt((String)cdtm.getValueAt(i, 4));
+				creditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
+				nonGpaSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
+				nonGpaCreditTotal += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 			
 			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Notation") && cdtm.getValueAt(i, 7).equals("TR")) {
-				creditSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
-				nonGpaSum += Integer.parseInt((String)cdtm.getValueAt(i, 4));
-				nonGpaCreditTotal += Integer.parseInt((String)cdtm.getValueAt(i, 4));
+				creditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
+				nonGpaSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
+				nonGpaCreditTotal += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 		}
@@ -668,11 +668,11 @@ public class Gradebook extends JFrame implements ActionListener {
 				cdtm.addRow(new Object[] {"Term Credits", creditSumString, "Term Quality Points", qualitySum, "", "", "", "", "GPA", gpa});
 				
 				double allQualitySum = 0;
-				int allCreditSum = 0;
+				double allCreditSum = 0;
 				for(int i = 0; i < cdtm.getRowCount(); i++)
 					if(((String) cdtm.getValueAt(i, 0)).equalsIgnoreCase("Term Credits")) {
 						allQualitySum += Double.parseDouble(cdtm.getValueAt(i, 3) + "");
-						allCreditSum += Integer.parseInt(cdtm.getValueAt(i, 1) + "");
+						allCreditSum += Double.parseDouble(cdtm.getValueAt(i, 1) + "");
 					}
 				
 				String allCreditSum1 = allCreditSum + "";
@@ -751,8 +751,8 @@ public class Gradebook extends JFrame implements ActionListener {
 					row = i;
 			}
 			
-			String[] editChoices = {"Course Title", "Professor", "Day/Time", "Credits", "Category Weightings", "Grade Mode", "Final Grade", "Term"};
-			String[] editChoices2 = {"Course Title", "Professor", "Day/Time", "Credits", "Category Weightings", "Final Grade", "Term"};
+			String[] editChoices = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Category Weightings", "Grade Mode", "Final Grade", "Term"};
+			String[] editChoices2 = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Category Weightings", "Final Grade", "Term"};
 			String edit = "";
 			
 			for(int i = 0; i < cdtm.getRowCount(); i++)
@@ -772,8 +772,8 @@ public class Gradebook extends JFrame implements ActionListener {
 				return;
 			}
 			
-			if(edit.equalsIgnoreCase("Course Title")) {
-				String course = JOptionPane.showInputDialog(null, "Enter Course Title", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+			if(edit.equalsIgnoreCase("Subject/Course Number")) {
+				String course = JOptionPane.showInputDialog(null, "Enter Subject/Course Number", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 				if(course == null) {
 					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
@@ -894,8 +894,8 @@ public class Gradebook extends JFrame implements ActionListener {
 				}
 			}
 			
-			if(edit.equalsIgnoreCase("Professor")) {
-				String prof = JOptionPane.showInputDialog(null, "Enter Professor Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+			if(edit.equalsIgnoreCase("Course Title")) {
+				String prof = JOptionPane.showInputDialog(null, "Enter New Course Title", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 				if(prof == null) {
 					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
@@ -904,8 +904,8 @@ public class Gradebook extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
-			if(edit.equalsIgnoreCase("Day/Time")) {
-				String dayTime = JOptionPane.showInputDialog(null, "Enter Day/Time", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+			if(edit.equalsIgnoreCase("Comment")) {
+				String dayTime = JOptionPane.showInputDialog(null, "Enter New Comment", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 				if(dayTime == null) {
 					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
@@ -915,8 +915,8 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			
 			if(edit.equalsIgnoreCase("Credits")) {
-				String[] creditsChoices = {"0", "1", "2", "3", "4", "5"};
-				String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[0]);
+				String[] creditsChoices = {"0", "0.5", "1", "1.5", "2", "2.5", "3", "4", "5", "6"};
+				String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[6]);
 				if(credits == null) {
 					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
@@ -1280,9 +1280,9 @@ public class Gradebook extends JFrame implements ActionListener {
 	 */
 	public void revertTableSettings() {
 		
-		courseList.getColumnModel().getColumn(0).setPreferredWidth(200);
+		courseList.getColumnModel().getColumn(0).setPreferredWidth(150);
         courseList.getColumnModel().getColumn(1).setPreferredWidth(200);
-        courseList.getColumnModel().getColumn(2).setPreferredWidth(150);
+        courseList.getColumnModel().getColumn(2).setPreferredWidth(200);
         courseList.getColumnModel().getColumn(3).setPreferredWidth(100);
         courseList.getColumnModel().getColumn(4).setPreferredWidth(50);
         courseList.getColumnModel().getColumn(5).setPreferredWidth(100);
