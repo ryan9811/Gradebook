@@ -39,6 +39,8 @@ public class Gradebook extends JFrame implements ActionListener {
 	
 	private JButton viewBreakdown;
 	
+	private double totalFCreditSum;
+	
 	private JFileChooser myJFileChooser = new JFileChooser(new File("."));
 	
 	public Gradebook() {
@@ -143,6 +145,7 @@ public class Gradebook extends JFrame implements ActionListener {
         
         assignmentCode = 11111;
         nonGpaCreditTotal = 0;
+        totalFCreditSum = 0;
         
         String gradeHeader[] = new String[] { "Course Title", "Identifier", "Assignment Code", "Category", "Category Weight", "Points Earned", "Total Points", "Grade", "Comment" };
         
@@ -185,6 +188,10 @@ public class Gradebook extends JFrame implements ActionListener {
 			out.writeObject(gdtm.getDataVector()); // Write the data from the grade table
 			out.writeObject(getColumnNamesG());
 			out.writeObject(categories); // Write the category weightings hash table
+			out.writeObject(courseCode);
+			out.writeObject(assignmentCode);
+			out.writeObject(nonGpaCreditTotal);
+			out.writeObject(totalFCreditSum);
 			out.close();		
 		}
 		catch(Exception e) {
@@ -240,6 +247,10 @@ public class Gradebook extends JFrame implements ActionListener {
 			Vector rowDataG = (Vector) in.readObject();
 			Vector columnNamesG = (Vector) in.readObject();
 			categories = (Hashtable<String, ArrayList<String>>) in.readObject();
+			courseCode = (int) in.readObject();
+			assignmentCode = (int) in.readObject();
+			nonGpaCreditTotal = (double) in.readObject();
+			totalFCreditSum = (double) in.readObject();
 			cdtm.setDataVector(rowDataC, columnNamesC);
 			gdtm.setDataVector(rowDataG, columnNamesG);
 			revertTableSettings();
@@ -628,6 +639,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		double creditSum = 0;
 		double qualitySum = 0;
 		double nonGpaSum = 0;
+		double failCreditSum = 0;
 		
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
 			if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && !cdtm.getValueAt(i, 7).equals("F")) {
@@ -637,12 +649,13 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			
 			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && cdtm.getValueAt(i, 7).equals("NP")) {
-				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 			
 			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && cdtm.getValueAt(i, 7).equals("F")) {
 				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
+				failCreditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
+				totalFCreditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 			
@@ -659,11 +672,15 @@ public class Gradebook extends JFrame implements ActionListener {
 				nonGpaCreditTotal += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
+			
+			else {
+				cdtm.setValueAt("Finalized", i, 9);
+			}
 		}
 		
 		if(((String) cdtm.getValueAt(cdtm.getRowCount() - 1, 9)).equalsIgnoreCase("Finalized")) {
 				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});		
-				String gpa = qualitySum / (creditSum - nonGpaSum) + "";
+				String gpa = qualitySum / (creditSum + failCreditSum - nonGpaSum) + "";
 				
 				if(gpa.length() > 5)
 					gpa = gpa.substring(0,5);
@@ -676,7 +693,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				if(qualitySumString.length() > 5)
 					qualitySumString = qualitySumString.substring(0,5);
 				
-				cdtm.addRow(new Object[] {"Term Credits", creditSumString, "Term Quality Points", qualitySum, "", "", "", "", "GPA", gpa});
+				cdtm.addRow(new Object[] {"Term Credits Earned", creditSumString, "Term Quality Points", qualitySum, "", "", "", "", "GPA", gpa});
 				
 				double allQualitySum = 0;
 				double allCreditSum = 0;
@@ -694,11 +711,11 @@ public class Gradebook extends JFrame implements ActionListener {
 				if(allQualitySum1.length() > 5)
 					allQualitySum1 = allQualitySum1.substring(0,5);
 				
-				String totalGpa = allQualitySum / (allCreditSum - nonGpaCreditTotal) + "";
+				String totalGpa = allQualitySum / (allCreditSum + totalFCreditSum - nonGpaCreditTotal) + "";
 				if(totalGpa.length() > 5)
 					totalGpa = totalGpa.substring(0,5);
 				
-				cdtm.addRow(new Object[] {"Total Credits", allCreditSum1, "Total Quality Points", allQualitySum1, "", "", "", "", "GPA", totalGpa});	
+				cdtm.addRow(new Object[] {"Total Credits Earned", allCreditSum1, "Total Quality Points", allQualitySum1, "", "", "", "", "GPA", totalGpa});	
 				
 				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});	
 				
