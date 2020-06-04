@@ -76,15 +76,15 @@ public class Gradebook extends JFrame implements ActionListener {
         // adding it to JScrollPane 
         JScrollPane spc = new JScrollPane(courseList); 
         frame.add(spc, BorderLayout.NORTH); 
-        courseList.getColumnModel().getColumn(0).setPreferredWidth(150);
+        courseList.getColumnModel().getColumn(0).setPreferredWidth(125);
         courseList.getColumnModel().getColumn(1).setPreferredWidth(200);
         courseList.getColumnModel().getColumn(2).setPreferredWidth(200);
         courseList.getColumnModel().getColumn(3).setPreferredWidth(100);
         courseList.getColumnModel().getColumn(4).setPreferredWidth(50);
         courseList.getColumnModel().getColumn(5).setPreferredWidth(100);
         courseList.getColumnModel().getColumn(6).setPreferredWidth(75);
-        courseList.getColumnModel().getColumn(7).setPreferredWidth(75);
-        courseList.getColumnModel().getColumn(8).setPreferredWidth(30);
+        courseList.getColumnModel().getColumn(7).setPreferredWidth(50);
+        courseList.getColumnModel().getColumn(8).setPreferredWidth(75);
         courseList.getColumnModel().getColumn(9).setPreferredWidth(125);
         
         // ------------------------Creating the panel for the buttons------------------------
@@ -110,6 +110,10 @@ public class Gradebook extends JFrame implements ActionListener {
         JButton finalizeGrades = new JButton("Finalize Grades");
         finalizeGrades.addActionListener(this);
         
+        JButton settings = new JButton("Settings");
+        
+        JButton quickCheck = new JButton("Quick Check");
+        
         JButton importExport = new JButton("Import/Export");
         importExport.addActionListener(this);
         
@@ -129,15 +133,17 @@ public class Gradebook extends JFrame implements ActionListener {
         buttons.add(removeCourse);
         buttons.add(editElement);
         buttons.add(enterGrade);
+        buttons.add(quickCheck);
         buttons.add(viewBreakdown);
         buttons.add(finalizeGrades);
-        buttons.add(manualOverride);
+        //buttons.add(manualOverride);
+        buttons.add(settings);
         buttons.add(importExport);
         buttons.add(identifier);
         buttons.add(identifierInput);
         
         // Add the panel to the frame
-        frame.add(buttons, BorderLayout.CENTER);
+        frame.add(buttons);
         
         // ------------------------Creating the table for the list of grades/assignments------------------------
         gradeList = new JTable();
@@ -381,42 +387,100 @@ public class Gradebook extends JFrame implements ActionListener {
 	 */
 	public void addCourse() {	
 		
-		String title = JOptionPane.showInputDialog(null, "Enter Subject/Course Number", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-		if(title == null) {
+		String credits, gMode, subject, title, comment, term;
+		credits = gMode = subject = title = comment = term = "";
+		JTextField subjectEntry = new JTextField();
+		JTextField titleEntry = new JTextField();
+		JTextField commentEntry = new JTextField();
+		JTextField termEntry = new JTextField();
+		
+		String[] creditsChoices = {"0", "0.5", "1", "1.5", "2", "2.5", "3", "4", "5", "6"};
+		JComboBox creditEntry = new JComboBox(creditsChoices);
+		creditEntry.setSelectedIndex(6);
+		
+		String[] gModeChoices = {"Letter", "P/NP", "Notation"};
+		JComboBox gModeEntry = new JComboBox(gModeChoices);
+		
+		JPanel p = new JPanel();
+		p.setLayout(new GridLayout(6, 0));
+		
+		p.add(new JLabel("Enter Subject/Course Number"));
+		p.add(subjectEntry);
+		
+		p.add(new JLabel("Enter Course Title"));
+		p.add(titleEntry);
+		
+		p.add(new JLabel("Enter Comment"));
+		p.add(commentEntry);
+		
+		p.add(new JLabel("Select Number of Credits"));
+		p.add(creditEntry);
+		
+		p.add(new JLabel("Select Grade Mode"));
+		p.add(gModeEntry);
+		
+		p.add(new JLabel("Enter Term"));
+		p.add(termEntry);
+		
+		int result = JOptionPane.showConfirmDialog(null, p, "Course Master", JOptionPane.OK_CANCEL_OPTION);
+		
+		if(result == JOptionPane.OK_OPTION) {
+			credits = (String) creditEntry.getSelectedItem();
+			gMode = (String) gModeEntry.getSelectedItem();
+			subject = subjectEntry.getText();
+			title = titleEntry.getText();
+			comment = commentEntry.getText();
+			term = termEntry.getText();
+			
+			if(subject.isEmpty() || title.isEmpty() || term.isEmpty()) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMissing Information", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
+		}
+		
+		else {
 			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
-		String prof = JOptionPane.showInputDialog(null, "Enter Course Title", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-		if(prof == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-			return;
-		}
 		
-		String time = JOptionPane.showInputDialog(null, "Enter Comment", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-		if(time == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-			return;
-		}
+		
+//		String title = JOptionPane.showInputDialog(null, "Enter Subject/Course Number", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+//		if(title == null) {
+//			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+//			return;
+//		}
+//		
+//		String prof = JOptionPane.showInputDialog(null, "Enter Course Title", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+//		if(prof == null) {
+//			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+//			return;
+//		}
+//		
+//		String time = JOptionPane.showInputDialog(null, "Enter Comment", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+//		if(time == null) {
+//			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+//			return;
+//		}
 		
 		courseCode += (int) (Math.random() * 50 + 1);
 		String identifier = "C" + courseCode;
 		
-		String[] creditsChoices = {"0", "0.5", "1", "1.5", "2", "2.5", "3", "4", "5", "6"};
-		String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[6]);
-		if(credits == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-			return;
-		}
+//		String[] creditsChoices = {"0", "0.5", "1", "1.5", "2", "2.5", "3", "4", "5", "6"};
+//		String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[6]);
+//		if(credits == null) {
+//			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+//			return;
+//		}
 		
 		String numGrade = "n/a";
 		
-		String[] gModeChoices = {"Letter", "P/NP", "Notation"};
-		String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
-		if(gMode == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-			return;
-		}
+//		String[] gModeChoices = {"Letter", "P/NP", "Notation"};
+//		String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
+//		if(gMode == null) {
+//			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+//			return;
+//		}
 		
 		String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
 		String[] fGradeChoicesP = {"In Progress", "P", "NP"};
@@ -491,27 +555,22 @@ public class Gradebook extends JFrame implements ActionListener {
 			categories.put(identifier, catsAndWeights);
 		}
 	
-		String year = JOptionPane.showInputDialog(null, "Enter Term Number", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+//		String year = JOptionPane.showInputDialog(null, "Enter Term Number", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 		
-		try {
-			double testError = Double.parseDouble(year);
-		} catch (NumberFormatException e) {
-			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
+//		try {
+//			double testError = Double.parseDouble(term);
+//		} catch (NumberFormatException e) {
+//			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
+//			return;
+//		}
 		
-		if(isTermFinalized(year)) {
+		if(isTermFinalized(term)) {
 			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nEntered Term is Finalized", "System Notification", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
-		if(!getUnfinalizedTerm().equals(year) && existsUnfinalizedTerm()) {
+		if(!getUnfinalizedTerm().equals(term) && existsUnfinalizedTerm()) {
 			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMust Finalize Previous Term", "System Notification", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		
-		if(year == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
@@ -520,7 +579,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			status = "In Progress";
 		else status = "Manual Entry";
 
-		cdtm.addRow(new Object[] {title, prof, time, identifier, credits, numGrade, gMode, fGrade, year, status});
+		cdtm.addRow(new Object[] {subject, title, comment, identifier, credits, numGrade, gMode, fGrade, term, status});
 		
 		JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 	}
@@ -1197,6 +1256,8 @@ public class Gradebook extends JFrame implements ActionListener {
 	 */
 	public void enterGrade() {
 		
+		hideBreakdown();
+		
 		ArrayList<String> identifiers = new ArrayList<String>();
 		for(int i = 0; i < cdtm.getRowCount(); i++)
 			if(cdtm.getValueAt(i, 9).equals("In Progress"))
@@ -1289,6 +1350,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		calculateGrade(identifier);
 		
+		viewBreakdown();
+		
 		JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
@@ -1310,15 +1373,15 @@ public class Gradebook extends JFrame implements ActionListener {
 	 */
 	public void revertTableSettings() {
 		
-		courseList.getColumnModel().getColumn(0).setPreferredWidth(150);
+		courseList.getColumnModel().getColumn(0).setPreferredWidth(125);
         courseList.getColumnModel().getColumn(1).setPreferredWidth(200);
         courseList.getColumnModel().getColumn(2).setPreferredWidth(200);
         courseList.getColumnModel().getColumn(3).setPreferredWidth(100);
         courseList.getColumnModel().getColumn(4).setPreferredWidth(50);
         courseList.getColumnModel().getColumn(5).setPreferredWidth(100);
         courseList.getColumnModel().getColumn(6).setPreferredWidth(75);
-        courseList.getColumnModel().getColumn(7).setPreferredWidth(75);
-        courseList.getColumnModel().getColumn(8).setPreferredWidth(30);
+        courseList.getColumnModel().getColumn(7).setPreferredWidth(50);
+        courseList.getColumnModel().getColumn(8).setPreferredWidth(75);
         courseList.getColumnModel().getColumn(9).setPreferredWidth(125);
         courseList.setShowVerticalLines(true);
         courseList.setColumnSelectionAllowed(false);
@@ -1382,6 +1445,8 @@ public class Gradebook extends JFrame implements ActionListener {
 				}
 				
 				gdtm.addRow(new Object[] {"","","","","","","","",""});
+				
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
 		else {
@@ -1396,6 +1461,8 @@ public class Gradebook extends JFrame implements ActionListener {
 				gdtm.removeRow(i);
 				i--;
 			}
+		
+		JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	@Override
