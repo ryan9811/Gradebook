@@ -1294,15 +1294,48 @@ public class Gradebook extends JFrame implements ActionListener {
 		String[] categoryChoices = new String[categories.get(identifier).size() / 2];
 		for(int i = 0; i < categoryChoices.length; i++)
 			categoryChoices[i] = categories.get(identifier).get(i * 2);
-				
-		String category = (String) JOptionPane.showInputDialog(null, "Select Category", "Grade Master", 
-				JOptionPane.QUESTION_MESSAGE, null, categoryChoices, categoryChoices[0]);
 		
-		if(category == null) {
+		JPanel p = new JPanel();
+		p.setLayout(new GridLayout(4, 0));
+		String pointsEarned, totalPoints, category, comment;
+		pointsEarned = totalPoints = category = comment = "";
+		
+		JComboBox categoryEntry = new JComboBox(categoryChoices);
+		JTextField pointsEarnedEntry = new JTextField(15);
+		JTextField totalPointsEntry = new JTextField(15);
+		JTextField commentEntry = new JTextField(15);
+		
+		p.add(new JLabel("Select Category"));
+		p.add(categoryEntry);
+		
+		p.add(new JLabel("Enter Points Earned"));
+		p.add(pointsEarnedEntry);
+		
+		p.add(new JLabel("Enter Total Points"));
+		p.add(totalPointsEntry);
+		
+		p.add(new JLabel("Enter Comment"));
+		p.add(commentEntry);
+		
+		int result = JOptionPane.showConfirmDialog(null, p, "Grade Master", JOptionPane.OK_CANCEL_OPTION);
+		
+		if(result == JOptionPane.OK_OPTION) {
+			category = (String) categoryEntry.getSelectedItem();
+			pointsEarned = pointsEarnedEntry.getText();
+			totalPoints = totalPointsEntry.getText();
+			comment = commentEntry.getText();
+			
+			if(pointsEarned.isEmpty() || totalPoints.isEmpty()) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMissing Information", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
+		}
+		
+		else {
 			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
-		
+				
 		int catIndex = 0;
 		for(int i = 0; i < categories.get(identifier).size(); i++)
 			if(categories.get(identifier).get(i).equals(category))
@@ -1310,12 +1343,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String catWeight = categories.get(identifier).get(catIndex + 1);
 		
-		String pointsEarned = JOptionPane.showInputDialog(null, "Enter Points Earned for Assignment", "Grade Master", JOptionPane.INFORMATION_MESSAGE);
-		
 		if(pointsEarned.length() > 5)
 			pointsEarned = pointsEarned.substring(0, 6);
-		
-		String totalPoints = JOptionPane.showInputDialog(null, "Enter Total Points for Assignment", "Grade Master", JOptionPane.INFORMATION_MESSAGE);
 		
 		String grade;
 		
@@ -1341,8 +1370,6 @@ public class Gradebook extends JFrame implements ActionListener {
 			return;
 		}
 		
-		String comment = JOptionPane.showInputDialog(null, "Enter Comment for Assignment", "Grade Master", JOptionPane.INFORMATION_MESSAGE);
-		
 		if(grade.length() > 5)
 			grade = grade.substring(0, 6);
 		
@@ -1352,7 +1379,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		viewBreakdown();
 		
-		JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+		//JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
 	/**
@@ -1462,7 +1489,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				i--;
 			}
 		
-		JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+		//JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	@Override
