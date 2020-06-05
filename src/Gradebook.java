@@ -111,8 +111,10 @@ public class Gradebook extends JFrame implements ActionListener {
         finalizeGrades.addActionListener(this);
         
         JButton settings = new JButton("Settings");
+        settings.addActionListener(this);
         
-        JButton quickCheck = new JButton("Quick Check");
+        JButton help = new JButton("Help");
+        help.addActionListener(this);
         
         JButton importExport = new JButton("Import/Export");
         importExport.addActionListener(this);
@@ -133,12 +135,12 @@ public class Gradebook extends JFrame implements ActionListener {
         buttons.add(removeCourse);
         buttons.add(editElement);
         buttons.add(enterGrade);
-        buttons.add(quickCheck);
         buttons.add(viewBreakdown);
         buttons.add(finalizeGrades);
         //buttons.add(manualOverride);
-        buttons.add(settings);
         buttons.add(importExport);
+        buttons.add(settings);
+        buttons.add(help);
         buttons.add(identifier);
         buttons.add(identifierInput);
         
@@ -1621,7 +1623,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 			else {
-				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nIdentifier Does Not Exist", "System Notification", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nElement Does Not Exist", "System Notification", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 		
@@ -1637,6 +1639,17 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			else
 				saveTable();
+		}
+		
+		if(s.equalsIgnoreCase("Help")) {
+			String[] options = {"Instructions", "Button Explanations", "Troubleshooting"};
+			String choice = (String) JOptionPane.showInputDialog(null, "Select an Option to Learn More", "Help Master", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+			
+			if(choice == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
+			
 		}
 	}
 	
