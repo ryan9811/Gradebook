@@ -159,6 +159,7 @@ public class Gradebook extends JFrame implements ActionListener {
         gradeList.setModel(gdtm);
         
         gradeList.setShowVerticalLines(true);
+        gradeList.setAutoCreateRowSorter(true);
         gradeList.setColumnSelectionAllowed(false);
         gradeList.getTableHeader().setReorderingAllowed(false);
         gradeList.getTableHeader().setResizingAllowed(false);
@@ -419,7 +420,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		p.add(new JLabel("Select Grade Mode"));
 		p.add(gModeEntry);
 		
-		p.add(new JLabel("Enter Term"));
+		p.add(new JLabel("Enter Term (Ex. Fall 2017)"));
+		termEntry.setText(getUnfinalizedTerm());
 		p.add(termEntry);
 		
 		int result = JOptionPane.showConfirmDialog(null, p, "Course Master", JOptionPane.OK_CANCEL_OPTION);
@@ -440,6 +442,16 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		else {
 			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
+		
+		if(isTermFinalized(term)) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nEntered Term is Finalized", "System Notification", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		if(!getUnfinalizedTerm().equals(term) && existsUnfinalizedTerm()) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMust Finalize Previous Term", "System Notification", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
@@ -563,16 +575,6 @@ public class Gradebook extends JFrame implements ActionListener {
 //			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
 //			return;
 //		}
-		
-		if(isTermFinalized(term)) {
-			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nEntered Term is Finalized", "System Notification", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		
-		if(!getUnfinalizedTerm().equals(term) && existsUnfinalizedTerm()) {
-			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMust Finalize Previous Term", "System Notification", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
 		
 		String status;
 		if(fGrade.equalsIgnoreCase("In Progress")) 
@@ -1256,8 +1258,6 @@ public class Gradebook extends JFrame implements ActionListener {
 	 */
 	public void enterGrade() {
 		
-		hideBreakdown();
-		
 		ArrayList<String> identifiers = new ArrayList<String>();
 		for(int i = 0; i < cdtm.getRowCount(); i++)
 			if(cdtm.getValueAt(i, 9).equals("In Progress"))
@@ -1377,9 +1377,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		calculateGrade(identifier);
 		
-		viewBreakdown();
-		
-		//JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
 	/**
@@ -1428,6 +1426,55 @@ public class Gradebook extends JFrame implements ActionListener {
 		return false;
 	}
 	
+	public void viewParticularBreakdown(String id) {
+		
+		if(existsUnfinalizedTerm() && existsInProgressCourse()) {
+			gdtm.addRow(new Object[] {"","","","","","","","",""});
+			gdtm.addRow(new Object[] {"Breakdown Viewed:","","","","","","","",""});
+			gdtm.addRow(new Object[] {"","","","","","","","",""});
+			ArrayList<String> identifiers = new ArrayList<String>();
+			ArrayList<String> titles = new ArrayList<String>();
+			ArrayList<String> weights = new ArrayList<String>();
+			ArrayList<String> courseTitles = new ArrayList<String>();
+			String term = getUnfinalizedTerm();
+			for(int i = 0; i < cdtm.getRowCount(); i++) {
+				if(cdtm.getValueAt(i, 9).equals("In Progress") && cdtm.getValueAt(i, 3).equals(id)) {
+					identifiers.add(cdtm.getValueAt(i, 3) + "");
+					if(!cdtm.getValueAt(i, 1).equals(""))
+						courseTitles.add(cdtm.getValueAt(i, 1) + "");
+					else
+						courseTitles.add(cdtm.getValueAt(i, 0) + "");
+				}
+			}
+			for(int i = 0; i < identifiers.size(); i++) {
+				String courseTitle = courseTitles.get(i);
+				String identifier = identifiers.get(i);
+				double pointsEarned = 0;
+				double totalPoints = 0;
+				titles = getCategoryNames(categories.get(identifiers.get(i)));
+				weights = getCategoryValues(categories.get(identifiers.get(i)));
+				
+				for(int j = 0; j < titles.size(); j++) {
+					for(int k = 0; k < gdtm.getRowCount(); k++) 
+						if(gdtm.getValueAt(k, 1).equals(identifier) && gdtm.getValueAt(k, 3).equals(titles.get(j))) {
+							pointsEarned += Double.parseDouble(gdtm.getValueAt(k, 5) + "");
+							totalPoints += Double.parseDouble(gdtm.getValueAt(k, 6) + "");
+						}
+					double grade = pointsEarned / totalPoints * 100;
+					String sGrade = grade + "";
+					if(sGrade.length() > 6)
+						sGrade = sGrade.substring(0, 6);
+					gdtm.addRow(new Object[] {courseTitle,identifier,"",titles.get(j),weights.get(j),pointsEarned,totalPoints,sGrade,""});
+					pointsEarned = 0;
+					totalPoints = 0;
+				}
+				
+				gdtm.addRow(new Object[] {"","","","","","","","",""});
+				
+			}
+		}
+	}
+	
 	public void viewBreakdown() {
 		
 		if(existsUnfinalizedTerm() && existsInProgressCourse()) {
@@ -1473,13 +1520,13 @@ public class Gradebook extends JFrame implements ActionListener {
 				
 				gdtm.addRow(new Object[] {"","","","","","","","",""});
 				
-				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
 		else {
 			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNo Courses In Progress", "System Notification", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
+		JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
 	public void hideBreakdown() {
@@ -1488,8 +1535,6 @@ public class Gradebook extends JFrame implements ActionListener {
 				gdtm.removeRow(i);
 				i--;
 			}
-		
-		//JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	@Override
@@ -1565,16 +1610,25 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(s.equalsIgnoreCase("Enter Grade")) {
+			hideBreakdown();
 			enterGrade();
 		}
 		
 		if(s.equalsIgnoreCase("View Breakdown")) {
-			viewBreakdown();
+			if(isIdentifierFound()) {
+				viewBreakdown.setText("Hide Breakdown");
+				viewParticularBreakdown(identifierInput.getText());
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			}
+			else {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nIdentifier Does Not Exist", "System Notification", JOptionPane.ERROR_MESSAGE);
+			}
 		}
 		
 		if(s.equalsIgnoreCase("Hide Breakdown")) {
 			hideBreakdown();
 			viewBreakdown.setText("View Breakdown");
+			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 		}
 		
 		if(s.equalsIgnoreCase("Import/Export")) {
