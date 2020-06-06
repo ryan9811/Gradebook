@@ -51,6 +51,8 @@ public class Gradebook extends JFrame implements ActionListener {
 	
 	private ArrayList<Hashtable> gradeScales = new ArrayList<Hashtable>();
 	
+	private Hashtable<String, Hashtable> courseScales = new Hashtable<String, Hashtable>();
+	
 	private JFileChooser myJFileChooser = new JFileChooser(new File("."));
 	
 	public Gradebook() {
@@ -105,6 +107,26 @@ public class Gradebook extends JFrame implements ActionListener {
         // Initialize buttons and add action listeners
         JButton addCourse = new JButton("Add Course");
         addCourse.addActionListener(this);
+        
+        Hashtable defaultScale = new Hashtable();
+        defaultScale.put("Name", "Default Scale");
+        if(isAPluses)
+        	defaultScale.put("A+", 98.0);
+        else
+        	defaultScale.put("A+", Double.MAX_VALUE);
+        defaultScale.put("A", 94.0);
+        defaultScale.put("A-", 90.0);
+        defaultScale.put("B+", 87.0);
+        defaultScale.put("B", 84.0);
+        defaultScale.put("B-", 80.0);
+        defaultScale.put("C+", 77.0);
+        defaultScale.put("C", 74.0);
+        defaultScale.put("C-", 70.0);
+        defaultScale.put("D+", 67.0);
+        defaultScale.put("D", 64.0);
+        defaultScale.put("D-", 60.0);
+        defaultScale.put("P", 60.0);
+        gradeScales.add(defaultScale);
         
         JButton removeCourse = new JButton("Remove Element");
         removeCourse.addActionListener(this);
@@ -281,6 +303,19 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 	}
 	
+	public void linkScale(String identifier, String scaleName) {
+		for(int i = 0; i < gradeScales.size(); i++)
+			if(gradeScales.get(i).get("Name").equals(scaleName)) {
+				System.out.println("linked");
+				courseScales.put(identifier, gradeScales.get(i));
+				System.out.println("In link: " + gradeScales.get(i).get("Name"));
+				System.out.println("In link: " + courseScales.get(identifier).get("A"));
+				return;
+			}
+		
+		JOptionPane.showMessageDialog(null, "Course Link Error\nGrade Scale Not Found", "System Notification", JOptionPane.ERROR_MESSAGE);
+	}
+	
 	/**
 	 * Calculates the final grade for a specified course from the grades table and changes the Numeric Grade
 	 * and Final Grade fields in the course table
@@ -341,11 +376,14 @@ public class Gradebook extends JFrame implements ActionListener {
 			finalGradeString = finalGradeString.substring(0, 6);
 
 		String gMode = "";
+		String id = "";
 		for(int i = 0; i < cdtm.getRowCount(); i++)
-			if(cdtm.getValueAt(i, 3).equals(identifier))
+			if(cdtm.getValueAt(i, 3).equals(identifier)) {
 				gMode = cdtm.getValueAt(i, 6) + "";
+				id = cdtm.getValueAt(i, 3) + "";
+			}
 		
-		String letGrade = numToLet(finalGrade, gMode);
+		String letGrade = numToLet(id, finalGrade, gMode);
 		
 		for(int i = 0; i < cdtm.getRowCount(); i++)
 			if(cdtm.getValueAt(i, 3).equals(identifier)) {
@@ -360,25 +398,29 @@ public class Gradebook extends JFrame implements ActionListener {
 	 * @param gMode the grade mode
 	 * @return the letter equivalent of the grade
 	 */
-	public String numToLet(double grade, String gMode) {
+	public String numToLet(String identifier, double grade, String gMode) {
+		
+		System.out.println("Tester: " + courseScales.get(identifier));
 		
 		if(gMode.equals("Letter")) {
-			if(isAPluses && grade >= 97) return "A+";
-			else if(grade >= 94) return "A";
-			else if(grade >= 90) return "A-";
-			else if(grade >= 87) return "B+";
-			else if(grade >= 84) return "B";
-			else if(grade >= 80) return "B-";
-			else if(grade >= 77) return "C+";
-			else if(grade >= 74) return "C";
-			else if(grade >= 70) return "C-";
-			else if(grade >= 67) return "D+";
-			else if(grade >= 64) return "D";
-			else if(grade >= 60) return "D-";
+			System.out.println("letterrrrrrr");
+			System.out.println("IN method " + (double)courseScales.get(identifier).get("A"));
+			if(isAPluses && grade >= (double)courseScales.get(identifier).get("A+")) return "A+";
+			else if(grade >= (double)courseScales.get(identifier).get("A")) return "A";
+			else if(grade >= (double)courseScales.get(identifier).get("A-")) return "A-";
+			else if(grade >= (double)courseScales.get(identifier).get("B+")) return "B+";
+			else if(grade >= (double)courseScales.get(identifier).get("B")) return "B";
+			else if(grade >= (double)courseScales.get(identifier).get("B-")) return "B-";
+			else if(grade >= (double)courseScales.get(identifier).get("C+")) return "C+";
+			else if(grade >= (double)courseScales.get(identifier).get("C")) return "C";
+			else if(grade >= (double)courseScales.get(identifier).get("C-")) return "C-";
+			else if(grade >= (double)courseScales.get(identifier).get("D+")) return "D+";
+			else if(grade >= (double)courseScales.get(identifier).get("D")) return "D";
+			else if(grade >= (double)courseScales.get(identifier).get("D-")) return "D-";
 			else return "F";
 		}
 		else if(gMode.equals("P/NP")) {
-			if(grade >= 60) return "P";
+			if(grade >= (double)courseScales.get(identifier).get("P")) return "P";
 			else return "NP";
 		}
 		return "";
@@ -416,8 +458,14 @@ public class Gradebook extends JFrame implements ActionListener {
 		String[] gModeChoices = {"Letter", "P/NP", "Notation"};
 		JComboBox gModeEntry = new JComboBox(gModeChoices);
 		
+		String[] scaleChoices = new String[gradeScales.size()];
+		for(int i = 0; i < scaleChoices.length; i++) {
+			scaleChoices[i] = (String) gradeScales.get(i).get("Name");
+		}
+		JComboBox scaleEntry = new JComboBox(scaleChoices);
+		
 		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(6, 0));
+		p.setLayout(new GridLayout(7, 0));
 		
 		p.add(new JLabel("Enter Subject/Course Number"));
 		p.add(subjectEntry);
@@ -434,9 +482,15 @@ public class Gradebook extends JFrame implements ActionListener {
 		p.add(new JLabel("Select Grade Mode"));
 		p.add(gModeEntry);
 		
+		p.add(new JLabel("Select Grade Scale"));
+		p.add(scaleEntry);
+		
 		p.add(new JLabel("Enter Term (Ex. Fall 2017)"));
 		termEntry.setText(getUnfinalizedTerm());
 		p.add(termEntry);
+		
+		courseCode += (int) (Math.random() * 50 + 1);
+		String identifier = "C" + courseCode;
 		
 		int result = JOptionPane.showConfirmDialog(null, p, "Course Master", JOptionPane.OK_CANCEL_OPTION);
 		
@@ -447,6 +501,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			title = titleEntry.getText();
 			comment = commentEntry.getText();
 			term = termEntry.getText();
+			linkScale(identifier, (String) scaleEntry.getSelectedItem());
 			
 			if(subject.isEmpty() || title.isEmpty() || term.isEmpty()) {
 				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMissing Information", "System Notification", JOptionPane.INFORMATION_MESSAGE);
@@ -468,9 +523,6 @@ public class Gradebook extends JFrame implements ActionListener {
 			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMust Finalize Previous Term", "System Notification", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		
-		courseCode += (int) (Math.random() * 50 + 1);
-		String identifier = "C" + courseCode;
 		
 		honorsAPStatuses.put(identifier, "College Prep");
 		
@@ -1178,16 +1230,17 @@ public class Gradebook extends JFrame implements ActionListener {
 				String[] fGradeChoicesP = {"In Progress", "P", "NP"};
 				String[] notationChoices = {"TR","I","W","Z"};
 				String fGrade = "";
+				String identifier = (String) cdtm.getValueAt(row, 3);
 				
 				if(gMode.equals("Letter")) {
 					cdtm.setValueAt(gMode, row, 6);
-					cdtm.setValueAt(numToLet(Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
+					cdtm.setValueAt(numToLet(identifier, Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
 					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
 				else if(gMode.equals("P/NP")) {
 					cdtm.setValueAt(gMode, row, 6);
-					cdtm.setValueAt(numToLet(Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
+					cdtm.setValueAt(numToLet(identifier, Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
 					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
@@ -1933,7 +1986,7 @@ public class Gradebook extends JFrame implements ActionListener {
 	public void addGradeScale() {
 		
 		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(13, 0));
+		p.setLayout(new GridLayout(14, 0));
 		JTextField name = new JTextField(12);
 		JTextField minAp = new JTextField(12);
 		JTextField minA = new JTextField(12);
@@ -1947,6 +2000,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		JTextField minDp = new JTextField(12);
 		JTextField minD = new JTextField(12);
 		JTextField minDm = new JTextField(12);
+		JTextField minP = new JTextField(12);
 		
 		p.add(new JLabel("Enter Name for Grade Scale"));
 		p.add(name);
@@ -1974,6 +2028,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		p.add(minD);
 		p.add(new JLabel("Min Grade for D-"));
 		p.add(minDm);
+		p.add(new JLabel("Min Grade for Pass"));
+		p.add(minP);
 		
 		int result = JOptionPane.showConfirmDialog(null, p, "Settings Master", JOptionPane.OK_CANCEL_OPTION);
 		
@@ -1994,6 +2050,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				testError = Double.parseDouble(minDp.getText());
 				testError = Double.parseDouble(minD.getText());
 				testError = Double.parseDouble(minDm.getText());
+				testError = Double.parseDouble(minP.getText());
 				
 			} catch (NumberFormatException e) {
 				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
@@ -2016,6 +2073,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				scale.put("D+", Double.parseDouble(minDp.getText()));
 				scale.put("D", Double.parseDouble(minD.getText()));
 				scale.put("D-", Double.parseDouble(minDm.getText()));
+				scale.put("P", Double.parseDouble(minP.getText()));
 			}
 			
 			else {
@@ -2032,6 +2090,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				scale.put("D+", Double.parseDouble(minDp.getText()));
 				scale.put("D", Double.parseDouble(minD.getText()));
 				scale.put("D-", Double.parseDouble(minDm.getText()));
+				scale.put("P", Double.parseDouble(minP.getText()));
 			}
 			gradeScales.add(scale);
 		}
