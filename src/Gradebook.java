@@ -13,6 +13,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -47,6 +48,8 @@ public class Gradebook extends JFrame implements ActionListener {
 	private double apBonus = 1;
 	private Hashtable<String, String> honorsAPStatuses;
 	private String rounding = "Tenths";
+	
+	private ArrayList<Hashtable> gradeScales = new ArrayList<Hashtable>();
 	
 	private JFileChooser myJFileChooser = new JFileChooser(new File("."));
 	
@@ -1822,13 +1825,21 @@ public class Gradebook extends JFrame implements ActionListener {
 		String[] apHonorsChoices = {"No", "Yes"};
 		
 		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(5, 0));
+		p.setLayout(new GridLayout(7, 0));
 		
 		JComboBox aPlusEntry = new JComboBox(aPlusChoices);
 		JComboBox decimalEntry = new JComboBox(decimalChoices);
 		JComboBox isAPHonorsEntry = new JComboBox(apHonorsChoices);
 		JTextField honorsBonusEntry = new JTextField(15);
 		JTextField apBonusEntry = new JTextField(15);
+		JButton setDefaultGradeScale = new JButton("Set Default Grade Scale");
+		setDefaultGradeScale.addActionListener(this);
+		JButton deleteGradeScale = new JButton("Delete Grade Scale");
+		deleteGradeScale.addActionListener(this);
+		JButton addNewGradeScale = new JButton("Add Grade Scale");
+		addNewGradeScale.addActionListener(this);
+		JButton editGradeScale = new JButton("Edit Grade Scale");
+		editGradeScale.addActionListener(this);
 		
 		p.add(new JLabel("Is A+ Allowed?"));
 		p.add(aPlusEntry);
@@ -1858,6 +1869,11 @@ public class Gradebook extends JFrame implements ActionListener {
 		p.add(new JLabel("AP Class GPA Bonus"));
 		p.add(apBonusEntry);
 		apBonusEntry.setText(apBonus + "");
+		
+		p.add(setDefaultGradeScale);
+		p.add(addNewGradeScale);
+		p.add(deleteGradeScale);
+		p.add(editGradeScale);
 		
 		int result = JOptionPane.showConfirmDialog(null, p, "Settings Master", JOptionPane.OK_CANCEL_OPTION);
 		
@@ -1912,6 +1928,118 @@ public class Gradebook extends JFrame implements ActionListener {
 			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			return; 
 		}
+	}
+	
+	public void addGradeScale() {
+		
+		JPanel p = new JPanel();
+		p.setLayout(new GridLayout(13, 0));
+		JTextField name = new JTextField(12);
+		JTextField minAp = new JTextField(12);
+		JTextField minA = new JTextField(12);
+		JTextField minAm = new JTextField(12);
+		JTextField minBp = new JTextField(12);
+		JTextField minB = new JTextField(12);
+		JTextField minBm = new JTextField(12);
+		JTextField minCp = new JTextField(12);
+		JTextField minC = new JTextField(12);
+		JTextField minCm = new JTextField(12);
+		JTextField minDp = new JTextField(12);
+		JTextField minD = new JTextField(12);
+		JTextField minDm = new JTextField(12);
+		
+		p.add(new JLabel("Enter Name for Grade Scale"));
+		p.add(name);
+		p.add(new JLabel("Min Grade for A+"));
+		p.add(minAp);
+		p.add(new JLabel("Min Grade for A"));
+		p.add(minA);
+		p.add(new JLabel("Min Grade for A-"));
+		p.add(minAm);
+		p.add(new JLabel("Min Grade for B+"));
+		p.add(minBp);
+		p.add(new JLabel("Min Grade for B"));
+		p.add(minB);
+		p.add(new JLabel("Min Grade for B-"));
+		p.add(minBm);
+		p.add(new JLabel("Min Grade for C+"));
+		p.add(minCp);
+		p.add(new JLabel("Min Grade for C"));
+		p.add(minC);
+		p.add(new JLabel("Min Grade for C-"));
+		p.add(minCm);
+		p.add(new JLabel("Min Grade for D+"));
+		p.add(minDp);
+		p.add(new JLabel("Min Grade for D"));
+		p.add(minD);
+		p.add(new JLabel("Min Grade for D-"));
+		p.add(minDm);
+		
+		int result = JOptionPane.showConfirmDialog(null, p, "Settings Master", JOptionPane.OK_CANCEL_OPTION);
+		
+		if(result == JOptionPane.OK_OPTION) {
+			
+			try {
+				double testError = 0;
+				if(isAPluses)
+					testError = Double.parseDouble(minAp.getText());
+				testError = Double.parseDouble(minA.getText());
+				testError = Double.parseDouble(minAm.getText());
+				testError = Double.parseDouble(minBp.getText());
+				testError = Double.parseDouble(minB.getText());
+				testError = Double.parseDouble(minBm.getText());
+				testError = Double.parseDouble(minCp.getText());
+				testError = Double.parseDouble(minC.getText());
+				testError = Double.parseDouble(minCm.getText());
+				testError = Double.parseDouble(minDp.getText());
+				testError = Double.parseDouble(minD.getText());
+				testError = Double.parseDouble(minDm.getText());
+				
+			} catch (NumberFormatException e) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			
+			Hashtable scale = new Hashtable();
+			if(!isAPluses) {
+				minAp.setEnabled(false);
+				scale.put("Name", name.getText());
+				scale.put("A+", Double.MAX_VALUE);
+				scale.put("A", Double.parseDouble(minA.getText()));
+				scale.put("A-", Double.parseDouble(minAm.getText()));
+				scale.put("B+", Double.parseDouble(minBp.getText()));
+				scale.put("B", Double.parseDouble(minB.getText()));
+				scale.put("B-", Double.parseDouble(minBm.getText()));
+				scale.put("C+", Double.parseDouble(minCp.getText()));
+				scale.put("C", Double.parseDouble(minC.getText()));
+				scale.put("C-", Double.parseDouble(minCm.getText()));
+				scale.put("D+", Double.parseDouble(minDp.getText()));
+				scale.put("D", Double.parseDouble(minD.getText()));
+				scale.put("D-", Double.parseDouble(minDm.getText()));
+			}
+			
+			else {
+				scale.put("Name", name.getText());
+				scale.put("A+", Double.parseDouble(minAp.getText()));
+				scale.put("A", Double.parseDouble(minA.getText()));
+				scale.put("A-", Double.parseDouble(minAm.getText()));
+				scale.put("B+", Double.parseDouble(minBp.getText()));
+				scale.put("B", Double.parseDouble(minB.getText()));
+				scale.put("B-", Double.parseDouble(minBm.getText()));
+				scale.put("C+", Double.parseDouble(minCp.getText()));
+				scale.put("C", Double.parseDouble(minC.getText()));
+				scale.put("C-", Double.parseDouble(minCm.getText()));
+				scale.put("D+", Double.parseDouble(minDp.getText()));
+				scale.put("D", Double.parseDouble(minD.getText()));
+				scale.put("D-", Double.parseDouble(minDm.getText()));
+			}
+			gradeScales.add(scale);
+		}
+		
+		
+	}
+	public String getScaleName(Hashtable scale) {
+	    return (String) scale.get("Name");
 	}
 
 	@Override
@@ -2033,6 +2161,11 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			
 		}
+		
+		if(s.equalsIgnoreCase("Add Grade Scale")) {
+			addGradeScale();
+		}
+			
 	}
 	
 	public static void main(String[] a) {
