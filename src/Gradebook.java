@@ -45,7 +45,7 @@ public class Gradebook extends JFrame implements ActionListener {
 	private boolean isHonorsAPClasses = false;
 	private double honorsBonus = 1;
 	private double apBonus = 1;
-	private Hashtable<String, String> isHonorsAPCourse;
+	private Hashtable<String, String> honorsAPStatuses;
 	private String rounding = "Tenths";
 	
 	private JFileChooser myJFileChooser = new JFileChooser(new File("."));
@@ -73,6 +73,7 @@ public class Gradebook extends JFrame implements ActionListener {
         cdtm.setColumnIdentifiers(courseHeader);
         courseList.setModel(cdtm);
         courseCode = 11111;
+        honorsAPStatuses = new Hashtable<String, String>();
         
         courseList.setShowVerticalLines(true);
         courseList.setColumnSelectionAllowed(false);
@@ -359,7 +360,8 @@ public class Gradebook extends JFrame implements ActionListener {
 	public String numToLet(double grade, String gMode) {
 		
 		if(gMode.equals("Letter")) {
-			if(grade >= 94) return "A";
+			if(isAPluses && grade >= 97) return "A+";
+			else if(grade >= 94) return "A";
 			else if(grade >= 90) return "A-";
 			else if(grade >= 87) return "B+";
 			else if(grade >= 84) return "B";
@@ -464,51 +466,26 @@ public class Gradebook extends JFrame implements ActionListener {
 			return;
 		}
 		
-		
-		
-//		String title = JOptionPane.showInputDialog(null, "Enter Subject/Course Number", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-//		if(title == null) {
-//			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-//			return;
-//		}
-//		
-//		String prof = JOptionPane.showInputDialog(null, "Enter Course Title", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-//		if(prof == null) {
-//			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-//			return;
-//		}
-//		
-//		String time = JOptionPane.showInputDialog(null, "Enter Comment", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-//		if(time == null) {
-//			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-//			return;
-//		}
-		
 		courseCode += (int) (Math.random() * 50 + 1);
 		String identifier = "C" + courseCode;
 		
-//		String[] creditsChoices = {"0", "0.5", "1", "1.5", "2", "2.5", "3", "4", "5", "6"};
-//		String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[6]);
-//		if(credits == null) {
-//			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-//			return;
-//		}
+		honorsAPStatuses.put(identifier, "College Prep");
 		
 		String numGrade = "n/a";
 		
-//		String[] gModeChoices = {"Letter", "P/NP", "Notation"};
-//		String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
-//		if(gMode == null) {
-//			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-//			return;
-//		}
-		
 		String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
+		String[] fGradeChoicesCPlus = {"In Progress", "A+", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
 		String[] fGradeChoicesP = {"In Progress", "P", "NP"};
 		String[] notationChoices = {"TR","I","W","Z"};
 		String fGrade;
-		if(gMode.equalsIgnoreCase("Letter"))
-			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
+		if(gMode.equalsIgnoreCase("Letter")) {
+			if(isAPluses)
+				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
+						JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesCPlus, fGradeChoicesCPlus[0]);
+			else
+				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
+						JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
+		}
 		else if(gMode.equalsIgnoreCase("P/NP"))
 			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
 		else
@@ -575,15 +552,178 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			categories.put(identifier, catsAndWeights);
 		}
-	
-//		String year = JOptionPane.showInputDialog(null, "Enter Term Number", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 		
-//		try {
-//			double testError = Double.parseDouble(term);
-//		} catch (NumberFormatException e) {
-//			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
-//			return;
-//		}
+		String status;
+		if(fGrade.equalsIgnoreCase("In Progress")) 
+			status = "In Progress";
+		else status = "Manual Entry";
+
+		cdtm.addRow(new Object[] {subject, title, comment, identifier, credits, numGrade, gMode, fGrade, term, status});
+		
+		JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	public void addCourseHonorsAP() {
+		
+		String credits, gMode, subject, title, comment, term;
+		credits = gMode = subject = title = comment = term = "";
+		JTextField subjectEntry = new JTextField();
+		JTextField titleEntry = new JTextField();
+		JTextField commentEntry = new JTextField();
+		JTextField termEntry = new JTextField();
+		
+		courseCode += (int) (Math.random() * 50 + 1);
+		String identifier = "C" + courseCode;
+		
+		String[] creditsChoices = {"0", "0.5", "1", "1.5", "2", "2.5", "3", "4", "5", "6"};
+		JComboBox creditEntry = new JComboBox(creditsChoices);
+		creditEntry.setSelectedIndex(6);
+		
+		String[] honorsAPChoices = {"College Prep", "Honors", "Advanced Placement"};
+		JComboBox courseTypeEntry = new JComboBox(honorsAPChoices);
+		
+		String[] gModeChoices = {"Letter", "P/NP", "Notation"};
+		JComboBox gModeEntry = new JComboBox(gModeChoices);
+		
+		JPanel p = new JPanel();
+		p.setLayout(new GridLayout(7, 0));
+		
+		p.add(new JLabel("Enter Subject/Course Number"));
+		p.add(subjectEntry);
+		
+		p.add(new JLabel("Enter Course Title"));
+		p.add(titleEntry);
+		
+		p.add(new JLabel("Enter Course Type"));
+		p.add(courseTypeEntry);
+		
+		
+		p.add(new JLabel("Enter Comment"));
+		p.add(commentEntry);
+		
+		p.add(new JLabel("Select Number of Credits"));
+		p.add(creditEntry);
+		
+		p.add(new JLabel("Select Grade Mode"));
+		p.add(gModeEntry);
+		
+		p.add(new JLabel("Enter Term (Ex. Fall 2017)"));
+		termEntry.setText(getUnfinalizedTerm());
+		p.add(termEntry);
+		
+		int result = JOptionPane.showConfirmDialog(null, p, "Course Master", JOptionPane.OK_CANCEL_OPTION);
+		
+		if(result == JOptionPane.OK_OPTION) {
+			credits = (String) creditEntry.getSelectedItem();
+			gMode = (String) gModeEntry.getSelectedItem();
+			subject = subjectEntry.getText();
+			title = titleEntry.getText();
+			comment = commentEntry.getText();
+			term = termEntry.getText();
+			honorsAPStatuses.put(identifier, courseTypeEntry.getSelectedItem() + "");
+			
+			if(subject.isEmpty() || title.isEmpty() || term.isEmpty()) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMissing Information", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
+		}
+		
+		else {
+			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
+		
+		if(isTermFinalized(term)) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nEntered Term is Finalized", "System Notification", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		if(!getUnfinalizedTerm().equals(term) && existsUnfinalizedTerm()) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMust Finalize Previous Term", "System Notification", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		String numGrade = "n/a";
+		
+		String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
+		String[] fGradeChoicesCPlus = {"In Progress", "A+", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
+		String[] fGradeChoicesP = {"In Progress", "P", "NP"};
+		String[] notationChoices = {"TR","I","W","Z"};
+		String fGrade;
+		if(gMode.equalsIgnoreCase("Letter")) {
+			if(isAPluses)
+				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
+						JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesCPlus, fGradeChoicesCPlus[0]);
+			else
+				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
+						JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
+		}
+		else if(gMode.equalsIgnoreCase("P/NP"))
+			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
+		else
+			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
+		if(fGrade == null) {
+			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
+		
+		if(!gMode.equals("Notation") && fGrade.equals("In Progress")) {
+			String category = "";
+			String catWeight = "";
+			ArrayList<String> catsAndWeights = new ArrayList<String>();
+			category = JOptionPane.showInputDialog(null, "Enter Grade Weight Category Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+			
+			if(category == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
+			
+			if(containsNumbers(category)) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers", "System Notification", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+
+			catWeight = JOptionPane.showInputDialog(null, "Enter Category Weight (Ex. 15)", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+			if(catWeight == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
+			try {
+				double testError = Double.parseDouble(catWeight);
+			} catch (NumberFormatException e) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			catsAndWeights.add(category);
+			catsAndWeights.add(catWeight);
+			int yesNo = 0;
+			while(yesNo == 0) {
+				yesNo = JOptionPane.showConfirmDialog(null, "Enter Another Category?");
+				if(yesNo == 0) {
+					category = JOptionPane.showInputDialog(null, "Enter Category Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+					
+					if(containsNumbers(category)) {
+						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCategory Name Cannot Contain Numbers", "System Notification", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+					
+					catWeight = JOptionPane.showInputDialog(null, "Enter Category Weight (ex. 15)", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+					try {
+						double testError = Double.parseDouble(catWeight);
+					} catch (NumberFormatException e) {
+						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+					catsAndWeights.add(category);
+					catsAndWeights.add(catWeight);
+				}
+				else if(yesNo == JOptionPane.CANCEL_OPTION){
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+			}
+			categories.put(identifier, catsAndWeights);
+		}
 		
 		String status;
 		if(fGrade.equalsIgnoreCase("In Progress")) 
@@ -713,7 +853,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
 			if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && !cdtm.getValueAt(i, 7).equals("F")) {
-				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
+				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual(cdtm.getValueAt(i, 3)+"",(String)cdtm.getValueAt(i, 7));
 				creditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
@@ -723,7 +863,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			
 			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && cdtm.getValueAt(i, 7).equals("F")) {
-				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual((String)cdtm.getValueAt(i, 7));
+				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual(cdtm.getValueAt(i, 3)+"",(String)cdtm.getValueAt(i, 7));
 				failCreditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				totalFCreditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
@@ -768,7 +908,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				double allQualitySum = 0;
 				double allCreditSum = 0;
 				for(int i = 0; i < cdtm.getRowCount(); i++)
-					if(((String) cdtm.getValueAt(i, 0)).equalsIgnoreCase("Term Credits")) {
+					if(((String) cdtm.getValueAt(i, 0)).equalsIgnoreCase("Term Credits Earned")) {
 						allQualitySum += Double.parseDouble(cdtm.getValueAt(i, 3) + "");
 						allCreditSum += Double.parseDouble(cdtm.getValueAt(i, 1) + "");
 					}
@@ -1073,12 +1213,19 @@ public class Gradebook extends JFrame implements ActionListener {
 			
 			if(edit.equalsIgnoreCase("Final Grade")) {
 				String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
+				String[] fGradeChoicesCPlus = {"In Progress", "A+","A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
 				String[] fGradeChoicesP = {"In Progress", "P", "NP"};
 				String[] notationChoices = {"TR","I","W","Z"};
 				String fGrade;
 				
-				if(cdtm.getValueAt(row, 6).equals("Letter"))
-					fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
+				if(cdtm.getValueAt(row, 6).equals("Letter")) {
+					if(isAPluses)
+						fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
+								JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesCPlus, fGradeChoicesCPlus[0]);
+					else
+						fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
+								JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
+				}
 				else if(cdtm.getValueAt(row, 6).equals("P/NP"))
 					fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
 				else 
@@ -1261,31 +1408,126 @@ public class Gradebook extends JFrame implements ActionListener {
 	 * @param letterGrade the letter grade to calculate the quality points
 	 * @return the number of quality points earned
 	 */
-	public static double letToQual(String letterGrade) {
+	public double letToQual(String letterGrade) {
 		
-		if(letterGrade.equalsIgnoreCase("A")) 
-			return 4;
-		if(letterGrade.equalsIgnoreCase("A-")) 
-			return 3.7;
-		if(letterGrade.equalsIgnoreCase("B+")) 
-			return 3.3;
-		if(letterGrade.equalsIgnoreCase("B")) 
-			return 3;
-		if(letterGrade.equalsIgnoreCase("B-")) 
-			return 2.7;
-		if(letterGrade.equalsIgnoreCase("C+")) 
-			return 2.3;
-		if(letterGrade.equalsIgnoreCase("C")) 
-			return 2;
-		if(letterGrade.equalsIgnoreCase("C-")) 
-			return 1.7;
-		if(letterGrade.equalsIgnoreCase("D+")) 
-			return 1.3;
-		if(letterGrade.equalsIgnoreCase("D")) 
-			return 1;
-		if(letterGrade.equalsIgnoreCase("D-")) 
-			return 0.7;
-		return 0;
+		if(rounding.equals("Tenths")) {
+			if(letterGrade.equalsIgnoreCase("A+"))
+				return 4.3;
+			if(letterGrade.equalsIgnoreCase("A")) 
+				return 4;
+			if(letterGrade.equalsIgnoreCase("A-")) 
+				return 3.7;
+			if(letterGrade.equalsIgnoreCase("B+")) 
+				return 3.3;
+			if(letterGrade.equalsIgnoreCase("B")) 
+				return 3;
+			if(letterGrade.equalsIgnoreCase("B-")) 
+				return 2.7;
+			if(letterGrade.equalsIgnoreCase("C+")) 
+				return 2.3;
+			if(letterGrade.equalsIgnoreCase("C")) 
+				return 2;
+			if(letterGrade.equalsIgnoreCase("C-")) 
+				return 1.7;
+			if(letterGrade.equalsIgnoreCase("D+")) 
+				return 1.3;
+			if(letterGrade.equalsIgnoreCase("D")) 
+				return 1;
+			if(letterGrade.equalsIgnoreCase("D-")) 
+				return 0.7;
+			return 0;
+		}
+		else {
+			if(letterGrade.equalsIgnoreCase("A+"))
+				return 4.33;
+			if(letterGrade.equalsIgnoreCase("A")) 
+				return 4;
+			if(letterGrade.equalsIgnoreCase("A-")) 
+				return 3.67;
+			if(letterGrade.equalsIgnoreCase("B+")) 
+				return 3.33;
+			if(letterGrade.equalsIgnoreCase("B")) 
+				return 3;
+			if(letterGrade.equalsIgnoreCase("B-")) 
+				return 2.67;
+			if(letterGrade.equalsIgnoreCase("C+")) 
+				return 2.33;
+			if(letterGrade.equalsIgnoreCase("C")) 
+				return 2;
+			if(letterGrade.equalsIgnoreCase("C-")) 
+				return 1.67;
+			if(letterGrade.equalsIgnoreCase("D+")) 
+				return 1.33;
+			if(letterGrade.equalsIgnoreCase("D")) 
+				return 1;
+			if(letterGrade.equalsIgnoreCase("D-")) 
+				return 0.67;
+			return 0;
+		}
+	}
+	
+	public double letToQual(String identifier, String letterGrade) {
+		
+		double quality = 0;
+		if(rounding.equals("Tenths")) {
+			if(letterGrade.equalsIgnoreCase("A+"))
+				quality = 4.3;
+			if(letterGrade.equalsIgnoreCase("A")) 
+				quality = 4;
+			if(letterGrade.equalsIgnoreCase("A-")) 
+				quality = 3.7;
+			if(letterGrade.equalsIgnoreCase("B+")) 
+				quality = 3.3;
+			if(letterGrade.equalsIgnoreCase("B")) 
+				quality = 3;
+			if(letterGrade.equalsIgnoreCase("B-")) 
+				quality = 2.7;
+			if(letterGrade.equalsIgnoreCase("C+")) 
+				quality = 2.3;
+			if(letterGrade.equalsIgnoreCase("C")) 
+				quality = 2;
+			if(letterGrade.equalsIgnoreCase("C-")) 
+				quality = 1.7;
+			if(letterGrade.equalsIgnoreCase("D+")) 
+				quality = 1.3;
+			if(letterGrade.equalsIgnoreCase("D")) 
+				quality = 1;
+			if(letterGrade.equalsIgnoreCase("D-")) 
+				quality = 0.7;
+		}
+		else {
+			if(letterGrade.equalsIgnoreCase("A+"))
+				quality = 4.33;
+			if(letterGrade.equalsIgnoreCase("A")) 
+				quality = 4;
+			if(letterGrade.equalsIgnoreCase("A-")) 
+				quality = 3.67;
+			if(letterGrade.equalsIgnoreCase("B+")) 
+				quality = 3.33;
+			if(letterGrade.equalsIgnoreCase("B")) 
+				quality = 3;
+			if(letterGrade.equalsIgnoreCase("B-")) 
+				quality = 2.67;
+			if(letterGrade.equalsIgnoreCase("C+")) 
+				quality = 2.33;
+			if(letterGrade.equalsIgnoreCase("C")) 
+				quality = 2;
+			if(letterGrade.equalsIgnoreCase("C-")) 
+				quality = 1.67;
+			if(letterGrade.equalsIgnoreCase("D+")) 
+				quality = 1.33;
+			if(letterGrade.equalsIgnoreCase("D")) 
+				quality = 1;
+			if(letterGrade.equalsIgnoreCase("D-")) 
+				quality = 0.67;
+		}
+		
+		if(honorsAPStatuses.get(identifier).equals("Honors"))
+			quality += honorsBonus;
+		else if(honorsAPStatuses.get(identifier).equals("Advanced Placement"))
+			quality += apBonus;
+		
+		return quality;
 	}
 	
 	/**
@@ -1577,12 +1819,14 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String[] aPlusChoices = {"No", "Yes"};
 		String[] decimalChoices = {"Tenths", "Hundredths"};
+		String[] apHonorsChoices = {"No", "Yes"};
 		
 		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(4, 0));
+		p.setLayout(new GridLayout(5, 0));
 		
 		JComboBox aPlusEntry = new JComboBox(aPlusChoices);
 		JComboBox decimalEntry = new JComboBox(decimalChoices);
+		JComboBox isAPHonorsEntry = new JComboBox(apHonorsChoices);
 		JTextField honorsBonusEntry = new JTextField(15);
 		JTextField apBonusEntry = new JTextField(15);
 		
@@ -1600,6 +1844,13 @@ public class Gradebook extends JFrame implements ActionListener {
 		else
 			decimalEntry.setSelectedItem("Hundredths");
 		
+		p.add(new JLabel("Are there Honors/AP Bonuses?"));
+		p.add(isAPHonorsEntry);
+		if(isHonorsAPClasses)
+			isAPHonorsEntry.setSelectedItem("Yes");
+		else 
+			isAPHonorsEntry.setSelectedItem("No");
+		
 		p.add(new JLabel("Honors Class GPA Bonus"));
 		p.add(honorsBonusEntry);
 		honorsBonusEntry.setText(honorsBonus + "");
@@ -1616,6 +1867,11 @@ public class Gradebook extends JFrame implements ActionListener {
 				isAPluses = true;
 			else
 				isAPluses = false;
+			
+			if(isAPHonorsEntry.getSelectedItem().equals("Yes"))
+				isHonorsAPClasses = true;
+			else
+				isHonorsAPClasses = false;
 			
 			if(decimalEntry.getSelectedItem().equals("Tenths"))
 				rounding = "Tenths";
@@ -1664,7 +1920,10 @@ public class Gradebook extends JFrame implements ActionListener {
 		String s = e.getActionCommand();
 		
 		if(s.equalsIgnoreCase("Add Course")) {
-			addCourse();
+			if(!isHonorsAPClasses)
+				addCourse();
+			else 
+				addCourseHonorsAP();
 		}
 		
 		if(s.equalsIgnoreCase("Remove Element")) {
