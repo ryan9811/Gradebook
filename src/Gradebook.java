@@ -842,7 +842,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					row = i;
 			}
 			
-			String[] editChoices = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Category Weightings", "Grade Mode", "Final Grade", "Term"};
+			String[] editChoices = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Category Weightings", "Grade Mode", "Final Grade"};
 			String[] editChoices2 = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Category Weightings", "Final Grade", "Term"};
 			String edit = "";
 			
@@ -1130,12 +1130,39 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			
 			else if(choice.equals("Grade")) {
-				String pointsEarned = JOptionPane.showInputDialog(null, "Enter Points Earned for Assignment", "Grade Master", JOptionPane.INFORMATION_MESSAGE);
+				
+				JPanel p = new JPanel();
+				p.setLayout(new GridLayout(2, 0));
+				String pointsEarned, totalPoints;
+				pointsEarned = totalPoints = "";
+				
+				JTextField pointsEarnedEntry = new JTextField(12);
+				JTextField totalPointsEntry = new JTextField(12);
+				
+				p.add(new JLabel("Enter Points Earned"));
+				p.add(pointsEarnedEntry);
+				
+				p.add(new JLabel("Enter Total Points"));
+				p.add(totalPointsEntry);
+				
+				int result = JOptionPane.showConfirmDialog(null, p, "Grade Master", JOptionPane.OK_CANCEL_OPTION);
+				
+				if(result == JOptionPane.OK_OPTION) {
+					pointsEarned = pointsEarnedEntry.getText();
+					totalPoints = totalPointsEntry.getText();
+					
+					if(pointsEarned.isEmpty() || totalPoints.isEmpty()) {
+						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMissing Information", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+						return;
+					}
+				}
+				else {
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
 				
 				if(pointsEarned.length() > 5)
 					pointsEarned = pointsEarned.substring(0, 6);
-				
-				String totalPoints = JOptionPane.showInputDialog(null, "Enter Total Points for Assignment", "Grade Master", JOptionPane.INFORMATION_MESSAGE);
 				
 				String grade;
 				
@@ -1538,6 +1565,10 @@ public class Gradebook extends JFrame implements ActionListener {
 				i--;
 			}
 	}
+	
+	public void settings() {
+		
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -1639,6 +1670,10 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			else
 				saveTable();
+		}
+		
+		if(s.equalsIgnoreCase("Settings")) {
+			settings();
 		}
 		
 		if(s.equalsIgnoreCase("Help")) {
