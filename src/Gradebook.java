@@ -1362,7 +1362,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		else {
 			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-			return;
+			return; 
 		}
 				
 		int catIndex = 0;
@@ -1689,7 +1689,7 @@ public class Gradebook extends JFrame implements ActionListener {
 	}
 	
 	public static void main(String[] a) {
-		
+		System.out.println("loading");
 		new Gradebook();
 	}
 }
