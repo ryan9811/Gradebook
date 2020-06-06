@@ -41,6 +41,13 @@ public class Gradebook extends JFrame implements ActionListener {
 	
 	private double totalFCreditSum;
 	
+	private boolean isAPluses = false;
+	private boolean isHonorsAPClasses = false;
+	private double honorsBonus = 1;
+	private double apBonus = 1;
+	private Hashtable<String, String> isHonorsAPCourse;
+	private String rounding = "Tenths";
+	
 	private JFileChooser myJFileChooser = new JFileChooser(new File("."));
 	
 	public Gradebook() {
@@ -1568,6 +1575,87 @@ public class Gradebook extends JFrame implements ActionListener {
 	
 	public void settings() {
 		
+		String[] aPlusChoices = {"No", "Yes"};
+		String[] decimalChoices = {"Tenths", "Hundredths"};
+		
+		JPanel p = new JPanel();
+		p.setLayout(new GridLayout(4, 0));
+		
+		JComboBox aPlusEntry = new JComboBox(aPlusChoices);
+		JComboBox decimalEntry = new JComboBox(decimalChoices);
+		JTextField honorsBonusEntry = new JTextField(15);
+		JTextField apBonusEntry = new JTextField(15);
+		
+		p.add(new JLabel("Is A+ Allowed?"));
+		p.add(aPlusEntry);
+		if(isAPluses)
+			aPlusEntry.setSelectedItem("Yes");
+		else
+			aPlusEntry.setSelectedItem("No");
+		
+		p.add(new JLabel("GPA Decimal Conversion"));
+		p.add(decimalEntry);
+		if(rounding.equals("Tenths"))
+			decimalEntry.setSelectedItem("Tenths");
+		else
+			decimalEntry.setSelectedItem("Hundredths");
+		
+		p.add(new JLabel("Honors Class GPA Bonus"));
+		p.add(honorsBonusEntry);
+		honorsBonusEntry.setText(honorsBonus + "");
+		
+		p.add(new JLabel("AP Class GPA Bonus"));
+		p.add(apBonusEntry);
+		apBonusEntry.setText(apBonus + "");
+		
+		int result = JOptionPane.showConfirmDialog(null, p, "Settings Master", JOptionPane.OK_CANCEL_OPTION);
+		
+		if(result == JOptionPane.OK_OPTION) {
+			
+			if(aPlusEntry.getSelectedItem().equals("Yes"))
+				isAPluses = true;
+			else
+				isAPluses = false;
+			
+			if(decimalEntry.getSelectedItem().equals("Tenths"))
+				rounding = "Tenths";
+			else
+				rounding = "Hundredths";
+			
+			try {
+				double testError = Double.parseDouble(honorsBonusEntry.getText());
+			} catch (NumberFormatException e) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			
+			try {
+				double testError = Double.parseDouble(apBonusEntry.getText());
+			} catch (NumberFormatException e) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			
+			honorsBonus = Double.parseDouble(honorsBonusEntry.getText());
+			apBonus = Double.parseDouble(apBonusEntry.getText());
+			
+			if(honorsBonus < 0 || apBonus < 0) {
+				honorsBonus = 1;
+				apBonus = 1;
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCannot Have Negative Bonus", "System Notification", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			
+			if(honorsBonusEntry.getText().isEmpty() || apBonusEntry.getText().isEmpty()) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMissing Information", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
+		}
+		
+		else {
+			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			return; 
+		}
 	}
 
 	@Override
