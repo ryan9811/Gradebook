@@ -982,7 +982,9 @@ public class Gradebook extends JFrame implements ActionListener {
 				
 				cdtm.addRow(new Object[] {"Total Credits Earned", allCreditSum1, "Total Quality Points", allQualitySum1, "", "", "", "", "GPA", totalGpa});	
 				
-				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});	
+				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});
+				
+				courseScales.clear();
 				
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 		}
@@ -1044,8 +1046,8 @@ public class Gradebook extends JFrame implements ActionListener {
 					row = i;
 			}
 			
-			String[] editChoices = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Category Weightings", "Grade Mode", "Final Grade"};
-			String[] editChoices2 = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Category Weightings", "Final Grade", "Term"};
+			String[] editChoices = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Category Weightings", "Grade Scale", "Grade Mode", "Final Grade"};
+			String[] editChoices2 = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Category Weightings", "Grade Scale", "Final Grade"};
 			String edit = "";
 			
 			for(int i = 0; i < cdtm.getRowCount(); i++)
@@ -1194,6 +1196,23 @@ public class Gradebook extends JFrame implements ActionListener {
 					return;
 				}
 				else cdtm.setValueAt(prof, row, 1);
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			}
+			
+			if(edit.equalsIgnoreCase("Grade Scale")) {
+				String[] choices = new String[gradeScales.size()];
+				for(int i = 0; i < gradeScales.size(); i++)
+					choices[i] = (String) gradeScales.get(i).get("Name");
+				
+				String scale = (String) JOptionPane.showInputDialog(null, "Select New Grading Scale", "Course Master", 
+						JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
+				
+				courseScales.remove(identifierInput.getText());
+				
+				linkScale(identifierInput.getText(), scale);
+				
+				calculateGrade(identifierInput.getText());
+				
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
@@ -1878,7 +1897,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		String[] apHonorsChoices = {"No", "Yes"};
 		
 		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(7, 0));
+		p.setLayout(new GridLayout(6, 0));
 		
 		JComboBox aPlusEntry = new JComboBox(aPlusChoices);
 		JComboBox decimalEntry = new JComboBox(decimalChoices);
@@ -1923,10 +1942,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		p.add(apBonusEntry);
 		apBonusEntry.setText(apBonus + "");
 		
-		p.add(setDefaults);
 		p.add(addNewGradeScale);
 		p.add(deleteGradeScale);
-		p.add(editGradeScale);
 		
 		int result = JOptionPane.showConfirmDialog(null, p, "Settings Master", JOptionPane.OK_CANCEL_OPTION);
 		
@@ -1975,12 +1992,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMissing Information", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
-		}
-		
-		else {
-			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-			return; 
-		}
+		} 
 	}
 	
 	public void addGradeScale() {
@@ -1989,6 +2001,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		p.setLayout(new GridLayout(14, 0));
 		JTextField name = new JTextField(12);
 		JTextField minAp = new JTextField(12);
+		if(!isAPluses)
+			minAp.setEnabled(false);
 		JTextField minA = new JTextField(12);
 		JTextField minAm = new JTextField(12);
 		JTextField minBp = new JTextField(12);
@@ -2093,10 +2107,17 @@ public class Gradebook extends JFrame implements ActionListener {
 				scale.put("P", Double.parseDouble(minP.getText()));
 			}
 			gradeScales.add(scale);
+			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 	
 	public void deleteGradeScale() {
+		
+		if(gradeScales.size() == 0) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNo Grade Scales to Delete", "System Notification", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
 		String[] choices = new String[gradeScales.size()];
 		for(int i = 0; i < gradeScales.size(); i++)
 			choices[i] = (String) gradeScales.get(i).get("Name");
@@ -2112,6 +2133,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					return;
 				}
 				gradeScales.remove(i);
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
 	}
@@ -2126,6 +2148,12 @@ public class Gradebook extends JFrame implements ActionListener {
 		String s = e.getActionCommand();
 		
 		if(s.equalsIgnoreCase("Add Course")) {
+			
+			if(gradeScales.size() == 0) {
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMust Create a Grade Scale", "System Notification", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			
 			if(!isHonorsAPClasses)
 				addCourse();
 			else 
@@ -2144,7 +2172,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					return;
 				}
 			}
-			
+				
 			if(!existsUnfinalizedCourses() || cdtm.getRowCount() == 0) {
 				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nAll Courses Finalized", "System Notification", JOptionPane.ERROR_MESSAGE);
 				return;
@@ -2246,10 +2274,6 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		if(s.equalsIgnoreCase("Delete Grade Scale")) {
 			deleteGradeScale();
-		}
-		
-		if(s.equalsIgnoreCase("Edit Grade Scale")) {
-			
 		}
 			
 	}
