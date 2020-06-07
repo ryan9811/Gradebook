@@ -234,6 +234,14 @@ public class Gradebook extends JFrame implements ActionListener {
 			out.writeObject(assignmentCode);
 			out.writeObject(nonGpaCreditTotal);
 			out.writeObject(totalFCreditSum);
+			out.writeObject(isAPluses);
+			out.writeObject(isHonorsAPClasses);
+			out.writeObject(honorsBonus);
+			out.writeObject(apBonus);
+			out.writeObject(honorsAPStatuses);
+			out.writeObject(rounding);
+			out.writeObject(gradeScales);
+			out.writeObject(courseScales);
 			out.close();		
 		}
 		catch(Exception e) {
@@ -293,6 +301,12 @@ public class Gradebook extends JFrame implements ActionListener {
 			assignmentCode = (int) in.readObject();
 			nonGpaCreditTotal = (double) in.readObject();
 			totalFCreditSum = (double) in.readObject();
+			isAPluses = (boolean) in.readObject();
+			isHonorsAPClasses = (boolean) in.readObject();
+			honorsBonus = (double) in.readObject();
+			apBonus = (double) in.readObject();
+			honorsAPStatuses = (Hashtable<String, String>) in.readObject();
+			rounding = (String) in.readObject();
 			cdtm.setDataVector(rowDataC, columnNamesC);
 			gdtm.setDataVector(rowDataG, columnNamesG);
 			revertTableSettings();
