@@ -1885,8 +1885,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		JComboBox isAPHonorsEntry = new JComboBox(apHonorsChoices);
 		JTextField honorsBonusEntry = new JTextField(15);
 		JTextField apBonusEntry = new JTextField(15);
-		JButton setDefaultGradeScale = new JButton("Set Default Grade Scale");
-		setDefaultGradeScale.addActionListener(this);
+		JButton setDefaults = new JButton("Set Defaults");
+		setDefaults.addActionListener(this);
 		JButton deleteGradeScale = new JButton("Delete Grade Scale");
 		deleteGradeScale.addActionListener(this);
 		JButton addNewGradeScale = new JButton("Add Grade Scale");
@@ -1923,7 +1923,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		p.add(apBonusEntry);
 		apBonusEntry.setText(apBonus + "");
 		
-		p.add(setDefaultGradeScale);
+		p.add(setDefaults);
 		p.add(addNewGradeScale);
 		p.add(deleteGradeScale);
 		p.add(editGradeScale);
@@ -2094,9 +2094,28 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			gradeScales.add(scale);
 		}
-		
-		
 	}
+	
+	public void deleteGradeScale() {
+		String[] choices = new String[gradeScales.size()];
+		for(int i = 0; i < gradeScales.size(); i++)
+			choices[i] = (String) gradeScales.get(i).get("Name");
+		
+		String delete = (String) JOptionPane.showInputDialog(null, "Select Grade Scale to Delete", "Settings Master", 
+				JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
+		
+		for(int i = 0; i < gradeScales.size(); i++) {
+			if(gradeScales.get(i).get("Name").equals(delete)) {
+				for(int j = 0; j < courseScales.size(); j++)
+				if(courseScales.containsValue(gradeScales.get(i))) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nGrade Scale In Use", "System Notification", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				gradeScales.remove(i);
+			}
+		}
+	}
+	
 	public String getScaleName(Hashtable scale) {
 	    return (String) scale.get("Name");
 	}
@@ -2223,6 +2242,14 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		if(s.equalsIgnoreCase("Add Grade Scale")) {
 			addGradeScale();
+		}
+		
+		if(s.equalsIgnoreCase("Delete Grade Scale")) {
+			deleteGradeScale();
+		}
+		
+		if(s.equalsIgnoreCase("Edit Grade Scale")) {
+			
 		}
 			
 	}
