@@ -2087,6 +2087,19 @@ public class Gradebook extends JFrame implements ActionListener {
 			
 			Hashtable scale = new Hashtable();
 			if(!isAPluses) {
+				if(!(Double.parseDouble(minA.getText()) > Double.parseDouble(minAm.getText()) &&
+						Double.parseDouble(minAm.getText()) > Double.parseDouble(minBp.getText()) &&
+						Double.parseDouble(minBp.getText()) > Double.parseDouble(minB.getText()) &&
+						Double.parseDouble(minB.getText()) > Double.parseDouble(minBm.getText()) &&
+						Double.parseDouble(minBm.getText()) > Double.parseDouble(minCp.getText()) &&
+						Double.parseDouble(minCp.getText()) > Double.parseDouble(minC.getText()) &&
+						Double.parseDouble(minC.getText()) > Double.parseDouble(minCm.getText()) &&
+						Double.parseDouble(minCm.getText()) > Double.parseDouble(minDp.getText()) &&
+						Double.parseDouble(minDp.getText()) > Double.parseDouble(minD.getText()) &&
+						Double.parseDouble(minD.getText()) > Double.parseDouble(minDm.getText()))) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nInvalid Grade Scale", "System Notification", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
 				minAp.setEnabled(false);
 				scale.put("Name", name.getText());
 				scale.put("A+", Double.MAX_VALUE);
@@ -2105,6 +2118,20 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			
 			else {
+				if(!(Double.parseDouble(minAp.getText()) > Double.parseDouble(minA.getText()) &&
+						Double.parseDouble(minA.getText()) > Double.parseDouble(minAm.getText()) &&
+						Double.parseDouble(minAm.getText()) > Double.parseDouble(minBp.getText()) &&
+						Double.parseDouble(minBp.getText()) > Double.parseDouble(minB.getText()) &&
+						Double.parseDouble(minB.getText()) > Double.parseDouble(minBm.getText()) &&
+						Double.parseDouble(minBm.getText()) > Double.parseDouble(minCp.getText()) &&
+						Double.parseDouble(minCp.getText()) > Double.parseDouble(minC.getText()) &&
+						Double.parseDouble(minC.getText()) > Double.parseDouble(minCm.getText()) &&
+						Double.parseDouble(minCm.getText()) > Double.parseDouble(minDp.getText()) &&
+						Double.parseDouble(minDp.getText()) > Double.parseDouble(minD.getText()) &&
+						Double.parseDouble(minD.getText()) > Double.parseDouble(minDm.getText()))) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nInvalid Grade Scale", "System Notification", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
 				scale.put("Name", name.getText());
 				scale.put("A+", Double.parseDouble(minAp.getText()));
 				scale.put("A", Double.parseDouble(minA.getText()));
@@ -2119,6 +2146,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				scale.put("D", Double.parseDouble(minD.getText()));
 				scale.put("D-", Double.parseDouble(minDm.getText()));
 				scale.put("P", Double.parseDouble(minP.getText()));
+				
 			}
 			gradeScales.add(scale);
 			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
