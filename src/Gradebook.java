@@ -1218,8 +1218,13 @@ public class Gradebook extends JFrame implements ActionListener {
 				for(int i = 0; i < gradeScales.size(); i++)
 					choices[i] = (String) gradeScales.get(i).get("Name");
 				
+				int index = 0;
+				for(int i = 0; i < choices.length; i++)
+					if(choices[i].equals(courseScales.get(identifierInput.getText()).get("Name")))
+						index = i;
+				
 				String scale = (String) JOptionPane.showInputDialog(null, "Select New Grading Scale", "Course Master", 
-						JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
+						JOptionPane.QUESTION_MESSAGE, null, choices, choices[index]);
 				
 				courseScales.remove(identifierInput.getText());
 				
@@ -2100,6 +2105,15 @@ public class Gradebook extends JFrame implements ActionListener {
 					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nInvalid Grade Scale", "System Notification", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
+				if((Double.parseDouble(minA.getText()) < 0 || Double.parseDouble(minAm.getText()) < 0 &&
+					    Double.parseDouble(minBp.getText()) < 0 || Double.parseDouble(minB.getText()) < 0 ||
+						Double.parseDouble(minBm.getText()) < 0 || Double.parseDouble(minCp.getText()) < 0 ||
+						Double.parseDouble(minC.getText()) < 0 || Double.parseDouble(minCm.getText()) < 0 ||
+						Double.parseDouble(minDp.getText()) < 0 || Double.parseDouble(minD.getText()) < 0 ||
+						Double.parseDouble(minDm.getText()) < 0)) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nInvalid Grade Scale", "System Notification", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
 				minAp.setEnabled(false);
 				scale.put("Name", name.getText());
 				scale.put("A+", Double.MAX_VALUE);
@@ -2129,6 +2143,15 @@ public class Gradebook extends JFrame implements ActionListener {
 						Double.parseDouble(minCm.getText()) > Double.parseDouble(minDp.getText()) &&
 						Double.parseDouble(minDp.getText()) > Double.parseDouble(minD.getText()) &&
 						Double.parseDouble(minD.getText()) > Double.parseDouble(minDm.getText()))) {
+					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nInvalid Grade Scale", "System Notification", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				if((Double.parseDouble(minA.getText()) < 0 || Double.parseDouble(minAm.getText()) < 0 &&
+					    Double.parseDouble(minBp.getText()) < 0 || Double.parseDouble(minB.getText()) < 0 ||
+						Double.parseDouble(minBm.getText()) < 0 || Double.parseDouble(minCp.getText()) < 0 ||
+						Double.parseDouble(minC.getText()) < 0 || Double.parseDouble(minCm.getText()) < 0 ||
+						Double.parseDouble(minDp.getText()) < 0 || Double.parseDouble(minD.getText()) < 0 ||
+						Double.parseDouble(minDm.getText()) < 0)) {
 					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nInvalid Grade Scale", "System Notification", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
