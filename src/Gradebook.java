@@ -320,10 +320,7 @@ public class Gradebook extends JFrame implements ActionListener {
 	public void linkScale(String identifier, String scaleName) {
 		for(int i = 0; i < gradeScales.size(); i++)
 			if(gradeScales.get(i).get("Name").equals(scaleName)) {
-				System.out.println("linked");
 				courseScales.put(identifier, gradeScales.get(i));
-				System.out.println("In link: " + gradeScales.get(i).get("Name"));
-				System.out.println("In link: " + courseScales.get(identifier).get("A"));
 				return;
 			}
 		
@@ -362,7 +359,6 @@ public class Gradebook extends JFrame implements ActionListener {
 			if(gdtm.getValueAt(i,1).equals(identifier) && !finishedCats.contains(gdtm.getValueAt(i, 3))) {
 				category = gdtm.getValueAt(i, 3) + "";
 				sumCategoryWeightsUsed += Double.parseDouble(gdtm.getValueAt(i, 4) + "");
-				System.out.println("sumCategoryWeightsUsed: " + sumCategoryWeightsUsed);
 				finishedCats.add(category);
 			}
 		
@@ -370,17 +366,13 @@ public class Gradebook extends JFrame implements ActionListener {
 			for(int j = 0; j < gdtm.getRowCount(); j++) {
 				if(gdtm.getValueAt(j, 3).equals(finishedCats.get(i))) {
 					categoryWeight = Double.parseDouble(gdtm.getValueAt(j, 4) + "");
-					System.out.println("categoryWeight: " + categoryWeight);
 				}
 				if(gdtm.getValueAt(j,1).equals(identifier) && finishedCats.get(i).equals(gdtm.getValueAt(j, 3))) {
 					sumPointsEarned += Double.parseDouble(gdtm.getValueAt(j, 5) + "");
-					System.out.println("sumPointsEarned: " + sumPointsEarned);
 					sumTotalPoints += Double.parseDouble(gdtm.getValueAt(j, 6) + "");
-					System.out.println("sumTotalPoints: " + sumTotalPoints);
 				}
 			}	
 			finalGrade += (sumPointsEarned / sumTotalPoints) * (categoryWeight / sumCategoryWeightsUsed) * 100;
-			System.out.println(finalGrade);
 			sumPointsEarned = 0;
 			sumTotalPoints = 0;
 		}
@@ -414,11 +406,7 @@ public class Gradebook extends JFrame implements ActionListener {
 	 */
 	public String numToLet(String identifier, double grade, String gMode) {
 		
-		System.out.println("Tester: " + courseScales.get(identifier));
-		
 		if(gMode.equals("Letter")) {
-			System.out.println("letterrrrrrr");
-			System.out.println("IN method " + (double)courseScales.get(identifier).get("A"));
 			if(isAPluses && grade >= (double)courseScales.get(identifier).get("A+")) return "A+";
 			else if(grade >= (double)courseScales.get(identifier).get("A")) return "A";
 			else if(grade >= (double)courseScales.get(identifier).get("A-")) return "A-";
@@ -591,7 +579,6 @@ public class Gradebook extends JFrame implements ActionListener {
 				try {
 					double testError = Double.parseDouble(catWeightEntry.getText());
 				} catch (NumberFormatException e) {
-					System.out.println("Number format 1");
 					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
@@ -632,9 +619,7 @@ public class Gradebook extends JFrame implements ActionListener {
 						}
 						try {
 							double testError = Double.parseDouble(catWeightEntry2.getText());
-							System.out.println(catWeightEntry2.getText());
 						} catch (NumberFormatException e) {
-							System.out.println("Number format 2");
 							JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNumber Format Exception", "System Notification", JOptionPane.ERROR_MESSAGE);
 							return;
 						}
@@ -2390,7 +2375,6 @@ public class Gradebook extends JFrame implements ActionListener {
 	}
 	
 	public static void main(String[] a) {
-		System.out.println("loading");
 		new Gradebook();
 	}
 }
