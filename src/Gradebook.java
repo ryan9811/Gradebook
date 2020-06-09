@@ -1217,6 +1217,11 @@ public class Gradebook extends JFrame implements ActionListener {
 						return;
 					}
 					
+					if(Double.parseDouble(newWeight) < 0) {
+						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nCannot Have Negative Weight", "System Notification", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+					
 					if(newWeight == null) {
 						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 						return;
@@ -1257,6 +1262,11 @@ public class Gradebook extends JFrame implements ActionListener {
 				
 				String scale = (String) JOptionPane.showInputDialog(null, "Select New Grading Scale", "Course Master", 
 						JOptionPane.QUESTION_MESSAGE, null, choices, choices[index]);
+				
+				if(scale == null) {
+					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
 				
 				courseScales.remove(identifierInput.getText());
 				
