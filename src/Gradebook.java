@@ -173,7 +173,7 @@ public class Gradebook extends JFrame implements ActionListener {
         //buttons.add(manualOverride);
         buttons.add(importExport);
         buttons.add(settings);
-        buttons.add(help);
+        buttons.add(manualOverride);
         buttons.add(identifier);
         buttons.add(identifierInput);
         
@@ -2324,10 +2324,9 @@ public class Gradebook extends JFrame implements ActionListener {
 			else {
 				JOptionPane.showMessageDialog(null, "Returned to Automatic Mode");
 				courseList.setEnabled(false);
-				for(int i = 0; i < cdtm.getRowCount(); i++) {
-					courseList.getSelectionModel().clearSelection();
-					gradeList.getSelectionModel().clearSelection();
-				}
+				courseList.getSelectionModel().clearSelection();
+				gradeList.getSelectionModel().clearSelection();
+				gradeList.setEnabled(false);
 			}
 		}
 		
