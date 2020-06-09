@@ -1432,7 +1432,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					totalPoints = totalPointsEntry.getText();
 					
 					if(pointsEarned.isEmpty() || totalPoints.isEmpty()) {
-						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMissing Information", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+						JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMissing Information", "System Notification", JOptionPane.ERROR_MESSAGE);
 						return;
 					}
 				}
@@ -1699,6 +1699,11 @@ public class Gradebook extends JFrame implements ActionListener {
 		for(int i = 0; i < categoryChoices.length; i++)
 			categoryChoices[i] = categories.get(identifier).get(i * 2);
 		
+		if(categoryChoices.length == 0) {
+			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMust Add Category", "System Notification", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
 		JPanel p = new JPanel();
 		p.setLayout(new GridLayout(4, 0));
 		String pointsEarned, totalPoints, category, comment;
@@ -1730,7 +1735,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			comment = commentEntry.getText();
 			
 			if(pointsEarned.isEmpty() || totalPoints.isEmpty()) {
-				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMissing Information", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMissing Information", "System Notification", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 		}
