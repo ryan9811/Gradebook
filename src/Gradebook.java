@@ -38,20 +38,20 @@ public class Gradebook extends JFrame implements ActionListener {
 	
 	private Hashtable<String, ArrayList<String>> categories; // Contains the category weights of each course
 	
-	private JButton viewBreakdown;
+	private JButton viewBreakdown; // JButton triggering the breakdown of category grading
 	
-	private double totalFCreditSum;
+	private double totalFCreditSum; // Total credits that were failed
 	
-	private boolean isAPluses = false;
-	private boolean isHonorsAPClasses = false;
-	private double honorsBonus = 1;
-	private double apBonus = 1;
-	private Hashtable<String, String> honorsAPStatuses;
-	private String rounding = "Tenths";
+	private boolean isAPluses = false; // Whether or not A+ is allowed
+	private boolean isHonorsAPClasses = false; // Whether or not there are honors/AP classes
+	private double honorsBonus = 1; // Honors GPA bonus
+	private double apBonus = 1; // AP GPA bonus
+	private Hashtable<String, String> honorsAPStatuses; // Links Course ID to Honors/AP/CP
+	private String rounding = "Tenths"; // GPA is calculated using tenths/hundredths
 	
-	private ArrayList<Hashtable> gradeScales = new ArrayList<Hashtable>();
+	private ArrayList<Hashtable> gradeScales = new ArrayList<Hashtable>(); // ArrayList of all available grade scales
 	
-	private Hashtable<String, Hashtable> courseScales = new Hashtable<String, Hashtable>();
+	private Hashtable<String, Hashtable> courseScales = new Hashtable<String, Hashtable>(); // Links a course to a specific grade scale
 	
 	private JFileChooser myJFileChooser = new JFileChooser(new File("."));
 	
@@ -72,7 +72,8 @@ public class Gradebook extends JFrame implements ActionListener {
         courseList = new JTable();
         cdtm = new DefaultTableModel(0,0);
         
-        String courseHeader[] = new String[] { "Subject/Course Number", "Course Title", "Comment", "Identifier", "Credits", "Numeric Grade", "Grade Mode", "Final Grade", "Term", "Status" };
+        String courseHeader[] = new String[] { "Subject/Course Number", "Course Title", "Comment", "Identifier",
+        		"Credits", "Numeric Grade", "Grade Mode", "Final Grade", "Term", "Status" };
         categories = new Hashtable<String, ArrayList<String>>();
         
         cdtm.setColumnIdentifiers(courseHeader);
@@ -188,7 +189,8 @@ public class Gradebook extends JFrame implements ActionListener {
         nonGpaCreditTotal = 0;
         totalFCreditSum = 0;
         
-        String gradeHeader[] = new String[] { "Course Title", "Identifier", "Assignment Code", "Category", "Category Weight", "Points Earned", "Total Points", "Grade", "Comment" };
+        String gradeHeader[] = new String[] { "Course Title", "Identifier", "Assignment Code", "Category", 
+        		"Category Weight", "Points Earned", "Total Points", "Grade", "Comment" };
         
         gdtm.setColumnIdentifiers(gradeHeader);
         gradeList.setModel(gdtm);
@@ -333,11 +335,15 @@ public class Gradebook extends JFrame implements ActionListener {
 	 * @param identifier the unique ID of the course
 	 */
 	public void calculateGrade(String identifier) {
-		// For a class
-		// Figure out which categories have grades so far
-		// Total up those categories weights
-		// For each category, sum up points earned and total points, multiply by categoryWeight/sumCategoryWeightsUsed
-		// Change the grade in the table
+
+		/* Process:
+		 * For a class
+		 * Figure out which categories have grades so far
+		 * Total up those categories weights
+		 * For each category, sum up points earned and total points, 
+		 * multiply by categoryWeight/sumCategoryWeightsUsed
+		 * Change the grade in the table 
+		 */
 		
 		if(!gradeExists(identifier))
 			for(int i = 0; i < cdtm.getRowCount(); i++)
@@ -649,6 +655,9 @@ public class Gradebook extends JFrame implements ActionListener {
 		JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
+	/**
+	 * Adds a new course to the course table with honors/AP distinction
+	 */
 	public void addCourseHonorsAP() {
 		
 		String credits, gMode, subject, title, comment, term;
@@ -1526,67 +1535,10 @@ public class Gradebook extends JFrame implements ActionListener {
 	
 	/**
 	 * Converts a letter grade to quality points
+	 * @param identifier the id of the course whose letter grade is being converted
 	 * @param letterGrade the letter grade to calculate the quality points
 	 * @return the number of quality points earned
 	 */
-	public double letToQual(String letterGrade) {
-		
-		if(rounding.equals("Tenths")) {
-			if(letterGrade.equalsIgnoreCase("A+"))
-				return 4.3;
-			if(letterGrade.equalsIgnoreCase("A")) 
-				return 4;
-			if(letterGrade.equalsIgnoreCase("A-")) 
-				return 3.7;
-			if(letterGrade.equalsIgnoreCase("B+")) 
-				return 3.3;
-			if(letterGrade.equalsIgnoreCase("B")) 
-				return 3;
-			if(letterGrade.equalsIgnoreCase("B-")) 
-				return 2.7;
-			if(letterGrade.equalsIgnoreCase("C+")) 
-				return 2.3;
-			if(letterGrade.equalsIgnoreCase("C")) 
-				return 2;
-			if(letterGrade.equalsIgnoreCase("C-")) 
-				return 1.7;
-			if(letterGrade.equalsIgnoreCase("D+")) 
-				return 1.3;
-			if(letterGrade.equalsIgnoreCase("D")) 
-				return 1;
-			if(letterGrade.equalsIgnoreCase("D-")) 
-				return 0.7;
-			return 0;
-		}
-		else {
-			if(letterGrade.equalsIgnoreCase("A+"))
-				return 4.33;
-			if(letterGrade.equalsIgnoreCase("A")) 
-				return 4;
-			if(letterGrade.equalsIgnoreCase("A-")) 
-				return 3.67;
-			if(letterGrade.equalsIgnoreCase("B+")) 
-				return 3.33;
-			if(letterGrade.equalsIgnoreCase("B")) 
-				return 3;
-			if(letterGrade.equalsIgnoreCase("B-")) 
-				return 2.67;
-			if(letterGrade.equalsIgnoreCase("C+")) 
-				return 2.33;
-			if(letterGrade.equalsIgnoreCase("C")) 
-				return 2;
-			if(letterGrade.equalsIgnoreCase("C-")) 
-				return 1.67;
-			if(letterGrade.equalsIgnoreCase("D+")) 
-				return 1.33;
-			if(letterGrade.equalsIgnoreCase("D")) 
-				return 1;
-			if(letterGrade.equalsIgnoreCase("D-")) 
-				return 0.67;
-			return 0;
-		}
-	}
-	
 	public double letToQual(String identifier, String letterGrade) {
 		
 		double quality = 0;
@@ -1823,6 +1775,10 @@ public class Gradebook extends JFrame implements ActionListener {
         gradeList.setEnabled(false);
 	}
 	
+	/**
+	 * Tells whether or not there is a course in progress
+	 * @return whether or not any courses are in progress
+	 */
 	public boolean existsInProgressCourse() {
 		for(int i = 0; i < cdtm.getRowCount(); i++)
 			if(cdtm.getValueAt(i, 9).equals("In Progress"))
@@ -1830,6 +1786,10 @@ public class Gradebook extends JFrame implements ActionListener {
 		return false;
 	}
 	
+	/**
+	 * Views grade category breakdown for course entered in identifierInput
+	 * @param the unique course identifier to view the breakdown
+	 */
 	public void viewParticularBreakdown(String id) {
 		
 		if(existsUnfinalizedTerm() && existsInProgressCourse()) {
@@ -1879,60 +1839,9 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 	}
 	
-	public void viewBreakdown() {
-		
-		if(existsUnfinalizedTerm() && existsInProgressCourse()) {
-			gdtm.addRow(new Object[] {"","","","","","","","",""});
-			gdtm.addRow(new Object[] {"Breakdown Viewed:","","","","","","","",""});
-			gdtm.addRow(new Object[] {"","","","","","","","",""});
-			ArrayList<String> identifiers = new ArrayList<String>();
-			ArrayList<String> titles = new ArrayList<String>();
-			ArrayList<String> weights = new ArrayList<String>();
-			ArrayList<String> courseTitles = new ArrayList<String>();
-			String term = getUnfinalizedTerm();
-			for(int i = 0; i < cdtm.getRowCount(); i++) {
-				if(cdtm.getValueAt(i, 9).equals("In Progress")) {
-					identifiers.add(cdtm.getValueAt(i, 3) + "");
-					if(!cdtm.getValueAt(i, 1).equals(""))
-						courseTitles.add(cdtm.getValueAt(i, 1) + "");
-					else
-						courseTitles.add(cdtm.getValueAt(i, 0) + "");
-				}
-			}
-			for(int i = 0; i < identifiers.size(); i++) {
-				String courseTitle = courseTitles.get(i);
-				String identifier = identifiers.get(i);
-				double pointsEarned = 0;
-				double totalPoints = 0;
-				titles = getCategoryNames(categories.get(identifiers.get(i)));
-				weights = getCategoryValues(categories.get(identifiers.get(i)));
-				
-				for(int j = 0; j < titles.size(); j++) {
-					for(int k = 0; k < gdtm.getRowCount(); k++) 
-						if(gdtm.getValueAt(k, 1).equals(identifier) && gdtm.getValueAt(k, 3).equals(titles.get(j))) {
-							pointsEarned += Double.parseDouble(gdtm.getValueAt(k, 5) + "");
-							totalPoints += Double.parseDouble(gdtm.getValueAt(k, 6) + "");
-						}
-					double grade = pointsEarned / totalPoints * 100;
-					String sGrade = grade + "";
-					if(sGrade.length() > 6)
-						sGrade = sGrade.substring(0, 6);
-					gdtm.addRow(new Object[] {courseTitle,identifier,"",titles.get(j),weights.get(j),pointsEarned,totalPoints,sGrade,""});
-					pointsEarned = 0;
-					totalPoints = 0;
-				}
-				
-				gdtm.addRow(new Object[] {"","","","","","","","",""});
-				
-			}
-		}
-		else {
-			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nNo Courses In Progress", "System Notification", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-	}
-	
+	/**
+	 * Hides grade breakdown if it is currently being viewed
+	 */
 	public void hideBreakdown() {
 		for(int i = 0; i < gdtm.getRowCount(); i++)
 			if(gdtm.getValueAt(i, 2).equals("")) {
@@ -1941,6 +1850,13 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 	}
 	
+	/**
+	 * Allows user to change settings such as...
+	 * Whether or not A+ is allowed
+	 * Whether or not there are Honors/AP Courses
+	 * Honors/AP GPA bonuses
+	 * Adding new grade scales/deleting grade scales
+	 */
 	public void settings() {
 		
 		String[] aPlusChoices = {"No", "Yes"};
@@ -2046,6 +1962,10 @@ public class Gradebook extends JFrame implements ActionListener {
 		} 
 	}
 	
+	/**
+	 * Adds a new grade scale to gradeScales
+	 * Allows user to assign each letter to a numeric grade
+	 */
 	public void addGradeScale() {
 		
 		JPanel p = new JPanel();
@@ -2208,6 +2128,9 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 	}
 	
+	/**
+	 * Adds user to delete a grade scale if it is not being used
+	 */
 	public void deleteGradeScale() {
 		
 		if(gradeScales.size() == 0) {
@@ -2235,6 +2158,11 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 	}
 	
+	/**
+	 * Gets the name of a grade scale
+	 * @param the grade scale
+	 * @return the name of a grade scale
+	 */
 	public String getScaleName(Hashtable scale) {
 	    return (String) scale.get("Name");
 	}
