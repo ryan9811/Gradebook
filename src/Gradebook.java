@@ -315,6 +315,8 @@ public class Gradebook extends JFrame implements ActionListener {
 			apBonus = (double) in.readObject();
 			honorsAPStatuses = (Hashtable<String, String>) in.readObject();
 			rounding = (String) in.readObject();
+			gradeScales = (ArrayList<Hashtable>) in.readObject();
+			courseScales = (Hashtable<String, Hashtable>) in.readObject();
 			checkedSettings = (boolean) in.readObject();
 			cdtm.setDataVector(rowDataC, columnNamesC);
 			gdtm.setDataVector(rowDataG, columnNamesG);
@@ -523,10 +525,16 @@ public class Gradebook extends JFrame implements ActionListener {
 			term = termEntry.getText();
 			linkScale(identifier, (String) scaleEntry.getSelectedItem());
 			
-			if(subject.isEmpty() || title.isEmpty() || term.isEmpty()) {
+			if((title.isEmpty() && subject.isEmpty()) || term.isEmpty()) {
 				Errors.ML1.displayErrorMsg();
 				return;
 			}
+			
+			if(subject.isEmpty())
+				subject = title;
+			
+			if(title.isEmpty())
+				title = subject;
 		}
 		
 		else {
@@ -579,7 +587,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			JTextField catWeightEntry = new JTextField(15);
 			p2.add(new JLabel("Enter Category Name"));
 			p2.add(catNameEntry);
-			p2.add(new JLabel("Enter Category Weight (Ex. 15)"));
+			p2.add(new JLabel("Enter Category Weight"));
 			p2.add(catWeightEntry);
 			
 			int result2 = JOptionPane.showConfirmDialog(null, p2, "Course Master", JOptionPane.OK_CANCEL_OPTION);
@@ -742,10 +750,16 @@ public class Gradebook extends JFrame implements ActionListener {
 			
 			linkScale(identifier, (String) scaleEntry.getSelectedItem());
 			
-			if(subject.isEmpty() || title.isEmpty() || term.isEmpty()) {
+			if((title.isEmpty() && subject.isEmpty()) || term.isEmpty()) {
 				Errors.ML1.displayErrorMsg();
 				return;
 			}
+			
+			if(subject.isEmpty())
+				subject = title;
+			
+			if(title.isEmpty())
+				title = subject;
 		}
 		
 		else {
