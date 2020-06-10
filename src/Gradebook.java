@@ -55,6 +55,8 @@ public class Gradebook extends JFrame implements ActionListener {
 	
 	private Hashtable<String, Hashtable> courseScales = new Hashtable<String, Hashtable>(); // Links a course to a specific grade scale
 	
+	private Hashtable defaultScale = new Hashtable();
+	
 	private JFileChooser myJFileChooser = new JFileChooser(new File("."));
 	
 	public Gradebook() {
@@ -111,7 +113,6 @@ public class Gradebook extends JFrame implements ActionListener {
         JButton addCourse = new JButton("Add Course");
         addCourse.addActionListener(this);
         
-        Hashtable defaultScale = new Hashtable();
         defaultScale.put("Name", "Default Scale");
         if(isAPluses)
         	defaultScale.put("A+", 98.0);
@@ -683,7 +684,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		JComboBox gModeEntry = new JComboBox(gModeChoices);
 		
 		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(7, 0));
+		p.setLayout(new GridLayout(8, 0));
 		
 		p.add(new JLabel("Enter Subject/Course Number"));
 		p.add(subjectEntry);
@@ -694,7 +695,6 @@ public class Gradebook extends JFrame implements ActionListener {
 		p.add(new JLabel("Enter Course Type"));
 		p.add(courseTypeEntry);
 		
-		
 		p.add(new JLabel("Enter Comment"));
 		p.add(commentEntry);
 		
@@ -703,6 +703,14 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		p.add(new JLabel("Select Grade Mode"));
 		p.add(gModeEntry);
+		
+		String[] scaleChoices = new String[gradeScales.size()];
+		for(int i = 0; i < scaleChoices.length; i++) {
+			scaleChoices[i] = (String) gradeScales.get(i).get("Name");
+		}
+		JComboBox scaleEntry = new JComboBox(scaleChoices);
+		p.add(new JLabel("Select Grade Scale"));
+		p.add(scaleEntry);
 		
 		p.add(new JLabel("Enter Term"));
 		termEntry.setText(getUnfinalizedTerm());
@@ -717,7 +725,13 @@ public class Gradebook extends JFrame implements ActionListener {
 			title = titleEntry.getText();
 			comment = commentEntry.getText();
 			term = termEntry.getText();
+			if(courseTypeEntry.getSelectedItem().equals("Honors"))
+				identifier += "H";
+			else if(courseTypeEntry.getSelectedItem().equals("Advanced Placement"))
+				identifier += "AP";
 			honorsAPStatuses.put(identifier, courseTypeEntry.getSelectedItem() + "");
+			
+			linkScale(identifier, (String) scaleEntry.getSelectedItem());
 			
 			if(subject.isEmpty() || title.isEmpty() || term.isEmpty()) {
 				Errors.ML1.displayErrorMsg();
@@ -765,65 +779,83 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(!gMode.equals("Notation") && fGrade.equals("In Progress")) {
-			String category = "";
-			String catWeight = "";
+
 			ArrayList<String> catsAndWeights = new ArrayList<String>();
-			category = JOptionPane.showInputDialog(null, "Enter Grade Weight Category Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+			JPanel p2 = new JPanel();
+			p2.setLayout(new GridLayout(2, 0));
+			JTextField catNameEntry = new JTextField(15);
+			JTextField catWeightEntry = new JTextField(15);
+			p2.add(new JLabel("Enter Category Name"));
+			p2.add(catNameEntry);
+			p2.add(new JLabel("Enter Category Weight (Ex. 15)"));
+			p2.add(catWeightEntry);
 			
-			if(category == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				return;
+			int result2 = JOptionPane.showConfirmDialog(null, p2, "Course Master", JOptionPane.OK_CANCEL_OPTION);
+			
+			if(result2 == JOptionPane.OK_OPTION) {
+				if(catNameEntry.getText().isEmpty() || catWeightEntry.getText().isEmpty()) {
+					Errors.ML1.displayErrorMsg();
+					return;
+				}
+			
+				if(containsNumbers(catNameEntry.getText())) {
+					Errors.AER3.displayErrorMsg();
+					return;
+				}
+				try {
+					double testError = Double.parseDouble(catWeightEntry.getText());
+				} catch (NumberFormatException e) {
+					Errors.ML2.displayErrorMsg();
+					return;
+				}
+				catsAndWeights.add(catNameEntry.getText());
+				catsAndWeights.add(catWeightEntry.getText());
 			}
-			
-			if(containsNumbers(category)) {
-				Errors.AER3.displayErrorMsg();
+			else {
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 
-			catWeight = JOptionPane.showInputDialog(null, "Enter Category Weight", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-			if(catWeight == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				return;
-			}
-			try {
-				double testError = Double.parseDouble(catWeight);
-			} catch (NumberFormatException e) {
-				Errors.ML2.displayErrorMsg();
-				return;
-			}
-			catsAndWeights.add(category);
-			catsAndWeights.add(catWeight);
 			int yesNo = 0;
 			while(yesNo == 0) {
 				yesNo = JOptionPane.showConfirmDialog(null, "Enter Another Category?");
 				if(yesNo == 0) {
-					category = JOptionPane.showInputDialog(null, "Enter Category Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+					JPanel p3 = new JPanel();
+					p3.setLayout(new GridLayout(2, 0));
+					JTextField catNameEntry2 = new JTextField(15);
+					JTextField catWeightEntry2 = new JTextField(15);
+					catNameEntry2.setText("");
+					catWeightEntry2.setText("");
+					p3.add(new JLabel("Enter Category Name"));
+					p3.add(catNameEntry2);
+					p3.add(new JLabel("Enter Category Weight (Ex. 15)"));
+					p3.add(catWeightEntry2);
 					
-					if(catsAndWeights.contains(category)) {
-						Errors.AER4.displayErrorMsg();
+					int result3 = JOptionPane.showConfirmDialog(null, p3, "Course Master", JOptionPane.OK_CANCEL_OPTION);
+					
+					if(result3 == JOptionPane.OK_OPTION) {
+						if(catNameEntry.getText().isEmpty() || catWeightEntry.getText().isEmpty()) {
+							Errors.ML1.displayErrorMsg();
+							return;
+						}
+					
+						if(containsNumbers(catNameEntry2.getText())) {
+							Errors.AER3.displayErrorMsg();
+							return;
+						}
+						try {
+							double testError = Double.parseDouble(catWeightEntry2.getText());
+						} catch (NumberFormatException e) {
+							Errors.ML2.displayErrorMsg();
+							return;
+						}
+						catsAndWeights.add(catNameEntry2.getText());
+						catsAndWeights.add(catWeightEntry2.getText());
+					}
+					else {
+						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 						return;
 					}
-					
-					if(containsNumbers(category)) {
-						Errors.AER3.displayErrorMsg();
-						return;
-					}
-					
-					catWeight = JOptionPane.showInputDialog(null, "Enter Category Weight", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-					try {
-						double testError = Double.parseDouble(catWeight);
-					} catch (NumberFormatException e) {
-						Errors.ML2.displayErrorMsg();
-						return;
-					}
-					
-					if(Double.parseDouble(catWeight) < 0) {
-						Errors.AER5.displayErrorMsg();
-						return;
-					}
-					
-					catsAndWeights.add(category);
-					catsAndWeights.add(catWeight);
 				}
 				else if(yesNo == JOptionPane.CANCEL_OPTION){
 					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
@@ -1097,7 +1129,8 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			
 			String[] editChoices = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Category Weightings", "Grade Scale", "Grade Mode", "Final Grade"};
-			String[] editChoices2 = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Category Weightings", "Grade Scale", "Final Grade"};
+			String[] editChoices2 = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Final Grade"};
+			
 			String edit = "";
 			
 			for(int i = 0; i < cdtm.getRowCount(); i++)
@@ -1926,8 +1959,10 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		if(result == JOptionPane.OK_OPTION) {
 			
-			if(aPlusEntry.getSelectedItem().equals("Yes"))
+			if(aPlusEntry.getSelectedItem().equals("Yes")) {
 				isAPluses = true;
+				
+			}
 			else
 				isAPluses = false;
 			
