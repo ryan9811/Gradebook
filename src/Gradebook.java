@@ -51,6 +51,8 @@ public class Gradebook extends JFrame implements ActionListener {
 	private Hashtable<String, String> honorsAPStatuses; // Links Course ID to Honors/AP/CP
 	private String rounding = "Tenths"; // GPA is calculated using tenths/hundredths
 	
+	private boolean checkedSettings = false;
+	
 	private ArrayList<Hashtable> gradeScales = new ArrayList<Hashtable>(); // ArrayList of all available grade scales
 	
 	private Hashtable<String, Hashtable> courseScales = new Hashtable<String, Hashtable>(); // Links a course to a specific grade scale
@@ -247,6 +249,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			out.writeObject(rounding);
 			out.writeObject(gradeScales);
 			out.writeObject(courseScales);
+			out.writeObject(checkedSettings);
 			out.close();		
 		}
 		catch(Exception e) {
@@ -312,6 +315,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			apBonus = (double) in.readObject();
 			honorsAPStatuses = (Hashtable<String, String>) in.readObject();
 			rounding = (String) in.readObject();
+			checkedSettings = (boolean) in.readObject();
 			cdtm.setDataVector(rowDataC, columnNamesC);
 			gdtm.setDataVector(rowDataG, columnNamesG);
 			revertTableSettings();
@@ -454,6 +458,11 @@ public class Gradebook extends JFrame implements ActionListener {
 	 * Adds a new course to the course table
 	 */
 	public void addCourse() {	
+		
+		if(cdtm.getRowCount() == 0 && !checkedSettings) {
+			Errors.SS5.displayErrorMsg();
+			return;
+		}
 		
 		String credits, gMode, subject, title, comment, term;
 		credits = gMode = subject = title = comment = term = "";
@@ -1955,6 +1964,14 @@ public class Gradebook extends JFrame implements ActionListener {
 		p.add(addNewGradeScale);
 		p.add(deleteGradeScale);
 		
+		if(cdtm.getRowCount() > 0) {
+			aPlusEntry.setEnabled(false);
+			decimalEntry.setEnabled(false);
+			isAPHonorsEntry.setEnabled(false);
+			honorsBonusEntry.setEnabled(false);
+			apBonusEntry.setEnabled(false);
+		}
+		
 		int result = JOptionPane.showConfirmDialog(null, p, "Settings Master", JOptionPane.OK_CANCEL_OPTION);
 		
 		if(result == JOptionPane.OK_OPTION) {
@@ -2468,6 +2485,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(s.equalsIgnoreCase("Settings")) {
+			checkedSettings = true;
 			settings();
 		}
 		

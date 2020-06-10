@@ -20,6 +20,7 @@ public enum Errors {
 	SS2("SS2", "Invalid Grade Scale"),
 	SS3("SS3", "No Grade Scales to Delete"),
 	SS4("SS4", "Grade Scale In Use"),
+	SS5("SS5", "Check Settings Before Adding Course"),
 	ML1("ML1", "Missing Information"),
 	ML2("ML2", "Number Format Exception");
 	
