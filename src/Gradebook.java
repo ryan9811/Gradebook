@@ -176,7 +176,7 @@ public class Gradebook extends JFrame implements ActionListener {
         //buttons.add(manualOverride);
         buttons.add(importExport);
         buttons.add(settings);
-        buttons.add(manualOverride);
+        buttons.add(help);
         buttons.add(identifier);
         buttons.add(identifierInput);
         
@@ -2176,6 +2176,151 @@ public class Gradebook extends JFrame implements ActionListener {
 	public String getScaleName(Hashtable scale) {
 	    return (String) scale.get("Name");
 	}
+	
+	public void help() {
+		String[] options = {"Glossary (Part 1)", "Glossary (Part 2)", "Functionality", "Error Details"};
+		String choice = (String) JOptionPane.showInputDialog(null, "Select an Option to Learn More", "Help Master", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+		
+		if(choice == null) {
+			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
+		
+		if(choice.equals("Glossary (Part 1)")) {
+			String s = "Subject/Course Number. Also known as a course code.\nExamples: ENGL 1011, CSCI 2113, BISC 1112, etc.\n\n"
+					+ "Course Title. What is the course called?\nExamples: Introduction to Psychology, Single-Variable Calculus I, etc.\n\n" 
+					+ "Comment. Anything you wish to put as additional information for the course.\nSuggestions: teacher name, course time/day, "
+					+ "course location, or, if it’s a grade, what the assignment/grade is for, etc.\n\n" 
+					+ "Identifier. A unique, system-generated ID for the course.\nThis is what you will enter "
+					+ "into the Identifier/Code textfield to make any deletions or edits.\n\n"
+					+ "Credits. The number of credits for the course. (Typically 3 or 4 for a college course).\n\n"
+					+ "Numeric Grade. The current average grade for the class, calculated from entering grades.\n\n"
+					+ "Grade Mode. How the course is graded.\n\n"
+					+ "Grade Mode - Letter. Indicates a Letter Grade for the course.\n\n"
+					+ "Grade Mode - P/NP. Indicates a Pass/No Pass grade for the course.\n\n"
+					+ "Grade Mode - Notation. Indicates that the course is there for record, but is not factored into GPA calculation.\n\n"
+					+ "Notation - TR. Transfer. Transfer credit has been awarded for the course.\n\n"
+					+ "Notation - I. Incomplete. An incomplete has been granted, meaning the student has provided a valid reason\n"
+					+ "for why they could not complete their work on time.\n\n"
+					+ "Notation - W. Withdrawal. The course has been withdrawn from.\n\n"
+					+ "Notation - Z. Assigned when a student has registered for a course but has not attended class or done any graded work.";		
+			JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);
+		}
+		
+		if(choice.equals("Glossary (Part 2)")) {
+			String s = "Final Grade. The final grade for the course, either manually entered by the user or calculated automatically\n"
+					+ "based on entered grades and the selected grade mode.\n\n"
+					+ "Term. The term that the courses were taken in. Examples: Spring 2020, Summer 2017, Fall 2015, etc.\n\n"
+					+ "Status. The current status of the course.\n\n"
+					+ "Status - In Progress. Indicates that the course is still being taken.\n\n"
+					+ "Status - Manual Entry. Indicates that the user has manually entered a final grade. The final grade will not\n"
+					+ "be calculated automatically. Typically used to input past history of grades.\n\n"
+					+ "Status - Finalized. Indicates that the user has finalized grades for the past term. A GPA will be calculated\n"
+					+ "and these courses can no longer be altered or removed once finalized.\n\n"
+					+ "Assignment Code. A unique, system-generated ID for an entered grade/assignment. This is what you will enter\n"
+					+ "into the Identifier/Code textfield to make any deletions or edits.\n\n"
+					+ "Category. The name of the category that a grade belongs to. These names should not contain numbers.\n"
+					+ "Examples: Homework, Exams, Quizzes, etc.\n\n"
+					+ "Category Weight. How much weight a category holds in calculating the numeric grade for the course. \n"
+					+ "Should be entered as a single number, with decimals allowed. Examples: 15, 25, 37.5, etc.\n"
+					+ "(Note: Percentage symbols should not be entered when setting up category weights, they are implied).\n\n"
+					+ "Points Earned. How many points were earned for an assignment. The numerator of the grade.\n"
+					+ "(Example: 90/100, Points Earned = 90).\n\n"
+					+ "Total Points. How many total possible points could have been earned for an assignment. The denominator of the grade.\n"
+					+ "(Example: 90/100, Total Points = 100).\n\n"
+					+ "Grade. The grade earned for a particular assignment, based on Points Earned / Total Points.";
+			JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);
+		}
+		
+		if(choice.equals("Functionality")) {
+			String s = "Add Course. Used to add a new course to the top table, which is a list of all courses entered by the user.\n\n"
+					+ "Remove Element. Used to delete either a course or an assignment, based on the Identifier or Assignment Code\n"
+					+ "entered into the textfield.\n\n"
+					+ "Edit Element. Used to edit a course or an assignment, based on the Identifier or Assignment Code entered into\n"
+					+ "the textfield.\n\n"
+					+ "Enter Grade. Used to enter a grade into the bottom table. Upon entering a grade, the course that the grade is\n"
+					+ "for will have its numeric grade and final grade recalculated.\n\n"
+					+ "View Breakdown. Used to view more detailed information about grades for a course. Displays the average for\n"
+					+ "each individual grade category.\n\n"
+					+ "Hide Breakdown. Hides the additional grading information from the View Breakdown button.\n\n"
+					+ "Finalize Grades. Calculates the GPA for the current term and the overall GPA based on all previous terms.\n"
+					+ "Sets the status of all courses to Finalized.\n\n"
+					+ "Import/Export. Used to save and load the gradebook so all data is maintained upon exiting the program.\n\n"
+					+ "Settings. Used to customize the gradebook for the user. Changes can be made to how grades and GPA is calculated.\n\n"
+					+ "Identifier/Code. In the text field, the Identifier of a course or the Assignment Code of a grade should be\n"
+					+ "entered when using Remove Element, Edit Element, and View Breakdown buttons.";
+			JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);		
+		}
+		
+		if(choice.equals("Error Details")) {
+			String[] errorOptions = {"AER", "EG", "FG", "SS", "ML"};
+			String choice2 = (String) JOptionPane.showInputDialog(null, "Select Error Type", "Help Master", 
+					JOptionPane.QUESTION_MESSAGE, null, errorOptions, errorOptions[0]);
+			
+			if(choice2 == null) {
+				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
+			
+			if(choice2.equals("AER")) {
+				String s = "AER: Add/Edit/Remove Errors\n\n"
+						+ "AER1. Entered Term is Finalized. User cannot enter a term for a course if that term has already been used.\n"
+						+ "For example, if a user has already finalized grades for Fall 2019, the user cannot use Fall 2019 as a term anymore.\n\n"
+						+ "AER2. Must Finalize Previous Term. User cannot enter courses for two different terms simultaneously.\n"
+						+ "Each term must be finalized because a new term can be used.\n\n"
+						+ "AER3. Category Name Cannot Contain Numbers. This will cause confusion between the name of the category and the category weight.\n"
+						+ "If numbers must be used, write them out in word form or use Roman numerals.\n\n"
+						+ "AER4. Category Name Already Exists. The entered category name has already been used for the course.\n\n"
+						+ "AER5. Cannot Have Negative Weight. Category weights cannot be negative. They must be positive numbers, with decimals permitted.\n\n"
+						+ "AER6. Must Create a Grade Scale. There are no available grade scales so a course cannot be added.\n"
+						+ "Add a grade scale in Settings and try again.\n\n"
+						+ "AER7. Element Does Not Exist. There is no course or assignment with a matching Identifier or Assignment Code\n"
+						+ "to what was entered into the Identifier/Code text field.\n\n"
+						+ "AER8. Cannot Remove Finalized Course. The course with a matching Identifier to what was entered into the Identifier/Code\n"
+						+ "text field has been finalized.\n\n"
+						+ "AER9. Cannot Edit Finalized Course. The course with a matching Identifier to what was entered into the Identifier/Code\n"
+						+ "text field has been finalized.";
+				JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);	
+			}
+			
+			if(choice2.equals("EG")) {
+				String s = "EG: Grade Entering Errors\n\n"
+						+ "EG1. Negative Values Not Accepted. Cannot use negative values when entering a grade.\n\n"
+						+ "EG2. No Courses Available. There are no courses available for which grades can be entered.\n"
+						+ "Courses must have Status = In Progress to be eligible to have grades entered.\n\n"
+						+ "EG3. Must Add Category. If all categories have been deleted, a new one must be added in order to enter a grade.";
+				JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);	
+			}
+			
+			if(choice2.equals("FG")) {
+				String s = "FG: Finalizing Grade Errors\n\n"
+						+ "FG1. Cannot Finalize with Final Grade = In Progress. If any of the cells in the Final Grade columns states \"In Progress\",\n"
+						+ "grades cannot be finalized as \"In Progress\" cannot be interpreted for GPA calculation.\n\n"
+						+ "FG2. All Courses Finalized. There are no courses to be finalized. Either all courses are finalized,\n"
+						+ "or no courses have yet been entered.";
+				JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);
+			}
+			
+			if(choice2.equals("SS")) {
+				String s = "SS: Settings Errors\n\n"
+						+ "SS1. Cannot Have Negative Bonus. An Honors or AP GPA Bonus cannot be a negative value.\n\n"
+						+ "SS2. Invalid Grade Scale. Occurs if negative values have been entered or if the scale does not make sense.\n"
+						+ "For example, a scale cannot contain a minimum grade of 90 for an A and 95 for a B because 95 > 90 but an A is a better grade.\n\n"
+						+ "SS3. No Grade Scales to Delete. There are no grade scales left to be deleted.\n\n"
+						+ "SS4. Grade Scale In Use. A grade scale cannot be deleted if it is currently being used by a course to calculate grades.\n"
+						+ "All courses linked to that grade scale must be changed to a different grade scale before it can be deleted.";
+				JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);
+			}
+			
+			if(choice2.equals("ML")) {
+				String s = "ML: Miscellaneous Errors\n\n"
+						+ "ML1. Missing Information. If any text fields are left blank other than a comment, this error will arise.\n\n"
+						+ "ML2. Number Format Exception. Arises when anything other than a number has been entered into a text field\n"
+						+ "that is only meant to accept numbers.";
+				JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);
+			}
+		}
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -2292,14 +2437,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(s.equalsIgnoreCase("Help")) {
-			String[] options = {"Instructions", "Button Explanations", "Troubleshooting"};
-			String choice = (String) JOptionPane.showInputDialog(null, "Select an Option to Learn More", "Help Master", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-			
-			if(choice == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				return;
-			}
-			
+			help();
 		}
 		
 		if(s.equalsIgnoreCase("Add Grade Scale")) {
