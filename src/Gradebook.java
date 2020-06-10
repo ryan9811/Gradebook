@@ -10,6 +10,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -989,27 +991,27 @@ public class Gradebook extends JFrame implements ActionListener {
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 			
-			else {
+			else if(!cdtm.getValueAt(i, 7).equals("")) {
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 		}
 		
 		if(((String) cdtm.getValueAt(cdtm.getRowCount() - 1, 9)).equalsIgnoreCase("Finalized")) {
+			
+				DecimalFormat df = new DecimalFormat("#.####");
+				df.setRoundingMode(RoundingMode.HALF_UP);
+			
 				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});		
-				String gpa = qualitySum / (creditSum + failCreditSum - nonGpaSum) + "";
+				String gpa = df.format(qualitySum / (creditSum + failCreditSum - nonGpaSum)) + "";
 				
-				if(gpa.length() > 5)
-					gpa = gpa.substring(0,5);
+				if(!gpa.contains("."))
+					gpa = gpa + ".0";
 				
-				String creditSumString = creditSum + "";
-				if(creditSumString.length() > 5)
-					creditSumString = creditSumString.substring(0,5);
+				String creditSumString = df.format(creditSum) + "";
 				
-				String qualitySumString = qualitySum + "";
-				if(qualitySumString.length() > 5)
-					qualitySumString = qualitySumString.substring(0,5);
+				String qualitySumString = df.format(qualitySum) + "";
 				
-				cdtm.addRow(new Object[] {"Term Credits Earned", creditSumString, "Term Quality Points", qualitySum, "", "", "", "", "GPA", gpa});
+				cdtm.addRow(new Object[] {"Term Credits Earned", creditSumString, "Term Quality Points", qualitySumString, "", "", "", "", "GPA", gpa});
 				
 				double allQualitySum = 0;
 				double allCreditSum = 0;
@@ -1019,17 +1021,14 @@ public class Gradebook extends JFrame implements ActionListener {
 						allCreditSum += Double.parseDouble(cdtm.getValueAt(i, 1) + "");
 					}
 				
-				String allCreditSum1 = allCreditSum + "";
-				if(allCreditSum1.length() > 5)
-					allCreditSum1 = allCreditSum1.substring(0,5);
+				String allCreditSum1 = df.format(allCreditSum) + "";
 				
-				String allQualitySum1 = allQualitySum + "";
-				if(allQualitySum1.length() > 5)
-					allQualitySum1 = allQualitySum1.substring(0,5);
+				String allQualitySum1 = df.format(allQualitySum) + "";
 				
-				String totalGpa = allQualitySum / (allCreditSum + totalFCreditSum - nonGpaCreditTotal) + "";
-				if(totalGpa.length() > 5)
-					totalGpa = totalGpa.substring(0,5);
+				String totalGpa = df.format(allQualitySum / (allCreditSum + totalFCreditSum - nonGpaCreditTotal)) + "";
+				
+				if(!totalGpa.contains("."))
+					totalGpa = totalGpa + ".0";
 				
 				cdtm.addRow(new Object[] {"Total Credits Earned", allCreditSum1, "Total Quality Points", allQualitySum1, "", "", "", "", "GPA", totalGpa});	
 				
@@ -2311,6 +2310,27 @@ public class Gradebook extends JFrame implements ActionListener {
 			deleteGradeScale();
 		}
 			
+	}
+	
+	public double round(double num) {
+		String s = num + "";
+		String s3 = "";
+		if(!s.contains("."))
+			s += ".0";
+		
+		String s2 = s.substring(s.indexOf("."));
+		
+		while(s2.length() < 6) {
+			s = s + "0";
+			s2 = s.substring(s.indexOf("."));
+		}
+		
+		int p1 = Integer.parseInt(s.substring(0, s.indexOf(".")));
+		int p2 = Integer.parseInt(s.substring(s.indexOf(".") + 1));
+		
+		s3 = p1 + "." + p2;
+		
+		return Double.parseDouble(s3);
 	}
 	
 	public static void main(String[] a) {
