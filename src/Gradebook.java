@@ -2298,7 +2298,8 @@ public class Gradebook extends JFrame implements ActionListener {
 					+ "Finalize Grades. Calculates the GPA for the current term and the overall GPA based on all previous terms.\n"
 					+ "Sets the status of all courses to Finalized.\n\n"
 					+ "Import/Export. Used to save and load the gradebook so all data is maintained upon exiting the program.\n\n"
-					+ "Settings. Used to customize the gradebook for the user. Changes can be made to how grades and GPA is calculated.\n\n"
+					+ "Settings. Used to customize the gradebook for the user. Changes can be made to how grades and GPA is calculated.\n"
+					+ "Once a course is added, settings cannot be changed unless all courses are removed to prevent inconsistency.\n\n"
 					+ "Identifier/Code. In the text field, the Identifier of a course or the Assignment Code of a grade should be\n"
 					+ "entered when using Remove Element, Edit Element, and View Breakdown buttons.";
 			JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);		
@@ -2360,7 +2361,9 @@ public class Gradebook extends JFrame implements ActionListener {
 						+ "For example, a scale cannot contain a minimum grade of 90 for an A and 95 for a B because 95 > 90 but an A is a better grade.\n\n"
 						+ "SS3. No Grade Scales to Delete. There are no grade scales left to be deleted.\n\n"
 						+ "SS4. Grade Scale In Use. A grade scale cannot be deleted if it is currently being used by a course to calculate grades.\n"
-						+ "All courses linked to that grade scale must be changed to a different grade scale before it can be deleted.";
+						+ "All courses linked to that grade scale must be changed to a different grade scale before it can be deleted.\n\n"
+						+ "SS5. Check Settings Before Adding Course. User must check settings before using Grade Calculator v5.\n"
+						+ "Once a course is added, settings cannot be changed unless all courses are removed to prevent inconsistency.";
 				JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
