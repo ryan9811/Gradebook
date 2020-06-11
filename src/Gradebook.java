@@ -96,17 +96,17 @@ public class Gradebook extends JFrame implements ActionListener {
         // adding it to JScrollPane 
         JScrollPane spc = new JScrollPane(courseList); 
         frame.add(spc, BorderLayout.NORTH); 
-        courseList.getColumnModel().getColumn(0).setPreferredWidth(125);
+        courseList.getColumnModel().getColumn(0).setPreferredWidth(150);
         courseList.getColumnModel().getColumn(1).setPreferredWidth(200);
         courseList.getColumnModel().getColumn(2).setPreferredWidth(200);
         courseList.getColumnModel().getColumn(3).setPreferredWidth(100);
-        courseList.getColumnModel().getColumn(4).setPreferredWidth(50);
+        courseList.getColumnModel().getColumn(4).setPreferredWidth(100);
         courseList.getColumnModel().getColumn(5).setPreferredWidth(100);
-        courseList.getColumnModel().getColumn(6).setPreferredWidth(75);
-        courseList.getColumnModel().getColumn(7).setPreferredWidth(50);
-        courseList.getColumnModel().getColumn(8).setPreferredWidth(75);
-        courseList.getColumnModel().getColumn(9).setPreferredWidth(125);
-        
+        courseList.getColumnModel().getColumn(6).setPreferredWidth(100);
+        courseList.getColumnModel().getColumn(7).setPreferredWidth(100);
+        courseList.getColumnModel().getColumn(8).setPreferredWidth(100);
+        courseList.getColumnModel().getColumn(9).setPreferredWidth(100);
+        System.out.println(courseList.getColumnModel().getColumn(1).getWidth());
         // ------------------------Creating the panel for the buttons------------------------
         JPanel buttons = new JPanel();
         buttons.setVisible(true);
@@ -194,7 +194,7 @@ public class Gradebook extends JFrame implements ActionListener {
         nonGpaCreditTotal = 0;
         totalFCreditSum = 0;
         
-        String gradeHeader[] = new String[] { "Course Title", "Identifier", "Assignment Code", "Category", 
+        String gradeHeader[] = new String[] { "Course Title", "Identifier", "Assignment Code", "Category Name", 
         		"Category Weight", "Points Earned", "Total Points", "Grade", "Comment" };
         
         gdtm.setColumnIdentifiers(gradeHeader);
@@ -206,6 +206,16 @@ public class Gradebook extends JFrame implements ActionListener {
         gradeList.getTableHeader().setReorderingAllowed(false);
         gradeList.getTableHeader().setResizingAllowed(false);
         gradeList.setEnabled(false);
+        
+        gradeList.getColumnModel().getColumn(0).setPreferredWidth(180);
+        gradeList.getColumnModel().getColumn(1).setPreferredWidth(100);
+        gradeList.getColumnModel().getColumn(2).setPreferredWidth(100);
+        gradeList.getColumnModel().getColumn(3).setPreferredWidth(100);
+        gradeList.getColumnModel().getColumn(4).setPreferredWidth(100);
+        gradeList.getColumnModel().getColumn(5).setPreferredWidth(100);
+        gradeList.getColumnModel().getColumn(6).setPreferredWidth(100);
+        gradeList.getColumnModel().getColumn(7).setPreferredWidth(100);
+        gradeList.getColumnModel().getColumn(8).setPreferredWidth(180);
         
         JScrollPane spg = new JScrollPane(gradeList); 
         frame.add(spg, BorderLayout.SOUTH);
@@ -628,7 +638,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					catWeightEntry2.setText("");
 					p3.add(new JLabel("Enter Category Name"));
 					p3.add(catNameEntry2);
-					p3.add(new JLabel("Enter Category Weight (Ex. 15)"));
+					p3.add(new JLabel("Enter Category Weight"));
 					p3.add(catWeightEntry2);
 					
 					int result3 = JOptionPane.showConfirmDialog(null, p3, "Course Master", JOptionPane.OK_CANCEL_OPTION);
@@ -810,7 +820,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			JTextField catWeightEntry = new JTextField(15);
 			p2.add(new JLabel("Enter Category Name"));
 			p2.add(catNameEntry);
-			p2.add(new JLabel("Enter Category Weight (Ex. 15)"));
+			p2.add(new JLabel("Enter Category Weight"));
 			p2.add(catWeightEntry);
 			
 			int result2 = JOptionPane.showConfirmDialog(null, p2, "Course Master", JOptionPane.OK_CANCEL_OPTION);
@@ -851,7 +861,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					catWeightEntry2.setText("");
 					p3.add(new JLabel("Enter Category Name"));
 					p3.add(catNameEntry2);
-					p3.add(new JLabel("Enter Category Weight (Ex. 15)"));
+					p3.add(new JLabel("Enter Category Weight"));
 					p3.add(catWeightEntry2);
 					
 					int result3 = JOptionPane.showConfirmDialog(null, p3, "Course Master", JOptionPane.OK_CANCEL_OPTION);
@@ -1661,9 +1671,9 @@ public class Gradebook extends JFrame implements ActionListener {
 				quality = 0.67;
 		}
 		
-		if(honorsAPStatuses.get(identifier).equals("Honors"))
+		if(honorsAPStatuses.get(identifier).equals("Honors") && !letterGrade.equals("F"))
 			quality += honorsBonus;
-		else if(honorsAPStatuses.get(identifier).equals("Advanced Placement"))
+		else if(honorsAPStatuses.get(identifier).equals("Advanced Placement") && !letterGrade.equals("F"))
 			quality += apBonus;
 		
 		return quality;
@@ -2244,7 +2254,7 @@ public class Gradebook extends JFrame implements ActionListener {
 	}
 	
 	public void help() {
-		String[] options = {"Glossary (Part 1)", "Glossary (Part 2)", "Functionality", "Error Details"};
+		String[] options = {"Glossary (Part 1)", "Glossary (Part 2)", "Functionality", "Error Details", "Copyright"};
 		String choice = (String) JOptionPane.showInputDialog(null, "Select an Option to Learn More", "Help Master", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 		
 		if(choice == null) {
@@ -2391,6 +2401,10 @@ public class Gradebook extends JFrame implements ActionListener {
 						+ "that is only meant to accept numbers.";
 				JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);
 			}
+		}
+		if(choice.equals("Copyright")) {
+			String s = "Copyright \u00A9 2020 Ryan Hudson. All rights reserved.";
+			JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 
