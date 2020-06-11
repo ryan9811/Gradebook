@@ -2584,27 +2584,6 @@ public class Gradebook extends JFrame implements ActionListener {
 			
 	}
 	
-	public double round(double num) {
-		String s = num + "";
-		String s3 = "";
-		if(!s.contains("."))
-			s += ".0";
-		
-		String s2 = s.substring(s.indexOf("."));
-		
-		while(s2.length() < 6) {
-			s = s + "0";
-			s2 = s.substring(s.indexOf("."));
-		}
-		
-		int p1 = Integer.parseInt(s.substring(0, s.indexOf(".")));
-		int p2 = Integer.parseInt(s.substring(s.indexOf(".") + 1));
-		
-		s3 = p1 + "." + p2;
-		
-		return Double.parseDouble(s3);
-	}
-	
 	public static void main(String[] a) {
 		new Gradebook();
 	}
