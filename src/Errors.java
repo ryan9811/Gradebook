@@ -11,6 +11,7 @@ public enum Errors {
 	AER7("AER7", "Element Does Not Exist"),
 	AER8("AER8", "Cannot Remove Finalized Course"),
 	AER9("AER9", "Cannot Edit Finalized Course"),
+	AER10("AER10", "No Categories Available"),
 	EG1("EG1", "Negative Values Not Accepted"),
 	EG2("EG2", "No Courses Available"),
 	EG3("EG3", "Must Add Category"),
@@ -22,7 +23,8 @@ public enum Errors {
 	SS4("SS4", "Grade Scale In Use"),
 	SS5("SS5", "Check Settings Before Adding Course"),
 	ML1("ML1", "Missing Information"),
-	ML2("ML2", "Number Format Exception");
+	ML2("ML2", "Number Format Exception"),
+	ML3("ML3", "No Breakdown to Formulate");
 	
 	private final String code, msg;
 	

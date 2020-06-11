@@ -44,22 +44,22 @@ public class Gradebook extends JFrame implements ActionListener {
 	
 	private double totalFCreditSum; // Total credits that were failed
 	
-	private boolean isAPluses = false; // Whether or not A+ is allowed
-	private boolean isHonorsAPClasses = false; // Whether or not there are honors/AP classes
-	private double honorsBonus = 1; // Honors GPA bonus
-	private double apBonus = 1; // AP GPA bonus
+	private boolean isAPluses; // Whether or not A+ is allowed
+	private boolean isHonorsAPClasses; // Whether or not there are honors/AP classes
+	private double honorsBonus; // Honors GPA bonus
+	private double apBonus; // AP GPA bonus
 	private Hashtable<String, String> honorsAPStatuses; // Links Course ID to Honors/AP/CP
-	private String rounding = "Tenths"; // GPA is calculated using tenths/hundredths
+	private String rounding; // GPA is calculated using tenths/hundredths
 	
-	private boolean checkedSettings = false;
+	private boolean checkedSettings; // Whether or not the user confirmed settings
 	
-	private ArrayList<Hashtable> gradeScales = new ArrayList<Hashtable>(); // ArrayList of all available grade scales
+	private ArrayList<Hashtable> gradeScales; // ArrayList of all available grade scales
 	
-	private Hashtable<String, Hashtable> courseScales = new Hashtable<String, Hashtable>(); // Links a course to a specific grade scale
+	private Hashtable<String, Hashtable> courseScales; // Links a course to a specific grade scale
 	
-	private Hashtable defaultScale = new Hashtable();
+	private Hashtable defaultScale; // The default grade scale
 	
-	private JFileChooser myJFileChooser = new JFileChooser(new File("."));
+	private JFileChooser fileChooser; // Selects file for import/export
 	
 	public Gradebook() {
 
@@ -73,6 +73,39 @@ public class Gradebook extends JFrame implements ActionListener {
         frame.setResizable(false);
         
         frame.setDefaultCloseOperation(EXIT_ON_CLOSE);;
+        
+        // Initialize variables
+        isAPluses = false;
+        isHonorsAPClasses = false;
+        honorsBonus = 1;
+        apBonus = 1;
+        rounding = "Tenths";
+        checkedSettings = false;
+        gradeScales = new ArrayList<Hashtable>();
+        courseScales = new Hashtable<String, Hashtable>();
+        honorsAPStatuses = new Hashtable<String, String>();
+        
+        defaultScale = new Hashtable();
+        defaultScale.put("Name", "Default Scale");
+        if(isAPluses)
+        	defaultScale.put("A+", 98.0);
+        else
+        	defaultScale.put("A+", Double.MAX_VALUE);
+        defaultScale.put("A", 94.0);
+        defaultScale.put("A-", 90.0);
+        defaultScale.put("B+", 87.0);
+        defaultScale.put("B", 84.0);
+        defaultScale.put("B-", 80.0);
+        defaultScale.put("C+", 77.0);
+        defaultScale.put("C", 74.0);
+        defaultScale.put("C-", 70.0);
+        defaultScale.put("D+", 67.0);
+        defaultScale.put("D", 64.0);
+        defaultScale.put("D-", 60.0);
+        defaultScale.put("P", 60.0);
+        gradeScales.add(defaultScale);
+        
+        fileChooser = new JFileChooser(new File("."));
   
         // ------------------------Creating the table for the list of courses------------------------
         courseList = new JTable();
@@ -85,7 +118,6 @@ public class Gradebook extends JFrame implements ActionListener {
         cdtm.setColumnIdentifiers(courseHeader);
         courseList.setModel(cdtm);
         courseCode = 11111;
-        honorsAPStatuses = new Hashtable<String, String>();
         
         courseList.setShowVerticalLines(true);
         courseList.setColumnSelectionAllowed(false);
@@ -107,6 +139,7 @@ public class Gradebook extends JFrame implements ActionListener {
         courseList.getColumnModel().getColumn(8).setPreferredWidth(100);
         courseList.getColumnModel().getColumn(9).setPreferredWidth(100);
         System.out.println(courseList.getColumnModel().getColumn(1).getWidth());
+        
         // ------------------------Creating the panel for the buttons------------------------
         JPanel buttons = new JPanel();
         buttons.setVisible(true);
@@ -114,25 +147,6 @@ public class Gradebook extends JFrame implements ActionListener {
         // Initialize buttons and add action listeners
         JButton addCourse = new JButton("Add Course");
         addCourse.addActionListener(this);
-        
-        defaultScale.put("Name", "Default Scale");
-        if(isAPluses)
-        	defaultScale.put("A+", 98.0);
-        else
-        	defaultScale.put("A+", Double.MAX_VALUE);
-        defaultScale.put("A", 94.0);
-        defaultScale.put("A-", 90.0);
-        defaultScale.put("B+", 87.0);
-        defaultScale.put("B", 84.0);
-        defaultScale.put("B-", 80.0);
-        defaultScale.put("C+", 77.0);
-        defaultScale.put("C", 74.0);
-        defaultScale.put("C-", 70.0);
-        defaultScale.put("D+", 67.0);
-        defaultScale.put("D", 64.0);
-        defaultScale.put("D-", 60.0);
-        defaultScale.put("P", 60.0);
-        gradeScales.add(defaultScale);
         
         JButton removeCourse = new JButton("Remove Element");
         removeCourse.addActionListener(this);
@@ -176,7 +190,6 @@ public class Gradebook extends JFrame implements ActionListener {
         buttons.add(enterGrade);
         buttons.add(viewBreakdown);
         buttons.add(finalizeGrades);
-        //buttons.add(manualOverride);
         buttons.add(importExport);
         buttons.add(settings);
         buttons.add(help);
@@ -229,8 +242,8 @@ public class Gradebook extends JFrame implements ActionListener {
 	 */
 	public void saveTable() {
 		
-		if(myJFileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-			saveTable(myJFileChooser.getSelectedFile());
+		if(fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+			saveTable(fileChooser.getSelectedFile());
 		}
 	}
 	
@@ -242,11 +255,11 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		try {
 			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
-			out.writeObject(cdtm.getDataVector()); // Write the data from the course table
+			out.writeObject(cdtm.getDataVector()); 
 			out.writeObject(getColumnNamesC());
-			out.writeObject(gdtm.getDataVector()); // Write the data from the grade table
+			out.writeObject(gdtm.getDataVector()); 
 			out.writeObject(getColumnNamesG());
-			out.writeObject(categories); // Write the category weightings hash table
+			out.writeObject(categories); 
 			out.writeObject(courseCode);
 			out.writeObject(assignmentCode);
 			out.writeObject(nonGpaCreditTotal);
@@ -298,8 +311,8 @@ public class Gradebook extends JFrame implements ActionListener {
 	 */
 	public void loadTable() {
 		
-		if(myJFileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
-			loadTable(myJFileChooser.getSelectedFile());
+		if(fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+			loadTable(fileChooser.getSelectedFile());
 	}
 	
 	/**
@@ -338,14 +351,17 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 	}
 	
+	/**
+	 * Links a course identifier to a grading scale using a hash table
+	 * @param identifier the identifier of the course to be linked
+	 * @param scaleName the name of the grade scale to be linked
+	 */
 	public void linkScale(String identifier, String scaleName) {
 		for(int i = 0; i < gradeScales.size(); i++)
 			if(gradeScales.get(i).get("Name").equals(scaleName)) {
 				courseScales.put(identifier, gradeScales.get(i));
 				return;
 			}
-		
-		JOptionPane.showMessageDialog(null, "Course Link Error\nGrade Scale Not Found", "System Notification", JOptionPane.ERROR_MESSAGE);
 	}
 	
 	/**
@@ -354,15 +370,6 @@ public class Gradebook extends JFrame implements ActionListener {
 	 * @param identifier the unique ID of the course
 	 */
 	public void calculateGrade(String identifier) {
-
-		/* Process:
-		 * For a class
-		 * Figure out which categories have grades so far
-		 * Total up those categories weights
-		 * For each category, sum up points earned and total points, 
-		 * multiply by categoryWeight/sumCategoryWeightsUsed
-		 * Change the grade in the table 
-		 */
 		
 		if(!gradeExists(identifier))
 			for(int i = 0; i < cdtm.getRowCount(); i++)
@@ -402,9 +409,9 @@ public class Gradebook extends JFrame implements ActionListener {
 			sumTotalPoints = 0;
 		}
 		
-		String finalGradeString = finalGrade + "";
-		if(finalGradeString.length() > 5)
-			finalGradeString = finalGradeString.substring(0, 6);
+		DecimalFormat rounder = new DecimalFormat("#.####");
+		
+		String finalGradeString = rounder.format(finalGrade);
 
 		String gMode = "";
 		String id = "";
@@ -466,6 +473,10 @@ public class Gradebook extends JFrame implements ActionListener {
 		return false;
 	}
 	
+	public void displayCancelMsg() {
+		JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
 	/**
 	 * Adds a new course to the course table
 	 */
@@ -496,37 +507,37 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		JComboBox scaleEntry = new JComboBox(scaleChoices);
 		
-		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(7, 0));
+		JPanel courseInfoPanel = new JPanel();
+		courseInfoPanel.setLayout(new GridLayout(7, 0));
 		
-		p.add(new JLabel("Enter Subject/Course Number"));
-		p.add(subjectEntry);
+		courseInfoPanel.add(new JLabel("Enter Subject/Course Number"));
+		courseInfoPanel.add(subjectEntry);
 		
-		p.add(new JLabel("Enter Course Title"));
-		p.add(titleEntry);
+		courseInfoPanel.add(new JLabel("Enter Course Title"));
+		courseInfoPanel.add(titleEntry);
 		
-		p.add(new JLabel("Enter Comment"));
-		p.add(commentEntry);
+		courseInfoPanel.add(new JLabel("Enter Comment"));
+		courseInfoPanel.add(commentEntry);
 		
-		p.add(new JLabel("Select Number of Credits"));
-		p.add(creditEntry);
+		courseInfoPanel.add(new JLabel("Select Number of Credits"));
+		courseInfoPanel.add(creditEntry);
 		
-		p.add(new JLabel("Select Grade Mode"));
-		p.add(gModeEntry);
+		courseInfoPanel.add(new JLabel("Select Grade Mode"));
+		courseInfoPanel.add(gModeEntry);
 		
-		p.add(new JLabel("Select Grade Scale"));
-		p.add(scaleEntry);
+		courseInfoPanel.add(new JLabel("Select Grade Scale"));
+		courseInfoPanel.add(scaleEntry);
 		
-		p.add(new JLabel("Enter Term"));
+		courseInfoPanel.add(new JLabel("Enter Term"));
 		termEntry.setText(getUnfinalizedTerm());
-		p.add(termEntry);
+		courseInfoPanel.add(termEntry);
 		
 		courseCode += (int) (Math.random() * 50 + 1);
 		String identifier = "C" + courseCode;
 		
-		int result = JOptionPane.showConfirmDialog(null, p, "Course Master", JOptionPane.OK_CANCEL_OPTION);
+		int addResult = JOptionPane.showConfirmDialog(null, courseInfoPanel, "Course Master", JOptionPane.OK_CANCEL_OPTION);
 		
-		if(result == JOptionPane.OK_OPTION) {
+		if(addResult == JOptionPane.OK_OPTION) {
 			credits = (String) creditEntry.getSelectedItem();
 			gMode = (String) gModeEntry.getSelectedItem();
 			subject = subjectEntry.getText();
@@ -548,7 +559,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		else {
-			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			displayCancelMsg();
 			return;
 		}
 		
@@ -571,7 +582,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		String[] fGradeChoicesP = {"In Progress", "P", "NP"};
 		String[] notationChoices = {"TR","I","W","Z"};
 		String fGrade;
-		if(gMode.equalsIgnoreCase("Letter")) {
+		if(gMode.equals("Letter")) {
 			if(isAPluses)
 				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
 						JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesCPlus, fGradeChoicesCPlus[0]);
@@ -579,30 +590,33 @@ public class Gradebook extends JFrame implements ActionListener {
 				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
 						JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
 		}
-		else if(gMode.equalsIgnoreCase("P/NP"))
-			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
+		else if(gMode.equals("P/NP"))
+			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
+					JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
 		else
-			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
+			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
+					JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
 		if(fGrade == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			displayCancelMsg();
 			return;
 		}
 		
 		if(!gMode.equals("Notation") && fGrade.equals("In Progress")) {
 
 			ArrayList<String> catsAndWeights = new ArrayList<String>();
-			JPanel p2 = new JPanel();
-			p2.setLayout(new GridLayout(2, 0));
+			JPanel initialCategoryPanel = new JPanel();
+			initialCategoryPanel.setLayout(new GridLayout(2, 0));
 			JTextField catNameEntry = new JTextField(15);
 			JTextField catWeightEntry = new JTextField(15);
-			p2.add(new JLabel("Enter Category Name"));
-			p2.add(catNameEntry);
-			p2.add(new JLabel("Enter Category Weight"));
-			p2.add(catWeightEntry);
+			initialCategoryPanel.add(new JLabel("Enter Category Name"));
+			initialCategoryPanel.add(catNameEntry);
+			initialCategoryPanel.add(new JLabel("Enter Category Weight"));
+			initialCategoryPanel.add(catWeightEntry);
 			
-			int result2 = JOptionPane.showConfirmDialog(null, p2, "Course Master", JOptionPane.OK_CANCEL_OPTION);
+			int initialCategoryResult = JOptionPane.showConfirmDialog(null, initialCategoryPanel, 
+					"Course Master", JOptionPane.OK_CANCEL_OPTION);
 			
-			if(result2 == JOptionPane.OK_OPTION) {
+			if(initialCategoryResult == JOptionPane.OK_OPTION) {
 				if(catNameEntry.getText().isEmpty() || catWeightEntry.getText().isEmpty()) {
 					Errors.ML1.displayErrorMsg();
 					return;
@@ -622,28 +636,30 @@ public class Gradebook extends JFrame implements ActionListener {
 				catsAndWeights.add(catWeightEntry.getText());
 			}
 			else {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				displayCancelMsg();
 				return;
 			}
 
-			int yesNo = 0;
-			while(yesNo == 0) {
-				yesNo = JOptionPane.showConfirmDialog(null, "Enter Another Category?");
-				if(yesNo == 0) {
-					JPanel p3 = new JPanel();
-					p3.setLayout(new GridLayout(2, 0));
+			int keepEntering = 0;
+			while(keepEntering == 0) {
+				keepEntering = JOptionPane.showConfirmDialog(null, "Enter Another Category?", "Course Master", 
+						JOptionPane.YES_NO_CANCEL_OPTION);
+				if(keepEntering == 0) {
+					JPanel categoryPanel2 = new JPanel(); // For additional category entries
+					categoryPanel2.setLayout(new GridLayout(2, 0));
 					JTextField catNameEntry2 = new JTextField(15);
 					JTextField catWeightEntry2 = new JTextField(15);
 					catNameEntry2.setText("");
 					catWeightEntry2.setText("");
-					p3.add(new JLabel("Enter Category Name"));
-					p3.add(catNameEntry2);
-					p3.add(new JLabel("Enter Category Weight"));
-					p3.add(catWeightEntry2);
+					categoryPanel2.add(new JLabel("Enter Category Name"));
+					categoryPanel2.add(catNameEntry2);
+					categoryPanel2.add(new JLabel("Enter Category Weight"));
+					categoryPanel2.add(catWeightEntry2);
 					
-					int result3 = JOptionPane.showConfirmDialog(null, p3, "Course Master", JOptionPane.OK_CANCEL_OPTION);
+					int additionalCategoryResult = JOptionPane.showConfirmDialog(null, categoryPanel2, 
+							"Course Master", JOptionPane.OK_CANCEL_OPTION);
 					
-					if(result3 == JOptionPane.OK_OPTION) {
+					if(additionalCategoryResult == JOptionPane.OK_OPTION) {
 						if(catNameEntry.getText().isEmpty() || catWeightEntry.getText().isEmpty()) {
 							Errors.ML1.displayErrorMsg();
 							return;
@@ -663,12 +679,12 @@ public class Gradebook extends JFrame implements ActionListener {
 						catsAndWeights.add(catWeightEntry2.getText());
 					}
 					else {
-						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+						displayCancelMsg();
 						return;
 					}
 				}
-				else if(yesNo == JOptionPane.CANCEL_OPTION){
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				else if(keepEntering == JOptionPane.CANCEL_OPTION){
+					displayCancelMsg();
 					return;
 				}
 			}
@@ -676,7 +692,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		String status;
-		if(fGrade.equalsIgnoreCase("In Progress")) 
+		if(fGrade.equals("In Progress")) 
 			status = "In Progress";
 		else status = "Manual Entry";
 
@@ -710,42 +726,42 @@ public class Gradebook extends JFrame implements ActionListener {
 		String[] gModeChoices = {"Letter", "P/NP", "Notation"};
 		JComboBox gModeEntry = new JComboBox(gModeChoices);
 		
-		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(8, 0));
+		JPanel addCoursePanel = new JPanel();
+		addCoursePanel.setLayout(new GridLayout(8, 0));
 		
-		p.add(new JLabel("Enter Subject/Course Number"));
-		p.add(subjectEntry);
+		addCoursePanel.add(new JLabel("Enter Subject/Course Number"));
+		addCoursePanel.add(subjectEntry);
 		
-		p.add(new JLabel("Enter Course Title"));
-		p.add(titleEntry);
+		addCoursePanel.add(new JLabel("Enter Course Title"));
+		addCoursePanel.add(titleEntry);
 		
-		p.add(new JLabel("Enter Course Type"));
-		p.add(courseTypeEntry);
+		addCoursePanel.add(new JLabel("Enter Course Type"));
+		addCoursePanel.add(courseTypeEntry);
 		
-		p.add(new JLabel("Enter Comment"));
-		p.add(commentEntry);
+		addCoursePanel.add(new JLabel("Enter Comment"));
+		addCoursePanel.add(commentEntry);
 		
-		p.add(new JLabel("Select Number of Credits"));
-		p.add(creditEntry);
+		addCoursePanel.add(new JLabel("Select Number of Credits"));
+		addCoursePanel.add(creditEntry);
 		
-		p.add(new JLabel("Select Grade Mode"));
-		p.add(gModeEntry);
+		addCoursePanel.add(new JLabel("Select Grade Mode"));
+		addCoursePanel.add(gModeEntry);
 		
 		String[] scaleChoices = new String[gradeScales.size()];
 		for(int i = 0; i < scaleChoices.length; i++) {
 			scaleChoices[i] = (String) gradeScales.get(i).get("Name");
 		}
 		JComboBox scaleEntry = new JComboBox(scaleChoices);
-		p.add(new JLabel("Select Grade Scale"));
-		p.add(scaleEntry);
+		addCoursePanel.add(new JLabel("Select Grade Scale"));
+		addCoursePanel.add(scaleEntry);
 		
-		p.add(new JLabel("Enter Term"));
+		addCoursePanel.add(new JLabel("Enter Term"));
 		termEntry.setText(getUnfinalizedTerm());
-		p.add(termEntry);
+		addCoursePanel.add(termEntry);
 		
-		int result = JOptionPane.showConfirmDialog(null, p, "Course Master", JOptionPane.OK_CANCEL_OPTION);
+		int courseInfoResult = JOptionPane.showConfirmDialog(null, addCoursePanel, "Course Master", JOptionPane.OK_CANCEL_OPTION);
 		
-		if(result == JOptionPane.OK_OPTION) {
+		if(courseInfoResult == JOptionPane.OK_OPTION) {
 			credits = (String) creditEntry.getSelectedItem();
 			gMode = (String) gModeEntry.getSelectedItem();
 			subject = subjectEntry.getText();
@@ -773,7 +789,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		else {
-			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			displayCancelMsg();
 			return;
 		}
 		
@@ -794,7 +810,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		String[] fGradeChoicesP = {"In Progress", "P", "NP"};
 		String[] notationChoices = {"TR","I","W","Z"};
 		String fGrade;
-		if(gMode.equalsIgnoreCase("Letter")) {
+		if(gMode.equals("Letter")) {
 			if(isAPluses)
 				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
 						JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesCPlus, fGradeChoicesCPlus[0]);
@@ -802,30 +818,33 @@ public class Gradebook extends JFrame implements ActionListener {
 				fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
 						JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
 		}
-		else if(gMode.equalsIgnoreCase("P/NP"))
-			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
+		else if(gMode.equals("P/NP"))
+			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
+					JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
 		else
-			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
+			fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
+					JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
 		if(fGrade == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			displayCancelMsg();
 			return;
 		}
 		
 		if(!gMode.equals("Notation") && fGrade.equals("In Progress")) {
 
 			ArrayList<String> catsAndWeights = new ArrayList<String>();
-			JPanel p2 = new JPanel();
-			p2.setLayout(new GridLayout(2, 0));
+			JPanel initialCategoryPanel = new JPanel();
+			initialCategoryPanel.setLayout(new GridLayout(2, 0));
 			JTextField catNameEntry = new JTextField(15);
 			JTextField catWeightEntry = new JTextField(15);
-			p2.add(new JLabel("Enter Category Name"));
-			p2.add(catNameEntry);
-			p2.add(new JLabel("Enter Category Weight"));
-			p2.add(catWeightEntry);
+			initialCategoryPanel.add(new JLabel("Enter Category Name"));
+			initialCategoryPanel.add(catNameEntry);
+			initialCategoryPanel.add(new JLabel("Enter Category Weight"));
+			initialCategoryPanel.add(catWeightEntry);
 			
-			int result2 = JOptionPane.showConfirmDialog(null, p2, "Course Master", JOptionPane.OK_CANCEL_OPTION);
+			int initialCategoryResult = JOptionPane.showConfirmDialog(null, initialCategoryPanel, 
+					"Course Master", JOptionPane.OK_CANCEL_OPTION);
 			
-			if(result2 == JOptionPane.OK_OPTION) {
+			if(initialCategoryResult == JOptionPane.OK_OPTION) {
 				if(catNameEntry.getText().isEmpty() || catWeightEntry.getText().isEmpty()) {
 					Errors.ML1.displayErrorMsg();
 					return;
@@ -845,28 +864,30 @@ public class Gradebook extends JFrame implements ActionListener {
 				catsAndWeights.add(catWeightEntry.getText());
 			}
 			else {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				displayCancelMsg();
 				return;
 			}
 
-			int yesNo = 0;
-			while(yesNo == 0) {
-				yesNo = JOptionPane.showConfirmDialog(null, "Enter Another Category?");
-				if(yesNo == 0) {
-					JPanel p3 = new JPanel();
-					p3.setLayout(new GridLayout(2, 0));
+			int keepEntering = 0;
+			while(keepEntering == 0) {
+				keepEntering = JOptionPane.showConfirmDialog(null, "Enter Another Category?", "Course Master", 
+						JOptionPane.YES_NO_CANCEL_OPTION);
+				if(keepEntering == 0) {
+					JPanel categoryPanel2 = new JPanel();
+					categoryPanel2.setLayout(new GridLayout(2, 0));
 					JTextField catNameEntry2 = new JTextField(15);
 					JTextField catWeightEntry2 = new JTextField(15);
 					catNameEntry2.setText("");
 					catWeightEntry2.setText("");
-					p3.add(new JLabel("Enter Category Name"));
-					p3.add(catNameEntry2);
-					p3.add(new JLabel("Enter Category Weight"));
-					p3.add(catWeightEntry2);
+					categoryPanel2.add(new JLabel("Enter Category Name"));
+					categoryPanel2.add(catNameEntry2);
+					categoryPanel2.add(new JLabel("Enter Category Weight"));
+					categoryPanel2.add(catWeightEntry2);
 					
-					int result3 = JOptionPane.showConfirmDialog(null, p3, "Course Master", JOptionPane.OK_CANCEL_OPTION);
+					int additionalCategoryResult = JOptionPane.showConfirmDialog(null, categoryPanel2, 
+							"Course Master", JOptionPane.OK_CANCEL_OPTION);
 					
-					if(result3 == JOptionPane.OK_OPTION) {
+					if(additionalCategoryResult == JOptionPane.OK_OPTION) {
 						if(catNameEntry.getText().isEmpty() || catWeightEntry.getText().isEmpty()) {
 							Errors.ML1.displayErrorMsg();
 							return;
@@ -886,12 +907,12 @@ public class Gradebook extends JFrame implements ActionListener {
 						catsAndWeights.add(catWeightEntry2.getText());
 					}
 					else {
-						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+						displayCancelMsg();
 						return;
 					}
 				}
-				else if(yesNo == JOptionPane.CANCEL_OPTION){
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				else if(keepEntering == JOptionPane.CANCEL_OPTION){
+					displayCancelMsg();
 					return;
 				}
 			}
@@ -899,7 +920,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		String status;
-		if(fGrade.equalsIgnoreCase("In Progress")) 
+		if(fGrade.equals("In Progress")) 
 			status = "In Progress";
 		else status = "Manual Entry";
 
@@ -969,13 +990,14 @@ public class Gradebook extends JFrame implements ActionListener {
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
 			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText())) {
 				String courseName = (String) cdtm.getValueAt(i, 0);
-				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete [" + courseName + "]? \nThis action cannot be reversed.") == 0) {
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete [" + 
+						courseName + "]? \nThis action cannot be reversed.") == 0) {
 					removeAssociatedGrades(identifierInput.getText());
 					cdtm.removeRow(i);
 					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				}
 				else {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					displayCancelMsg();
 					return;
 				}
 			}
@@ -984,14 +1006,15 @@ public class Gradebook extends JFrame implements ActionListener {
 		for(int i = 0; i < gdtm.getRowCount(); i++) {
 			if(gdtm.getValueAt(i, 2).equals(identifierInput.getText())) {
 				String assignmentCode = (String) gdtm.getValueAt(i, 2);
-				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete assignment [" + assignmentCode + "]? \nThis action cannot be reversed.") == 0) {
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete assignment [" + 
+						assignmentCode + "]? \nThis action cannot be reversed.") == 0) {
 					String id = gdtm.getValueAt(i, 1) + "";
 					gdtm.removeRow(i);
 					calculateGrade(id);
 					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				}
 				else {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					displayCancelMsg();
 					return;
 				}
 			}
@@ -1061,41 +1084,43 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 		}
 		
-		if(((String) cdtm.getValueAt(cdtm.getRowCount() - 1, 9)).equalsIgnoreCase("Finalized")) {
+		if(((String) cdtm.getValueAt(cdtm.getRowCount() - 1, 9)).equals("Finalized")) {
 			
-				DecimalFormat df = new DecimalFormat("#.####");
-				df.setRoundingMode(RoundingMode.HALF_UP);
+				DecimalFormat rounder = new DecimalFormat("#.####");
+				rounder.setRoundingMode(RoundingMode.HALF_UP);
 			
 				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});		
-				String gpa = df.format(qualitySum / (creditSum + failCreditSum - nonGpaSum)) + "";
+				String gpa = rounder.format(qualitySum / (creditSum + failCreditSum - nonGpaSum)) + "";
 				
 				if(!gpa.contains("."))
 					gpa = gpa + ".0";
 				
-				String creditSumString = df.format(creditSum) + "";
+				String creditSumString = rounder.format(creditSum) + "";
 				
-				String qualitySumString = df.format(qualitySum) + "";
+				String qualitySumString = rounder.format(qualitySum) + "";
 				
-				cdtm.addRow(new Object[] {"Term Credits Earned", creditSumString, "Term Quality Points", qualitySumString, "", "", "", "", "GPA", gpa});
+				cdtm.addRow(new Object[] {"Term Credits Earned", creditSumString, "Term Quality Points", 
+						qualitySumString, "", "", "", "", "GPA", gpa});
 				
 				double allQualitySum = 0;
 				double allCreditSum = 0;
 				for(int i = 0; i < cdtm.getRowCount(); i++)
-					if(((String) cdtm.getValueAt(i, 0)).equalsIgnoreCase("Term Credits Earned")) {
+					if(((String) cdtm.getValueAt(i, 0)).equals("Term Credits Earned")) {
 						allQualitySum += Double.parseDouble(cdtm.getValueAt(i, 3) + "");
 						allCreditSum += Double.parseDouble(cdtm.getValueAt(i, 1) + "");
 					}
 				
-				String allCreditSum1 = df.format(allCreditSum) + "";
+				String allCreditSumString = rounder.format(allCreditSum) + "";
 				
-				String allQualitySum1 = df.format(allQualitySum) + "";
+				String allQualitySumString = rounder.format(allQualitySum) + "";
 				
-				String totalGpa = df.format(allQualitySum / (allCreditSum + totalFCreditSum - nonGpaCreditTotal)) + "";
+				String totalGpa = rounder.format(allQualitySum / (allCreditSum + totalFCreditSum - nonGpaCreditTotal)) + "";
 				
 				if(!totalGpa.contains("."))
 					totalGpa = totalGpa + ".0";
 				
-				cdtm.addRow(new Object[] {"Total Credits Earned", allCreditSum1, "Total Quality Points", allQualitySum1, "", "", "", "", "GPA", totalGpa});	
+				cdtm.addRow(new Object[] {"Total Credits Earned", allCreditSumString, "Total Quality Points", 
+						allQualitySumString, "", "", "", "", "GPA", totalGpa});	
 				
 				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});
 				
@@ -1157,50 +1182,55 @@ public class Gradebook extends JFrame implements ActionListener {
 			
 			int row = 0;
 			for(int i = 0; i < cdtm.getRowCount(); i++) {
-				if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()))
+				if(cdtm.getValueAt(i, 3).equals(identifierInput.getText())) {
 					row = i;
+				}
 			}
 			
-			String[] editChoices = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Category Weightings", "Grade Scale", "Grade Mode", "Final Grade"};
-			String[] editChoices2 = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Final Grade"};
+			String[] editChoices = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Category Weightings", 
+					"Grade Scale", "Grade Mode", "Final Grade"};
+			String[] editChoicesManualEntry = {"Subject/Course Number", "Course Title", "Comment", "Credits", "Final Grade"};
 			
 			String edit = "";
 			
 			for(int i = 0; i < cdtm.getRowCount(); i++)
 				if(cdtm.getValueAt(i, 3).equals(identifierInput.getText()) && cdtm.getValueAt(i, 9).equals("Manual Entry")) {
-					edit = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Course Master", JOptionPane.QUESTION_MESSAGE, null, editChoices2, editChoices2[0]);
+					edit = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Course Master", 
+							JOptionPane.QUESTION_MESSAGE, null, editChoicesManualEntry, editChoicesManualEntry[0]);
 					if(edit == null) {
-						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+						displayCancelMsg();
 						return;
 					}
 				}
 			
 			if(edit.equals(""))
-				edit = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Course Master", JOptionPane.QUESTION_MESSAGE, null, editChoices, editChoices[0]);
+				edit = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Course Master", 
+						JOptionPane.QUESTION_MESSAGE, null, editChoices, editChoices[0]);
 			
 			if(edit == null) {
 				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 			
-			if(edit.equalsIgnoreCase("Subject/Course Number")) {
+			if(edit.equals("Subject/Course Number")) {
 				String course = JOptionPane.showInputDialog(null, "Enter Subject/Course Number", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 				if(course == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					displayCancelMsg();
 					return;
 				}
 				else cdtm.setValueAt(course, row, 0);
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
-			if(edit.equalsIgnoreCase("Category Weightings")) {
+			if(edit.equals("Category Weightings")) {
 				ArrayList<String> courseWeightings = categories.get(identifierInput.getText());
 				
-				String[] options = {"Add Category", "Remove Category", "Change Weighting"};
-				String selection = (String) JOptionPane.showInputDialog(null, "Select Action to Perform", "Course Master", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+				String[] catEditChoices = {"Add Category", "Remove Category", "Change Weighting"};
+				String selection = (String) JOptionPane.showInputDialog(null, "Select Action to Perform", "Course Master", 
+						JOptionPane.QUESTION_MESSAGE, null, catEditChoices, catEditChoices[0]);
 				
 				if(selection == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					displayCancelMsg();
 					return;
 				}
 				
@@ -1235,16 +1265,22 @@ public class Gradebook extends JFrame implements ActionListener {
 					for(int i = 0; i < nameChoices.length; i++)
 						nameChoices[i] = categoryNames.get(i);
 					
+					if(categoryNames.size() == 0) {
+						Errors.AER10.displayErrorMsg();
+						return;
+					}
+					
 					String nameSelection = (String) JOptionPane.showInputDialog(null, "Select Category to Remove", "Course Master", 
 							JOptionPane.QUESTION_MESSAGE, null, nameChoices, nameChoices[0]);
 					
 					if(nameSelection == null) {
-						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+						displayCancelMsg();
 						return;
 					}
 					
-					if(JOptionPane.showConfirmDialog(null, "Are you sure you wish to delete the category [" + nameSelection + "]?\nThis action cannot be reversed.") != 0) {
-						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					if(JOptionPane.showConfirmDialog(null, "Are you sure you wish to delete the category [" + 
+							nameSelection + "]?\nThis action cannot be reversed.") != 0) {
+						displayCancelMsg();
 						return;
 					}
 					
@@ -1270,11 +1306,16 @@ public class Gradebook extends JFrame implements ActionListener {
 					for(int i = 0; i < nameChoices.length; i++)
 						nameChoices[i] = categoryNames.get(i);
 					
+					if(categoryNames.size() == 0) {
+						Errors.AER10.displayErrorMsg();
+						return;
+					}
+					
 					String nameSelection = (String) JOptionPane.showInputDialog(null, "Select Category to Change Weight", "Course Master", 
 							JOptionPane.QUESTION_MESSAGE, null, nameChoices, nameChoices[0]);
 					
 					if(nameSelection == null) {
-						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+						displayCancelMsg();
 						return;
 					}
 					
@@ -1293,7 +1334,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					}
 					
 					if(newWeight == null) {
-						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+						displayCancelMsg();
 						return;
 					}
 					
@@ -1310,17 +1351,17 @@ public class Gradebook extends JFrame implements ActionListener {
 				}
 			}
 			
-			if(edit.equalsIgnoreCase("Course Title")) {
+			if(edit.equals("Course Title")) {
 				String prof = JOptionPane.showInputDialog(null, "Enter New Course Title", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 				if(prof == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					displayCancelMsg();
 					return;
 				}
 				else cdtm.setValueAt(prof, row, 1);
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
-			if(edit.equalsIgnoreCase("Grade Scale")) {
+			if(edit.equals("Grade Scale")) {
 				String[] choices = new String[gradeScales.size()];
 				for(int i = 0; i < gradeScales.size(); i++)
 					choices[i] = (String) gradeScales.get(i).get("Name");
@@ -1334,7 +1375,7 @@ public class Gradebook extends JFrame implements ActionListener {
 						JOptionPane.QUESTION_MESSAGE, null, choices, choices[index]);
 				
 				if(scale == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					displayCancelMsg();
 					return;
 				}
 				
@@ -1347,32 +1388,34 @@ public class Gradebook extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
-			if(edit.equalsIgnoreCase("Comment")) {
+			if(edit.equals("Comment")) {
 				String dayTime = JOptionPane.showInputDialog(null, "Enter New Comment", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 				if(dayTime == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					displayCancelMsg();
 					return;
 				}
 				else cdtm.setValueAt(dayTime, row, 2);
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
-			if(edit.equalsIgnoreCase("Credits")) {
+			if(edit.equals("Credits")) {
 				String[] creditsChoices = {"0", "0.5", "1", "1.5", "2", "2.5", "3", "4", "5", "6"};
-				String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[6]);
+				String credits = (String) JOptionPane.showInputDialog(null, "Select Number of Credits", "Course Edit Master", 
+						JOptionPane.QUESTION_MESSAGE, null, creditsChoices, creditsChoices[6]);
 				if(credits == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					displayCancelMsg();
 					return;
 				}
 				else cdtm.setValueAt(credits, row, 4);
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
-			if(edit.equalsIgnoreCase("Grade Mode")) {
+			if(edit.equals("Grade Mode")) {
 				String[] gModeChoices = {"Letter", "P/NP", "Notation"};
-				String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Edit Master", JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
+				String gMode = (String) JOptionPane.showInputDialog(null, "Select Grade Mode", "Course Edit Master", 
+						JOptionPane.QUESTION_MESSAGE, null, gModeChoices, gModeChoices[0]);
 				if(gMode == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					displayCancelMsg();
 					return;
 				}
 				
@@ -1384,21 +1427,25 @@ public class Gradebook extends JFrame implements ActionListener {
 				
 				if(gMode.equals("Letter")) {
 					cdtm.setValueAt(gMode, row, 6);
-					cdtm.setValueAt(numToLet(identifier, Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
+					if(!cdtm.getValueAt(row, 7).equals("In Progress"))
+						cdtm.setValueAt(numToLet(identifier, Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
 					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
 				else if(gMode.equals("P/NP")) {
 					cdtm.setValueAt(gMode, row, 6);
-					cdtm.setValueAt(numToLet(identifier, Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
+					if(!cdtm.getValueAt(row, 7).equals("In Progress"))
+						cdtm.setValueAt(numToLet(identifier, Double.parseDouble(cdtm.getValueAt(row, 5) + ""), gMode), row, 7);
 					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
 				else if(gMode.equals("Notation")) {
-					if(JOptionPane.showConfirmDialog(null, "Are you sure you wish\nto change Grade Mode to Notation?\nNote: Grade Mode Notation cannot be changed back.") == 0) {
-						fGrade = (String) JOptionPane.showInputDialog(null, "Select Notation", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
+					if(JOptionPane.showConfirmDialog(null, "Are you sure you wish\nto change Grade Mode to Notation?\n"
+							+ "Note: Grade Mode Notation cannot be changed back.", "Course Master", JOptionPane.YES_NO_CANCEL_OPTION) == 0) {
+						fGrade = (String) JOptionPane.showInputDialog(null, "Select Notation", "Course Master", 
+								JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
 						if(fGrade == null) {
-							JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+							displayCancelMsg();
 							return;
 						}
 						else {
@@ -1411,16 +1458,16 @@ public class Gradebook extends JFrame implements ActionListener {
 						}
 					}
 					else {
-						JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+						displayCancelMsg();
 						return;
 					}
 				}
 			}
 			
-			if(edit.equalsIgnoreCase("Final Grade")) {
-				String[] fGradeChoicesC = {"In Progress", "A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
-				String[] fGradeChoicesCPlus = {"In Progress", "A+","A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
-				String[] fGradeChoicesP = {"In Progress", "P", "NP"};
+			if(edit.equals("Final Grade")) {
+				String[] fGradeChoicesC = {"A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
+				String[] fGradeChoicesCPlus = {"A+","A","A-","B+","B","B-","C+","C","C-","D+","D","D-","F"};
+				String[] fGradeChoicesP = {"P", "NP"};
 				String[] notationChoices = {"TR","I","W","Z"};
 				String fGrade;
 				
@@ -1433,18 +1480,20 @@ public class Gradebook extends JFrame implements ActionListener {
 								JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesC, fGradeChoicesC[0]);
 				}
 				else if(cdtm.getValueAt(row, 6).equals("P/NP"))
-					fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
+					fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
+							JOptionPane.QUESTION_MESSAGE, null, fGradeChoicesP, fGradeChoicesP[0]);
 				else 
-					fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
+					fGrade = (String) JOptionPane.showInputDialog(null, "Select Final Grade", "Course Master", 
+							JOptionPane.QUESTION_MESSAGE, null, notationChoices, notationChoices[0]);
 				if(fGrade == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					displayCancelMsg();
 					return;
 				}
 				else cdtm.setValueAt(fGrade, row, 7);
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
-			if(edit.equalsIgnoreCase("Term")) {
+			if(edit.equals("Term")) {
 				String term = JOptionPane.showInputDialog(null, "Enter Term", "Course Master", JOptionPane.INFORMATION_MESSAGE);
 				try {
 					double testError = Double.parseDouble(term);
@@ -1453,7 +1502,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					return;
 				}
 				if(term == null) {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					displayCancelMsg();
 					return;
 				}
 				else cdtm.setValueAt(term, row, 8);
@@ -1470,10 +1519,11 @@ public class Gradebook extends JFrame implements ActionListener {
 			
 			String id = gdtm.getValueAt(row, 1) + "";
 					
-			String[] options = {"Category", "Grade", "Comment"};
-			String choice = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Grade Master", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+			String[] catEditChoices = {"Category", "Grade", "Comment"};
+			String catEditChoice = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Grade Master", 
+					JOptionPane.QUESTION_MESSAGE, null, catEditChoices, catEditChoices[0]);
 					
-			if(choice.equals("Category")) {
+			if(catEditChoice.equals("Category")) {
 				ArrayList<String> names = getCategoryNames(categories.get(id));
 				String[] categoryNames = new String[names.size()];
 				for(int i = 0; i < categoryNames.length; i++)
@@ -1489,7 +1539,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
-			else if(choice.equals("Grade")) {
+			else if(catEditChoice.equals("Grade")) {
 				
 				JPanel p = new JPanel();
 				p.setLayout(new GridLayout(2, 0));
@@ -1517,7 +1567,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					}
 				}
 				else {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					displayCancelMsg();
 					return;
 				}
 				
@@ -1532,16 +1582,6 @@ public class Gradebook extends JFrame implements ActionListener {
 					Errors.ML2.displayErrorMsg();
 					return;
 				}
-				
-//				if(Double.parseDouble(pointsEarned) > 2000) {
-//					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMaximum Points Earned Exceeded", "System Notification", JOptionPane.ERROR_MESSAGE);
-//					return;
-//				}
-//				
-//				if(Double.parseDouble(totalPoints) > 1000) {
-//					JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMaximum Total Points Exceeded", "System Notification", JOptionPane.ERROR_MESSAGE);
-//					return;
-//				}
 				
 				if(Double.parseDouble(pointsEarned) < 0 || Double.parseDouble(totalPoints) < 0) {
 					Errors.EG1.displayErrorMsg();
@@ -1559,7 +1599,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
-			else if(choice.equals("Comment")) {
+			else if(catEditChoice.equals("Comment")) {
 				String comment = JOptionPane.showInputDialog(null, "Enter New Comment", "Grade Master", JOptionPane.INFORMATION_MESSAGE);
 				gdtm.setValueAt(comment, row, 8);
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
@@ -1619,55 +1659,55 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		double quality = 0;
 		if(rounding.equals("Tenths")) {
-			if(letterGrade.equalsIgnoreCase("A+"))
+			if(letterGrade.equals("A+"))
 				quality = 4.3;
-			if(letterGrade.equalsIgnoreCase("A")) 
+			if(letterGrade.equals("A")) 
 				quality = 4;
-			if(letterGrade.equalsIgnoreCase("A-")) 
+			if(letterGrade.equals("A-")) 
 				quality = 3.7;
-			if(letterGrade.equalsIgnoreCase("B+")) 
+			if(letterGrade.equals("B+")) 
 				quality = 3.3;
-			if(letterGrade.equalsIgnoreCase("B")) 
+			if(letterGrade.equals("B")) 
 				quality = 3;
-			if(letterGrade.equalsIgnoreCase("B-")) 
+			if(letterGrade.equals("B-")) 
 				quality = 2.7;
-			if(letterGrade.equalsIgnoreCase("C+")) 
+			if(letterGrade.equals("C+")) 
 				quality = 2.3;
-			if(letterGrade.equalsIgnoreCase("C")) 
+			if(letterGrade.equals("C")) 
 				quality = 2;
-			if(letterGrade.equalsIgnoreCase("C-")) 
+			if(letterGrade.equals("C-")) 
 				quality = 1.7;
-			if(letterGrade.equalsIgnoreCase("D+")) 
+			if(letterGrade.equals("D+")) 
 				quality = 1.3;
-			if(letterGrade.equalsIgnoreCase("D")) 
+			if(letterGrade.equals("D")) 
 				quality = 1;
-			if(letterGrade.equalsIgnoreCase("D-")) 
+			if(letterGrade.equals("D-")) 
 				quality = 0.7;
 		}
 		else {
-			if(letterGrade.equalsIgnoreCase("A+"))
+			if(letterGrade.equals("A+"))
 				quality = 4.33;
-			if(letterGrade.equalsIgnoreCase("A")) 
+			if(letterGrade.equals("A")) 
 				quality = 4;
-			if(letterGrade.equalsIgnoreCase("A-")) 
+			if(letterGrade.equals("A-")) 
 				quality = 3.67;
-			if(letterGrade.equalsIgnoreCase("B+")) 
+			if(letterGrade.equals("B+")) 
 				quality = 3.33;
-			if(letterGrade.equalsIgnoreCase("B")) 
+			if(letterGrade.equals("B")) 
 				quality = 3;
-			if(letterGrade.equalsIgnoreCase("B-")) 
+			if(letterGrade.equals("B-")) 
 				quality = 2.67;
-			if(letterGrade.equalsIgnoreCase("C+")) 
+			if(letterGrade.equals("C+")) 
 				quality = 2.33;
-			if(letterGrade.equalsIgnoreCase("C")) 
+			if(letterGrade.equals("C")) 
 				quality = 2;
-			if(letterGrade.equalsIgnoreCase("C-")) 
+			if(letterGrade.equals("C-")) 
 				quality = 1.67;
-			if(letterGrade.equalsIgnoreCase("D+")) 
+			if(letterGrade.equals("D+")) 
 				quality = 1.33;
-			if(letterGrade.equalsIgnoreCase("D")) 
+			if(letterGrade.equals("D")) 
 				quality = 1;
-			if(letterGrade.equalsIgnoreCase("D-")) 
+			if(letterGrade.equals("D-")) 
 				quality = 0.67;
 		}
 		
@@ -1703,7 +1743,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				JOptionPane.QUESTION_MESSAGE, null, identifierChoices, identifierChoices[0]);
 		
 		if(identifier == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			displayCancelMsg();
 			return;
 		}
 		
@@ -1764,7 +1804,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		else {
-			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			displayCancelMsg();
 			return; 
 		}
 				
@@ -1775,36 +1815,25 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String catWeight = categories.get(identifier).get(catIndex + 1);
 		
-		if(pointsEarned.length() > 5)
-			pointsEarned = pointsEarned.substring(0, 6);
+		DecimalFormat rounder = new DecimalFormat("#.####");
 		
-		String grade;
+		String grade = "";
 		
 		try {
-			grade = (Double.parseDouble(pointsEarned) / Double.parseDouble(totalPoints) * 100 + "");
+			grade = rounder.format(Double.parseDouble(pointsEarned) / Double.parseDouble(totalPoints) * 100);
 		} catch (NumberFormatException e) {
 			Errors.ML2.displayErrorMsg();
 			return;
 		}
-		
-//		if(Double.parseDouble(pointsEarned) > 2000) {
-//			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMaximum Points Earned Exceeded", "System Notification", JOptionPane.ERROR_MESSAGE);
-//			return;
-//		}
-//		
-//		if(Double.parseDouble(totalPoints) > 1000) {
-//			JOptionPane.showMessageDialog(null, "User Action Denied\nReason:\nMaximum Total Points Exceeded", "System Notification", JOptionPane.ERROR_MESSAGE);
-//			return;
-//		}
-		
+
 		if(Double.parseDouble(pointsEarned) < 0 || Double.parseDouble(totalPoints) < 0) {
 			Errors.EG1.displayErrorMsg();
 			return;
 		}
 		
-		if(grade.length() > 5)
-			grade = grade.substring(0, 6);
-		
+		pointsEarned = rounder.format(Double.parseDouble(pointsEarned));
+		totalPoints = rounder.format(Double.parseDouble(totalPoints));
+
 		gdtm.addRow(new Object[] {courseTitle, identifier, code, category, catWeight, pointsEarned, totalPoints, grade, comment});
 		
 		calculateGrade(identifier);
@@ -1863,10 +1892,28 @@ public class Gradebook extends JFrame implements ActionListener {
 	}
 	
 	/**
+	 * Tells whether or not grades have been inputted for a course based on identifier
+	 * @param id the identifier of a course
+	 * @return whether or not any grades exist for the given course
+	 */
+	public boolean existsGrade(String id) {
+		for(int i = 0; i < gdtm.getRowCount(); i++) {
+			if(gdtm.getValueAt(i, 1).equals(id))
+				return true;
+		}
+		return false;
+	}
+	
+	/**
 	 * Views grade category breakdown for course entered in identifierInput
 	 * @param the unique course identifier to view the breakdown
 	 */
 	public void viewParticularBreakdown(String id) {
+		
+		if(!existsGrade(id)) {
+			Errors.ML3.displayErrorMsg();
+			return;
+		}
 		
 		if(existsUnfinalizedTerm() && existsInProgressCourse()) {
 			gdtm.addRow(new Object[] {"","","","","","","","",""});
@@ -1908,9 +1955,9 @@ public class Gradebook extends JFrame implements ActionListener {
 					pointsEarned = 0;
 					totalPoints = 0;
 				}
-				
 				gdtm.addRow(new Object[] {"","","","","","","","",""});
-				
+				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				viewBreakdown.setText("Hide Breakdown");
 			}
 		}
 	}
@@ -2258,7 +2305,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		String choice = (String) JOptionPane.showInputDialog(null, "Select an Option to Learn More", "Help Master", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 		
 		if(choice == null) {
-			JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			displayCancelMsg();
 			return;
 		}
 		
@@ -2338,7 +2385,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					JOptionPane.QUESTION_MESSAGE, null, errorOptions, errorOptions[0]);
 			
 			if(choice2 == null) {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				displayCancelMsg();
 				return;
 			}
 			
@@ -2359,7 +2406,8 @@ public class Gradebook extends JFrame implements ActionListener {
 						+ "AER8. Cannot Remove Finalized Course. The course with a matching Identifier to what was entered into the Identifier/Code\n"
 						+ "text field has been finalized.\n\n"
 						+ "AER9. Cannot Edit Finalized Course. The course with a matching Identifier to what was entered into the Identifier/Code\n"
-						+ "text field has been finalized.";
+						+ "text field has been finalized.\n\n"
+						+ "AER10. No Categories Available. All grade categories for this course have been removed.";
 				JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);	
 			}
 			
@@ -2398,7 +2446,8 @@ public class Gradebook extends JFrame implements ActionListener {
 				String s = "ML: Miscellaneous Errors\n\n"
 						+ "ML1. Missing Information. If any text fields are left blank other than a comment, this error will arise.\n\n"
 						+ "ML2. Number Format Exception. Arises when anything other than a number has been entered into a text field\n"
-						+ "that is only meant to accept numbers.";
+						+ "that is only meant to accept numbers.\n\n" 
+						+ "ML3. No Breakdown to Formulate. Arises when no grades have been inputted for the identified course.";
 				JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
@@ -2413,7 +2462,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String s = e.getActionCommand();
 		
-		if(s.equalsIgnoreCase("Add Course")) {
+		if(s.equals("Add Course")) {
 			
 			if(gradeScales.size() == 0) {
 				Errors.AER6.displayErrorMsg();
@@ -2426,11 +2475,11 @@ public class Gradebook extends JFrame implements ActionListener {
 				addCourseHonorsAP();
 		}
 		
-		if(s.equalsIgnoreCase("Remove Element")) {
+		if(s.equals("Remove Element")) {
 			removeElement();
 		}
 		
-		if(s.equalsIgnoreCase("Finalize Grades")) {
+		if(s.equals("Finalize Grades")) {
 			
 			for(int i = 0; i < cdtm.getRowCount(); i++) {
 				if(cdtm.getValueAt(i, 7).equals("In Progress")) {
@@ -2458,12 +2507,12 @@ public class Gradebook extends JFrame implements ActionListener {
 				}
 			}
 			else {
-				JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+				displayCancelMsg();
 				return;
 			}
 		}
 		
-		if(s.equalsIgnoreCase("Manual Override")) {
+		if(s.equals("Manual Override")) {
 			if(!courseList.isEnabled()) {
 				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to enter Manual Override mode? \n"
 						+ "It is highly recommended to use the Edit Course function.\nNote: Reclick Manual Override to return to Automatic.") == 0) {
@@ -2471,7 +2520,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					gradeList.setEnabled(true);
 				}
 				else {
-					JOptionPane.showMessageDialog(null, "Action Cancelled", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					displayCancelMsg();
 					return;
 				}
 			}
@@ -2484,33 +2533,31 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 		}
 		
-		if(s.equalsIgnoreCase("Edit Element")) {
+		if(s.equals("Edit Element")) {
 			editElement();
 		}
 		
-		if(s.equalsIgnoreCase("Enter Grade")) {
+		if(s.equals("Enter Grade")) {
 			hideBreakdown();
 			enterGrade();
 		}
 		
-		if(s.equalsIgnoreCase("View Breakdown")) {
+		if(s.equals("View Breakdown")) {
 			if(isIdentifierFound()) {
-				viewBreakdown.setText("Hide Breakdown");
 				viewParticularBreakdown(identifierInput.getText());
-				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 			else {
 				Errors.AER7.displayErrorMsg();
 			}
 		}
 		
-		if(s.equalsIgnoreCase("Hide Breakdown")) {
+		if(s.equals("Hide Breakdown")) {
 			hideBreakdown();
 			viewBreakdown.setText("View Breakdown");
 			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 		}
 		
-		if(s.equalsIgnoreCase("Import/Export")) {
+		if(s.equals("Import/Export")) {
 			if(cdtm.getRowCount() == 0 && gdtm.getRowCount() == 0) {
 				loadTable();
 			}
@@ -2518,20 +2565,20 @@ public class Gradebook extends JFrame implements ActionListener {
 				saveTable();
 		}
 		
-		if(s.equalsIgnoreCase("Settings")) {
+		if(s.equals("Settings")) {
 			checkedSettings = true;
 			settings();
 		}
 		
-		if(s.equalsIgnoreCase("Help")) {
+		if(s.equals("Help")) {
 			help();
 		}
 		
-		if(s.equalsIgnoreCase("Add Grade Scale")) {
+		if(s.equals("Add Grade Scale")) {
 			addGradeScale();
 		}
 		
-		if(s.equalsIgnoreCase("Delete Grade Scale")) {
+		if(s.equals("Delete Grade Scale")) {
 			deleteGradeScale();
 		}
 			
