@@ -1105,7 +1105,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				double allQualitySum = 0;
 				double allCreditSum = 0;
 				for(int i = 0; i < cdtm.getRowCount(); i++)
-					if(((String) cdtm.getValueAt(i, 0)).equals("Term Credits Earned")) {
+					if(((String) cdtm.getValueAt(i, 0)).equals("Term Credits Earned") && ((String) cdtm.getValueAt(i, 4)).equals("")) {
 						allQualitySum += Double.parseDouble(cdtm.getValueAt(i, 3) + "");
 						allCreditSum += Double.parseDouble(cdtm.getValueAt(i, 1) + "");
 					}
