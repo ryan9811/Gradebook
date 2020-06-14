@@ -2153,6 +2153,12 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		if(result == JOptionPane.OK_OPTION) {
 			
+			for(int i = 0; i < gradeScales.size(); i++)
+				if(gradeScales.get(i).containsValue(name.getText())) {
+					Errors.SS2.displayErrorMsg();
+					return;
+				}
+			
 			try {
 				double testError = 0;
 				if(isAPluses)
@@ -2433,7 +2439,8 @@ public class Gradebook extends JFrame implements ActionListener {
 				String s = "SS: Settings Errors\n\n"
 						+ "SS1. Cannot Have Negative Bonus. An Honors or AP GPA Bonus cannot be a negative value.\n\n"
 						+ "SS2. Invalid Grade Scale. Occurs if negative values have been entered or if the scale does not make sense.\n"
-						+ "For example, a scale cannot contain a minimum grade of 90 for an A and 95 for a B because 95 > 90 but an A is a better grade.\n\n"
+						+ "For example, a scale cannot contain a minimum grade of 90 for an A and 95 for a B because 95 > 90 but an A is a better grade.\n"
+						+ "Also occurs if the name of the grade scale is already taken. Two grade scales cannot exist with the same name.\n\n"
 						+ "SS3. No Grade Scales to Delete. There are no grade scales left to be deleted.\n\n"
 						+ "SS4. Grade Scale In Use. A grade scale cannot be deleted if it is currently being used by a course to calculate grades.\n"
 						+ "All courses linked to that grade scale must be changed to a different grade scale before it can be deleted.\n\n"
