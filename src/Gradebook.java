@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.Vector;
 
 /**
- * Ryan Hudson
  * Grade Calculator v5
+ * Copyright © 2020 Ryan Hudson. All rights reserved.
  */
 public class Gradebook extends JFrame implements ActionListener {
 
