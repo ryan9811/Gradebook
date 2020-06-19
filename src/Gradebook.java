@@ -42,7 +42,6 @@ public class Gradebook extends JFrame implements ActionListener {
 	
 	private JButton viewBreakdown; // JButton triggering the breakdown of category grading
 	
-	private double totalFCreditSum; // Total credits that were failed
 	
 	private boolean isAPluses; // Whether or not A+ is allowed
 	private boolean isHonorsAPClasses; // Whether or not there are honors/AP classes
@@ -58,6 +57,8 @@ public class Gradebook extends JFrame implements ActionListener {
 	private Hashtable<String, Hashtable> courseScales; // Links a course to a specific grade scale
 	
 	private Hashtable defaultScale; // The default grade scale
+	
+	private double totalFCreditSum; // Total credits failed
 	
 	private JFileChooser fileChooser; // Selects file for import/export
 	
@@ -1235,28 +1236,45 @@ public class Gradebook extends JFrame implements ActionListener {
 				}
 				
 				if(selection.equals("Add Category")) {
-					String categoryName = JOptionPane.showInputDialog(null, "Enter Category Name", "Course Master", JOptionPane.INFORMATION_MESSAGE);
+					JPanel categoryPanel2 = new JPanel(); // For additional category entries
+					categoryPanel2.setLayout(new GridLayout(2, 0));
+					JTextField catNameEntry2 = new JTextField(15);
+					JTextField catWeightEntry2 = new JTextField(15);
+					catNameEntry2.setText("");
+					catWeightEntry2.setText("");
+					categoryPanel2.add(new JLabel("Enter Category Name"));
+					categoryPanel2.add(catNameEntry2);
+					categoryPanel2.add(new JLabel("Enter Category Weight"));
+					categoryPanel2.add(catWeightEntry2);
 					
-					if(containsNumbers(categoryName)) {
-						Errors.AER3.displayErrorMsg();
+					int additionalCategoryResult = JOptionPane.showConfirmDialog(null, categoryPanel2, 
+							"Course Master", JOptionPane.OK_CANCEL_OPTION);
+					
+					if(additionalCategoryResult == JOptionPane.OK_OPTION) {
+						if(catNameEntry2.getText().isEmpty() || catWeightEntry2.getText().isEmpty()) {
+							Errors.ML1.displayErrorMsg();
+							return;
+						}
+					
+						if(containsNumbers(catNameEntry2.getText())) {
+							Errors.AER3.displayErrorMsg();
+							return;
+						}
+						try {
+							double testError = Double.parseDouble(catWeightEntry2.getText());
+						} catch (NumberFormatException e) {
+							Errors.ML2.displayErrorMsg();
+							return;
+						}
+						courseWeightings.add(catNameEntry2.getText());
+						courseWeightings.add(catWeightEntry2.getText());
+						
+						JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+					}
+					else {
+						displayCancelMsg();
 						return;
 					}
-					
-					if(courseWeightings.contains(categoryName)) {
-						Errors.AER4.displayErrorMsg();
-						return;
-					}
-					
-					String categoryWeight = JOptionPane.showInputDialog(null, "Enter Category Weight", "Course Master", JOptionPane.INFORMATION_MESSAGE);
-					try {
-						double testError = Double.parseDouble(categoryWeight);
-					} catch (NumberFormatException e) {
-						Errors.ML2.displayErrorMsg();
-						return;
-					}
-					courseWeightings.add(categoryName);
-					courseWeightings.add(categoryWeight);
-					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				}
 				
 				else if(selection.equals("Remove Category")) {
@@ -1916,14 +1934,24 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(existsUnfinalizedTerm() && existsInProgressCourse()) {
+			
+			DecimalFormat rounder = new DecimalFormat("#.####");
+			
+			Hashtable scale = courseScales.get(id);
+			
 			gdtm.addRow(new Object[] {"","","","","","","","",""});
-			gdtm.addRow(new Object[] {"Breakdown Viewed:","","","","","","","",""});
+			gdtm.addRow(new Object[] {"~~GRADE ANALYZER~~","","","","","","","",""});
 			gdtm.addRow(new Object[] {"","","","","","","","",""});
 			ArrayList<String> identifiers = new ArrayList<String>();
 			ArrayList<String> titles = new ArrayList<String>();
 			ArrayList<String> weights = new ArrayList<String>();
 			ArrayList<String> courseTitles = new ArrayList<String>();
 			String term = getUnfinalizedTerm();
+			
+			double minPossibleGrade = 0;
+			double remCatTotals = 0;
+			double minRemAvgA = 0;
+			
 			for(int i = 0; i < cdtm.getRowCount(); i++) {
 				if(cdtm.getValueAt(i, 9).equals("In Progress") && cdtm.getValueAt(i, 3).equals(id)) {
 					identifiers.add(cdtm.getValueAt(i, 3) + "");
@@ -1948,18 +1976,140 @@ public class Gradebook extends JFrame implements ActionListener {
 							totalPoints += Double.parseDouble(gdtm.getValueAt(k, 6) + "");
 						}
 					double grade = pointsEarned / totalPoints * 100;
-					String sGrade = grade + "";
-					if(sGrade.length() > 6)
-						sGrade = sGrade.substring(0, 6);
-					gdtm.addRow(new Object[] {courseTitle,identifier,"",titles.get(j),weights.get(j),pointsEarned,totalPoints,sGrade,""});
+
+					if(totalPoints == 0) {
+						gdtm.addRow(new Object[] {courseTitle,identifier,"",titles.get(j),weights.get(j),rounder.format(pointsEarned),
+							rounder.format(totalPoints), grade, "Category Average"});
+						remCatTotals += Double.parseDouble(weights.get(j));
+					}
+					else
+						gdtm.addRow(new Object[] {courseTitle,identifier,"",titles.get(j),weights.get(j),rounder.format(pointsEarned),
+								rounder.format(totalPoints), rounder.format(grade), "Category Average"});
+					
+					if(totalPoints != 0)
+						minPossibleGrade += pointsEarned / totalPoints * (Double.parseDouble(weights.get(j)) / getSumWeights(id)) * 100;
 					pointsEarned = 0;
 					totalPoints = 0;
 				}
+				
+				gdtm.addRow(new Object[] {"","","","","","","","",""});
+				
+				gdtm.addRow(new Object[] {courseTitle,identifier,"","Minimum Grade Possible","","","",rounder.format(minPossibleGrade),"Assumes Static Grades"});
+				
+				gdtm.addRow(new Object[] {"","","","","","","","",""});
+				
+				boolean printedAp, printedA, printedAm, printedBp, printedB, printedBm, printedCp, printedC, printedCm,
+					printedDp, printedD, printedDm, printedP;
+				
+				printedAp = printedA = printedAm = printedBp = printedB = printedBm = printedCp = printedC = printedCm = printedDp = 
+						printedD = printedDm = printedP = false;
+				
+				double tAp, tA, tAm, tBp, tB, tBm, tCp, tC, tCm, tDp, tD, tDm, tP;
+				
+				tAp = tA = tAm = tBp = tB = tBm = tCp = tC = tCm = tDp = tD = tDm = tP = -1;
+				
+				for(double x = 0; x < 200; x+= 0.125) {
+					System.out.println("remCatTotals=" + remCatTotals + ", getSumWeights=" + getSumWeights(id) + ", x=" + x);
+					System.out.println("A conversion=" + Double.parseDouble(scale.get("A") + ""));
+					if(!printedAp && isAPluses && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("A+") + "")) {
+						printedAp = true;
+						tAp = x;
+					}
+					if(!printedA && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("A") + "")) {
+						printedA = true;
+						tA = x;
+					}
+					if(!printedAm && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("A-") + "")) {
+						printedAm = true;
+						tAm = x;
+					}
+					if(!printedBp && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("B+") + "")) {
+						printedBp = true;
+						tBp = x;
+					}
+					if(!printedB && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("B") + "")) {
+						printedB = true;
+						tB = x;
+					}
+					if(!printedBm && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("B-") + "")) {
+						printedBm = true;
+						tBm = x;
+					}
+					if(!printedCp && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("C+") + "")) {
+						printedCp = true;
+						tCp = x;
+					}
+					if(!printedC && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("C") + "")) {
+						printedC = true;
+						tC = x;
+					}
+					if(!printedCm && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("C-") + "")) {
+						printedCm = true;
+						tCm = x;
+					}
+					if(!printedDp && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("D+") + "")) {
+						printedDp = true;
+						tDp = x;
+					}
+					if(!printedD && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("D") + "")) {
+						printedD = true;
+						tD = x;
+					}
+					if(!printedDm && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("D-") + "")) {
+						printedDm = true;
+						tDm = x;
+					}
+					if(!printedP && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("P") + "")) {
+						printedP = true;
+						tP = x;
+					}
+				}
+				
+				if(isAPluses)
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tAp),"Rem Avg Req for [A+]"});
+				
+				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tA),"Rem Avg Req for [A]"});
+				
+				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tAm),"Rem Avg Req for [A-]"});
+				
+				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tBp),"Rem Avg Req for [B+]"});
+				
+				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tB),"Rem Avg Req for [B]"});
+				
+				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tBm),"Rem Avg Req for [B-]"});
+				
+				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tCp),"Rem Avg Req for [C+]"});
+				
+				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tC),"Rem Avg Req for [C]"});
+				
+				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tCm),"Rem Avg Req for [C-]"});
+				
+				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tDp),"Rem Avg Req for [D+]"});
+				
+				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tD),"Rem Avg Req for [D]"});
+				
+				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tDm),"Rem Avg Req for [D-]"});
+				
+				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tP),"Rem Avg Req for [Pass]"});
+				
 				gdtm.addRow(new Object[] {"","","","","","","","",""});
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				viewBreakdown.setText("Hide Breakdown");
 			}
 		}
+	}
+	
+	/**
+	 * Gets the sum of the category weights for a specified course
+	 * @param id the identifier of the course
+	 * @return the sum of the category weights for the course
+	 */
+	public double getSumWeights(String id) {
+		double sum = 0;
+		ArrayList<String> values = getCategoryValues(categories.get(id));
+		for(int i = 0; i < values.size(); i++)
+			sum += Double.parseDouble(values.get(i));
+		return sum;
 	}
 	
 	/**
