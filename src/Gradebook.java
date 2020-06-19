@@ -158,7 +158,7 @@ public class Gradebook extends JFrame implements ActionListener {
         JButton enterGrade = new JButton("Enter Grade");
         enterGrade.addActionListener(this);
         
-        viewBreakdown = new JButton("View Breakdown");
+        viewBreakdown = new JButton("Analyze Grades");
         viewBreakdown.addActionListener(this);
         
         JButton finalizeGrades = new JButton("Finalize Grades");
@@ -411,6 +411,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		DecimalFormat rounder = new DecimalFormat("#.####");
+		rounder.setRoundingMode(RoundingMode.HALF_UP);
 		
 		String finalGradeString = rounder.format(finalGrade);
 
@@ -1589,9 +1590,6 @@ public class Gradebook extends JFrame implements ActionListener {
 					return;
 				}
 				
-				if(pointsEarned.length() > 5)
-					pointsEarned = pointsEarned.substring(0, 6);
-				
 				String grade;
 				
 				try {
@@ -1606,12 +1604,12 @@ public class Gradebook extends JFrame implements ActionListener {
 					return;
 				}
 				
-				if(grade.length() > 5)
-					grade = grade.substring(0, 6);
+				DecimalFormat rounder = new DecimalFormat("#.####");
+				rounder.setRoundingMode(RoundingMode.HALF_UP);
 				
-				gdtm.setValueAt(pointsEarned, row, 5);
-				gdtm.setValueAt(totalPoints, row, 6);
-				gdtm.setValueAt(grade, row, 7);
+				gdtm.setValueAt(rounder.format(Double.parseDouble(pointsEarned)), row, 5);
+				gdtm.setValueAt(rounder.format(Double.parseDouble(totalPoints)), row, 6);
+				gdtm.setValueAt(rounder.format(Double.parseDouble(grade)), row, 7);
 				
 				calculateGrade(id);
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
@@ -1834,6 +1832,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		String catWeight = categories.get(identifier).get(catIndex + 1);
 		
 		DecimalFormat rounder = new DecimalFormat("#.####");
+		rounder.setRoundingMode(RoundingMode.HALF_UP);
 		
 		String grade = "";
 		
@@ -1852,7 +1851,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		pointsEarned = rounder.format(Double.parseDouble(pointsEarned));
 		totalPoints = rounder.format(Double.parseDouble(totalPoints));
 
-		gdtm.addRow(new Object[] {courseTitle, identifier, code, category, catWeight, pointsEarned, totalPoints, grade, comment});
+		gdtm.addRow(new Object[] {courseTitle, identifier, code, category, catWeight, rounder.format(Double.parseDouble(pointsEarned)),
+				rounder.format(Double.parseDouble(totalPoints)), rounder.format(Double.parseDouble(grade)), comment});
 		
 		calculateGrade(identifier);
 		
@@ -1936,6 +1936,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		if(existsUnfinalizedTerm() && existsInProgressCourse()) {
 			
 			DecimalFormat rounder = new DecimalFormat("#.####");
+			rounder.setRoundingMode(RoundingMode.HALF_UP);
 			
 			Hashtable scale = courseScales.get(id);
 			
@@ -2009,8 +2010,6 @@ public class Gradebook extends JFrame implements ActionListener {
 				tAp = tA = tAm = tBp = tB = tBm = tCp = tC = tCm = tDp = tD = tDm = tP = -1;
 				
 				for(double x = 0; x < 200; x+= 0.125) {
-					System.out.println("remCatTotals=" + remCatTotals + ", getSumWeights=" + getSumWeights(id) + ", x=" + x);
-					System.out.println("A conversion=" + Double.parseDouble(scale.get("A") + ""));
 					if(!printedAp && isAPluses && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("A+") + "")) {
 						printedAp = true;
 						tAp = x;
@@ -2094,7 +2093,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				
 				gdtm.addRow(new Object[] {"","","","","","","","",""});
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
-				viewBreakdown.setText("Hide Breakdown");
+				viewBreakdown.setText("Hide Analyzer");
 			}
 		}
 	}
@@ -2522,9 +2521,9 @@ public class Gradebook extends JFrame implements ActionListener {
 					+ "the textfield.\n\n"
 					+ "Enter Grade. Used to enter a grade into the bottom table. Upon entering a grade, the course that the grade is\n"
 					+ "for will have its numeric grade and final grade recalculated.\n\n"
-					+ "View Breakdown. Used to view more detailed information about grades for a course. Displays the average for\n"
-					+ "each individual grade category.\n\n"
-					+ "Hide Breakdown. Hides the additional grading information from the View Breakdown button.\n\n"
+					+ "Analyze Grades. Used to view more detailed information about grades for a course. Displays the average for\n"
+					+ "each individual grade category and tells you the minimum grade necessary to attain each threshold.\n\n"
+					+ "Hide Analyzer. Hides the additional grading information from the Analyze Grades button.\n\n"
 					+ "Finalize Grades. Calculates the GPA for the current term and the overall GPA based on all previous terms.\n"
 					+ "Sets the status of all courses to Finalized.\n\n"
 					+ "Import/Export. Used to save and load the gradebook so all data is maintained upon exiting the program.\n\n"
@@ -2699,7 +2698,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			enterGrade();
 		}
 		
-		if(s.equals("View Breakdown")) {
+		if(s.equals("Analyze Grades")) {
 			if(isIdentifierFound()) {
 				viewParticularBreakdown(identifierInput.getText());
 			}
@@ -2708,9 +2707,9 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 		}
 		
-		if(s.equals("Hide Breakdown")) {
+		if(s.equals("Hide Analyzer")) {
 			hideBreakdown();
-			viewBreakdown.setText("View Breakdown");
+			viewBreakdown.setText("Analyze Grades");
 			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 		}
 		
