@@ -624,7 +624,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					return;
 				}
 			
-				if(containsNumbers(catNameEntry.getText())) {
+				if(isNumbers(catNameEntry.getText())) {
 					Errors.AER3.displayErrorMsg();
 					return;
 				}
@@ -667,7 +667,7 @@ public class Gradebook extends JFrame implements ActionListener {
 							return;
 						}
 					
-						if(containsNumbers(catNameEntry2.getText())) {
+						if(isNumbers(catNameEntry2.getText())) {
 							Errors.AER3.displayErrorMsg();
 							return;
 						}
@@ -852,7 +852,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					return;
 				}
 			
-				if(containsNumbers(catNameEntry.getText())) {
+				if(isNumbers(catNameEntry.getText())) {
 					Errors.AER3.displayErrorMsg();
 					return;
 				}
@@ -895,7 +895,7 @@ public class Gradebook extends JFrame implements ActionListener {
 							return;
 						}
 					
-						if(containsNumbers(catNameEntry2.getText())) {
+						if(isNumbers(catNameEntry2.getText())) {
 							Errors.AER3.displayErrorMsg();
 							return;
 						}
@@ -1257,7 +1257,7 @@ public class Gradebook extends JFrame implements ActionListener {
 							return;
 						}
 					
-						if(containsNumbers(catNameEntry2.getText())) {
+						if(isNumbers(catNameEntry2.getText())) {
 							Errors.AER3.displayErrorMsg();
 							return;
 						}
@@ -1638,16 +1638,25 @@ public class Gradebook extends JFrame implements ActionListener {
 	}
 	
 	/**
-	 * Tells whether or not a word contains any numbers
+	 * Tells whether or not a word is all numbers
 	 * @param word the word to be checked for numbers
-	 * @return whether or not the word contains any numbers
+	 * @return whether or not the word contains all numbers
 	 */
-	public boolean containsNumbers(String word) {
+	public boolean isNumbers(String word) {
 		
-		String[] nums = {"0","1","2","3","4","5","6","7","8","9","10"};
-		for(int i = 0; i < nums.length; i++)
-			if(word.contains(nums[i]))
-				return true;
+		ArrayList<String> nums = new ArrayList<String>();
+		for(int i = 0; i < 10; i++) {
+			nums.add(i + "");
+		}
+		
+		int counter = 0;
+		for(int i = 0; i < word.length(); i++)
+			if(nums.contains(word.charAt(i) + ""))
+				counter++;
+		
+		if(counter == word.length())
+			return true;
+		
 		return false;
 	}
 	
@@ -2550,7 +2559,7 @@ public class Gradebook extends JFrame implements ActionListener {
 						+ "For example, if a user has already finalized grades for Fall 2019, the user cannot use Fall 2019 as a term anymore.\n\n"
 						+ "AER2. Must Finalize Previous Term. User cannot enter courses for two different terms simultaneously.\n"
 						+ "Each term must be finalized because a new term can be used.\n\n"
-						+ "AER3. Category Name Cannot Contain Numbers. This will cause confusion between the name of the category and the category weight.\n"
+						+ "AER3. Category Name Cannot Be Numbers. This will cause confusion between the name of the category and the category weight.\n"
 						+ "If numbers must be used, write them out in word form or use Roman numerals.\n\n"
 						+ "AER4. Category Name Already Exists. The entered category name has already been used for the course.\n\n"
 						+ "AER5. Cannot Have Negative Weight. Category weights cannot be negative. They must be positive numbers, with decimals permitted.\n\n"
