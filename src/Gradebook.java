@@ -57,6 +57,10 @@ public class Gradebook extends JFrame implements ActionListener {
 	
 	private Hashtable defaultScale; // The default grade scale
 	
+	private String defaultCreditAmount;
+	private String defaultGMode;
+	private String defaultGMethod;
+	
 	private double totalFCreditSum; // Total credits failed
 	
 	private JFileChooser fileChooser; // Selects file for import/export
@@ -84,6 +88,10 @@ public class Gradebook extends JFrame implements ActionListener {
         gradeScales = new ArrayList<Hashtable>();
         courseScales = new Hashtable<String, Hashtable>();
         honorsAPStatuses = new Hashtable<String, String>();
+        
+        defaultCreditAmount = "3";
+        defaultGMode = "Letter";
+        defaultGMethod = "CategoryWeightings";
         
         defaultScale = new Hashtable();
         defaultScale.put("Name", "Default Scale");
@@ -273,6 +281,9 @@ public class Gradebook extends JFrame implements ActionListener {
 			out.writeObject(gradeScales);
 			out.writeObject(courseScales);
 			out.writeObject(checkedSettings);
+			out.writeObject(defaultCreditAmount);
+			out.writeObject(defaultGMode);
+			out.writeObject(defaultGMethod);
 			out.close();		
 		}
 		catch(Exception e) {
@@ -341,6 +352,9 @@ public class Gradebook extends JFrame implements ActionListener {
 			gradeScales = (ArrayList<Hashtable>) in.readObject();
 			courseScales = (Hashtable<String, Hashtable>) in.readObject();
 			checkedSettings = (boolean) in.readObject();
+			defaultCreditAmount = (String) in.readObject();
+			defaultGMode = (String) in.readObject();
+			defaultGMethod = (String) in.readObject();
 			cdtm.setDataVector(rowDataC, columnNamesC);
 			gdtm.setDataVector(rowDataG, columnNamesG);
 			revertTableSettings();
@@ -497,13 +511,15 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String[] creditsChoices = {"0", "0.5", "1", "1.5", "2", "2.5", "3", "4", "5", "6"};
 		JComboBox creditEntry = new JComboBox(creditsChoices);
-		creditEntry.setSelectedIndex(6);
+		creditEntry.setSelectedItem(defaultCreditAmount);
 		
 		String[] gModeChoices = {"Letter", "P/NP", "Notation"};
 		JComboBox gModeEntry = new JComboBox(gModeChoices);
+		gModeEntry.setSelectedItem(defaultGMode);
 		
-		String[] weightChoices = {"Category Weightings", "Total Points"};
-		JComboBox weightEntry = new JComboBox(weightChoices);
+		String[] gMethodChoices = {"Category Weightings", "Total Points"};
+		JComboBox gMethodEntry = new JComboBox(gMethodChoices);
+		gMethodEntry.setSelectedItem(defaultGMethod);
 		
 		String[] scaleChoices = new String[gradeScales.size()];
 		for(int i = 0; i < scaleChoices.length; i++) {
@@ -530,7 +546,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		courseInfoPanel.add(gModeEntry);
 		
 		courseInfoPanel.add(new JLabel("Select Grading Method"));
-		courseInfoPanel.add(weightEntry);
+		courseInfoPanel.add(gMethodEntry);
 		
 		courseInfoPanel.add(new JLabel("Select Grade Scale"));
 		courseInfoPanel.add(scaleEntry);
@@ -612,7 +628,7 @@ public class Gradebook extends JFrame implements ActionListener {
 
 			ArrayList<String> catsAndWeights = new ArrayList<String>();
 			
-			if(weightEntry.getSelectedItem().equals("Total Points")) {
+			if(gMethodEntry.getSelectedItem().equals("Total Points")) {
 				catsAndWeights.add("Total Points");
 				catsAndWeights.add("100");
 			}
@@ -697,16 +713,18 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String[] creditsChoices = {"0", "0.5", "1", "1.5", "2", "2.5", "3", "4", "5", "6"};
 		JComboBox creditEntry = new JComboBox(creditsChoices);
-		creditEntry.setSelectedIndex(6);
+		creditEntry.setSelectedItem(defaultCreditAmount);
 		
-		String[] weightChoices = {"Category Weightings", "Total Points"};
-		JComboBox weightEntry = new JComboBox(weightChoices);
+		String[] gMethodChoices = {"Category Weightings", "Total Points"};
+		JComboBox gMethodEntry = new JComboBox(gMethodChoices);
+		gMethodEntry.setSelectedItem(defaultGMethod);
 		
 		String[] honorsAPChoices = {"College Prep", "Honors", "Advanced Placement"};
 		JComboBox courseTypeEntry = new JComboBox(honorsAPChoices);
 		
 		String[] gModeChoices = {"Letter", "P/NP", "Notation"};
 		JComboBox gModeEntry = new JComboBox(gModeChoices);
+		gModeEntry.setSelectedItem(defaultGMode);
 		
 		JPanel courseInfoPanel = new JPanel();
 		courseInfoPanel.setLayout(new GridLayout(8, 0));
@@ -730,7 +748,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		courseInfoPanel.add(gModeEntry);
 		
 		courseInfoPanel.add(new JLabel("Select Grading Method"));
-		courseInfoPanel.add(weightEntry);
+		courseInfoPanel.add(gMethodEntry);
 		
 		String[] scaleChoices = new String[gradeScales.size()];
 		for(int i = 0; i < scaleChoices.length; i++) {
@@ -818,7 +836,7 @@ public class Gradebook extends JFrame implements ActionListener {
 
 			ArrayList<String> catsAndWeights = new ArrayList<String>();
 			
-			if(weightEntry.getSelectedItem().equals("Total Points")) {
+			if(gMethodEntry.getSelectedItem().equals("Total Points")) {
 				catsAndWeights.add("Total Points");
 				catsAndWeights.add("100");
 			}
@@ -2387,6 +2405,10 @@ public class Gradebook extends JFrame implements ActionListener {
 			gradeScales.add(scale);
 			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 		}
+		else {
+			displayCancelMsg();
+			return;
+		}
 	}
 	
 	/**
@@ -2405,6 +2427,11 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String delete = (String) JOptionPane.showInputDialog(null, "Select Grade Scale to Delete", "Settings Master", 
 				JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
+		
+		if(delete == null) {
+			displayCancelMsg();
+			return;
+		}
 		
 		for(int i = 0; i < gradeScales.size(); i++) {
 			if(gradeScales.get(i).get("Name").equals(delete)) {
@@ -2435,6 +2462,11 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String view = (String) JOptionPane.showInputDialog(null, "Select Grade Scale to View", "Settings Master", 
 				JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
+		
+		if(view == null) {
+			displayCancelMsg();
+			return;
+		}
 		
 		for(int i = 0; i < gradeScales.size(); i++) {
 			if(isAPluses && gradeScales.get(i).get("Name").equals(view)) {
@@ -2482,6 +2514,54 @@ public class Gradebook extends JFrame implements ActionListener {
 	    return (String) scale.get("Name");
 	}
 	
+	/**
+	 * Allows user to change default values for adding a course, including
+	 * number of credits, grade mode, and grading method
+	 */
+	public void setDefaults() {
+		
+		String[] creditChoices = {"0","0.5","1","1.5","2.5","3","4","5","6"};
+		JComboBox creditDefaults = new JComboBox(creditChoices);
+		creditDefaults.setSelectedItem(defaultCreditAmount);
+		
+		String[] gModeChoices = {"Letter", "P/NP", "Notation"};
+		JComboBox gModeDefaults = new JComboBox(gModeChoices);
+		gModeDefaults.setSelectedItem(defaultGMode);
+		
+		String[] gMethodChoices = {"Category Weightings", "Total Points"};
+		JComboBox gMethodDefaults = new JComboBox(gMethodChoices);
+		gMethodDefaults.setSelectedItem(defaultGMethod);
+		
+		JPanel p = new JPanel();
+		p.setLayout(new GridLayout(3, 2));
+		
+		p.add(new JLabel("Default Number of Credits"));
+		p.add(creditDefaults);
+		
+		p.add(new JLabel("Default Grade Mode"));
+		p.add(gModeDefaults);
+		
+		p.add(new JLabel("Default Grading Method"));
+		p.add(gMethodDefaults);
+		
+		int result = JOptionPane.showConfirmDialog(null, p, "Settings Master", JOptionPane.OK_CANCEL_OPTION);
+		
+		if(result == JOptionPane.OK_OPTION) {
+			defaultCreditAmount = (String) creditDefaults.getSelectedItem();
+			defaultGMode = (String) gModeDefaults.getSelectedItem();
+			defaultGMethod = (String) gMethodDefaults.getSelectedItem();
+			
+			JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+		}
+		else {
+			displayCancelMsg();
+			return;
+		}
+	}
+	
+	/**
+	 * Helps user with navigating the program including an explanation of terminology, how things work, and error details
+	 */
 	public void help() {
 		String[] options = {"Glossary (Part 1)", "Glossary (Part 2)", "Functionality", "Error Details", "Copyright"};
 		String choice = (String) JOptionPane.showInputDialog(null, "Select an Option to Learn More", "Help Master", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
@@ -2767,6 +2847,10 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		if(s.equals("View Grade Scale")) {
 			viewGradeScale();
+		}
+		
+		if(s.equals("Set Defaults")) {
+			setDefaults();
 		}
 			
 	}
