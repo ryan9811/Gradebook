@@ -606,89 +606,53 @@ public class Gradebook extends JFrame implements ActionListener {
 		if(!gMode.equals("Notation") && fGrade.equals("In Progress")) {
 
 			ArrayList<String> catsAndWeights = new ArrayList<String>();
-			JPanel initialCategoryPanel = new JPanel();
-			initialCategoryPanel.setLayout(new GridLayout(2, 0));
-			JTextField catNameEntry = new JTextField(15);
-			JTextField catWeightEntry = new JTextField(15);
-			initialCategoryPanel.add(new JLabel("Enter Category Name"));
-			initialCategoryPanel.add(catNameEntry);
-			initialCategoryPanel.add(new JLabel("Enter Category Weight"));
-			initialCategoryPanel.add(catWeightEntry);
+			ArrayList<JTextField> catNameEntries = new ArrayList<JTextField>();
+			ArrayList<JTextField> catWeightEntries = new ArrayList<JTextField>();
+			JPanel categoryPanel = new JPanel();
+			categoryPanel.setLayout(new GridLayout(16, 2));
 			
-			int initialCategoryResult = JOptionPane.showConfirmDialog(null, initialCategoryPanel, 
+			categoryPanel.add(new JLabel("Category Names"));
+			categoryPanel.add(new JLabel("Category Weights"));
+			
+			for(int i = 0; i < 15; i++) {
+				catNameEntries.add(new JTextField(15));
+				catWeightEntries.add(new JTextField(15));
+				categoryPanel.add(catNameEntries.get(i));
+				categoryPanel.add(catWeightEntries.get(i));
+			}
+			
+			int categoryResult = JOptionPane.showConfirmDialog(null, categoryPanel, 
 					"Course Master", JOptionPane.OK_CANCEL_OPTION);
 			
-			if(initialCategoryResult == JOptionPane.OK_OPTION) {
-				if(catNameEntry.getText().isEmpty() || catWeightEntry.getText().isEmpty()) {
-					Errors.ML1.displayErrorMsg();
-					return;
-				}
-			
-				if(isNumbers(catNameEntry.getText())) {
-					Errors.AER3.displayErrorMsg();
-					return;
-				}
-				try {
-					double testError = Double.parseDouble(catWeightEntry.getText());
-				} catch (NumberFormatException e) {
-					Errors.ML2.displayErrorMsg();
-					return;
-				}
-				catsAndWeights.add(catNameEntry.getText());
-				catsAndWeights.add(catWeightEntry.getText());
-			}
-			else {
-				displayCancelMsg();
-				return;
-			}
-
-			int keepEntering = 0;
-			while(keepEntering == 0) {
-				keepEntering = JOptionPane.showConfirmDialog(null, "Enter Another Category?", "Course Master", 
-						JOptionPane.YES_NO_CANCEL_OPTION);
-				if(keepEntering == 0) {
-					JPanel categoryPanel2 = new JPanel(); // For additional category entries
-					categoryPanel2.setLayout(new GridLayout(2, 0));
-					JTextField catNameEntry2 = new JTextField(15);
-					JTextField catWeightEntry2 = new JTextField(15);
-					catNameEntry2.setText("");
-					catWeightEntry2.setText("");
-					categoryPanel2.add(new JLabel("Enter Category Name"));
-					categoryPanel2.add(catNameEntry2);
-					categoryPanel2.add(new JLabel("Enter Category Weight"));
-					categoryPanel2.add(catWeightEntry2);
-					
-					int additionalCategoryResult = JOptionPane.showConfirmDialog(null, categoryPanel2, 
-							"Course Master", JOptionPane.OK_CANCEL_OPTION);
-					
-					if(additionalCategoryResult == JOptionPane.OK_OPTION) {
-						if(catNameEntry.getText().isEmpty() || catWeightEntry.getText().isEmpty()) {
-							Errors.ML1.displayErrorMsg();
-							return;
-						}
-					
-						if(isNumbers(catNameEntry2.getText())) {
-							Errors.AER3.displayErrorMsg();
-							return;
-						}
+			if(categoryResult == JOptionPane.OK_OPTION) {
+				
+				for(int i = 0; i < catNameEntries.size(); i++) {
+					if(!catNameEntries.get(i).getText().isEmpty() && isNumbers(catNameEntries.get(i).getText())) {
+						System.out.println(catNameEntries.get(i).getText());
+						System.out.println(catWeightEntries.get(i).getText());
+						Errors.AER3.displayErrorMsg();
+						return;
+					}
+					if(!catNameEntries.get(i).getText().isEmpty()) {
 						try {
-							double testError = Double.parseDouble(catWeightEntry2.getText());
+							double testError = Double.parseDouble(catWeightEntries.get(i).getText());
 						} catch (NumberFormatException e) {
 							Errors.ML2.displayErrorMsg();
 							return;
 						}
-						catsAndWeights.add(catNameEntry2.getText());
-						catsAndWeights.add(catWeightEntry2.getText());
-					}
-					else {
-						displayCancelMsg();
-						return;
+						catsAndWeights.add(catNameEntries.get(i).getText());
+						catsAndWeights.add(catWeightEntries.get(i).getText());
 					}
 				}
-				else if(keepEntering == JOptionPane.CANCEL_OPTION){
-					displayCancelMsg();
+				
+				if(catsAndWeights.size() == 0) {
+					Errors.ML1.displayErrorMsg();
 					return;
 				}
+			}
+			else {
+				displayCancelMsg();
+				return;
 			}
 			categories.put(identifier, catsAndWeights);
 		}
