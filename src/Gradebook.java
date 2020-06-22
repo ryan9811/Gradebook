@@ -42,7 +42,6 @@ public class Gradebook extends JFrame implements ActionListener {
 	
 	private JButton viewBreakdown; // JButton triggering the breakdown of category grading
 	
-	
 	private boolean isAPluses; // Whether or not A+ is allowed
 	private boolean isHonorsAPClasses; // Whether or not there are honors/AP classes
 	private double honorsBonus; // Honors GPA bonus
@@ -503,6 +502,9 @@ public class Gradebook extends JFrame implements ActionListener {
 		String[] gModeChoices = {"Letter", "P/NP", "Notation"};
 		JComboBox gModeEntry = new JComboBox(gModeChoices);
 		
+		String[] weightChoices = {"Category Weightings", "Total Points"};
+		JComboBox weightEntry = new JComboBox(weightChoices);
+		
 		String[] scaleChoices = new String[gradeScales.size()];
 		for(int i = 0; i < scaleChoices.length; i++) {
 			scaleChoices[i] = (String) gradeScales.get(i).get("Name");
@@ -510,7 +512,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		JComboBox scaleEntry = new JComboBox(scaleChoices);
 		
 		JPanel courseInfoPanel = new JPanel();
-		courseInfoPanel.setLayout(new GridLayout(7, 0));
+		courseInfoPanel.setLayout(new GridLayout(8, 0));
 		
 		courseInfoPanel.add(new JLabel("Enter Subject/Course Number"));
 		courseInfoPanel.add(subjectEntry);
@@ -526,6 +528,9 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		courseInfoPanel.add(new JLabel("Select Grade Mode"));
 		courseInfoPanel.add(gModeEntry);
+		
+		courseInfoPanel.add(new JLabel("Select Grading Method"));
+		courseInfoPanel.add(weightEntry);
 		
 		courseInfoPanel.add(new JLabel("Select Grade Scale"));
 		courseInfoPanel.add(scaleEntry);
@@ -606,53 +611,61 @@ public class Gradebook extends JFrame implements ActionListener {
 		if(!gMode.equals("Notation") && fGrade.equals("In Progress")) {
 
 			ArrayList<String> catsAndWeights = new ArrayList<String>();
-			ArrayList<JTextField> catNameEntries = new ArrayList<JTextField>();
-			ArrayList<JTextField> catWeightEntries = new ArrayList<JTextField>();
-			JPanel categoryPanel = new JPanel();
-			categoryPanel.setLayout(new GridLayout(16, 2));
 			
-			categoryPanel.add(new JLabel("Category Names"));
-			categoryPanel.add(new JLabel("Category Weights"));
-			
-			for(int i = 0; i < 15; i++) {
-				catNameEntries.add(new JTextField(15));
-				catWeightEntries.add(new JTextField(15));
-				categoryPanel.add(catNameEntries.get(i));
-				categoryPanel.add(catWeightEntries.get(i));
+			if(weightEntry.getSelectedItem().equals("Total Points")) {
+				catsAndWeights.add("Total Points");
+				catsAndWeights.add("100");
 			}
 			
-			int categoryResult = JOptionPane.showConfirmDialog(null, categoryPanel, 
-					"Course Master", JOptionPane.OK_CANCEL_OPTION);
-			
-			if(categoryResult == JOptionPane.OK_OPTION) {
+			else {	
+				ArrayList<JTextField> catNameEntries = new ArrayList<JTextField>();
+				ArrayList<JTextField> catWeightEntries = new ArrayList<JTextField>();
+				JPanel categoryPanel = new JPanel();
+				categoryPanel.setLayout(new GridLayout(16, 2));
 				
-				for(int i = 0; i < catNameEntries.size(); i++) {
-					if(!catNameEntries.get(i).getText().isEmpty() && isNumbers(catNameEntries.get(i).getText())) {
-						System.out.println(catNameEntries.get(i).getText());
-						System.out.println(catWeightEntries.get(i).getText());
-						Errors.AER3.displayErrorMsg();
-						return;
-					}
-					if(!catNameEntries.get(i).getText().isEmpty()) {
-						try {
-							double testError = Double.parseDouble(catWeightEntries.get(i).getText());
-						} catch (NumberFormatException e) {
-							Errors.ML2.displayErrorMsg();
+				categoryPanel.add(new JLabel("Category Names"));
+				categoryPanel.add(new JLabel("Category Weights"));
+				
+				for(int i = 0; i < 15; i++) {
+					catNameEntries.add(new JTextField(15));
+					catWeightEntries.add(new JTextField(15));
+					categoryPanel.add(catNameEntries.get(i));
+					categoryPanel.add(catWeightEntries.get(i));
+				}
+				
+				int categoryResult = JOptionPane.showConfirmDialog(null, categoryPanel, 
+						"Course Master", JOptionPane.OK_CANCEL_OPTION);
+				
+				if(categoryResult == JOptionPane.OK_OPTION) {
+					
+					for(int i = 0; i < catNameEntries.size(); i++) {
+						if(!catNameEntries.get(i).getText().isEmpty() && isNumbers(catNameEntries.get(i).getText())) {
+							System.out.println(catNameEntries.get(i).getText());
+							System.out.println(catWeightEntries.get(i).getText());
+							Errors.AER3.displayErrorMsg();
 							return;
 						}
-						catsAndWeights.add(catNameEntries.get(i).getText());
-						catsAndWeights.add(catWeightEntries.get(i).getText());
+						if(!catNameEntries.get(i).getText().isEmpty()) {
+							try {
+								double testError = Double.parseDouble(catWeightEntries.get(i).getText());
+							} catch (NumberFormatException e) {
+								Errors.ML2.displayErrorMsg();
+								return;
+							}
+							catsAndWeights.add(catNameEntries.get(i).getText());
+							catsAndWeights.add(catWeightEntries.get(i).getText());
+						}
+					}
+					
+					if(catsAndWeights.size() == 0) {
+						Errors.ML1.displayErrorMsg();
+						return;
 					}
 				}
-				
-				if(catsAndWeights.size() == 0) {
-					Errors.ML1.displayErrorMsg();
+				else {
+					displayCancelMsg();
 					return;
 				}
-			}
-			else {
-				displayCancelMsg();
-				return;
 			}
 			categories.put(identifier, catsAndWeights);
 		}
@@ -686,46 +699,52 @@ public class Gradebook extends JFrame implements ActionListener {
 		JComboBox creditEntry = new JComboBox(creditsChoices);
 		creditEntry.setSelectedIndex(6);
 		
+		String[] weightChoices = {"Category Weightings", "Total Points"};
+		JComboBox weightEntry = new JComboBox(weightChoices);
+		
 		String[] honorsAPChoices = {"College Prep", "Honors", "Advanced Placement"};
 		JComboBox courseTypeEntry = new JComboBox(honorsAPChoices);
 		
 		String[] gModeChoices = {"Letter", "P/NP", "Notation"};
 		JComboBox gModeEntry = new JComboBox(gModeChoices);
 		
-		JPanel addCoursePanel = new JPanel();
-		addCoursePanel.setLayout(new GridLayout(8, 0));
+		JPanel courseInfoPanel = new JPanel();
+		courseInfoPanel.setLayout(new GridLayout(8, 0));
 		
-		addCoursePanel.add(new JLabel("Enter Subject/Course Number"));
-		addCoursePanel.add(subjectEntry);
+		courseInfoPanel.add(new JLabel("Enter Subject/Course Number"));
+		courseInfoPanel.add(subjectEntry);
 		
-		addCoursePanel.add(new JLabel("Enter Course Title"));
-		addCoursePanel.add(titleEntry);
+		courseInfoPanel.add(new JLabel("Enter Course Title"));
+		courseInfoPanel.add(titleEntry);
 		
-		addCoursePanel.add(new JLabel("Enter Course Type"));
-		addCoursePanel.add(courseTypeEntry);
+		courseInfoPanel.add(new JLabel("Enter Course Type"));
+		courseInfoPanel.add(courseTypeEntry);
 		
-		addCoursePanel.add(new JLabel("Enter Comment"));
-		addCoursePanel.add(commentEntry);
+		courseInfoPanel.add(new JLabel("Enter Comment"));
+		courseInfoPanel.add(commentEntry);
 		
-		addCoursePanel.add(new JLabel("Select Number of Credits"));
-		addCoursePanel.add(creditEntry);
+		courseInfoPanel.add(new JLabel("Select Number of Credits"));
+		courseInfoPanel.add(creditEntry);
 		
-		addCoursePanel.add(new JLabel("Select Grade Mode"));
-		addCoursePanel.add(gModeEntry);
+		courseInfoPanel.add(new JLabel("Select Grade Mode"));
+		courseInfoPanel.add(gModeEntry);
+		
+		courseInfoPanel.add(new JLabel("Select Grading Method"));
+		courseInfoPanel.add(weightEntry);
 		
 		String[] scaleChoices = new String[gradeScales.size()];
 		for(int i = 0; i < scaleChoices.length; i++) {
 			scaleChoices[i] = (String) gradeScales.get(i).get("Name");
 		}
 		JComboBox scaleEntry = new JComboBox(scaleChoices);
-		addCoursePanel.add(new JLabel("Select Grade Scale"));
-		addCoursePanel.add(scaleEntry);
+		courseInfoPanel.add(new JLabel("Select Grade Scale"));
+		courseInfoPanel.add(scaleEntry);
 		
-		addCoursePanel.add(new JLabel("Enter Term"));
+		courseInfoPanel.add(new JLabel("Enter Term"));
 		termEntry.setText(getUnfinalizedTerm());
-		addCoursePanel.add(termEntry);
+		courseInfoPanel.add(termEntry);
 		
-		int courseInfoResult = JOptionPane.showConfirmDialog(null, addCoursePanel, "Course Master", JOptionPane.OK_CANCEL_OPTION);
+		int courseInfoResult = JOptionPane.showConfirmDialog(null, courseInfoPanel, "Course Master", JOptionPane.OK_CANCEL_OPTION);
 		
 		if(courseInfoResult == JOptionPane.OK_OPTION) {
 			credits = (String) creditEntry.getSelectedItem();
@@ -798,86 +817,58 @@ public class Gradebook extends JFrame implements ActionListener {
 		if(!gMode.equals("Notation") && fGrade.equals("In Progress")) {
 
 			ArrayList<String> catsAndWeights = new ArrayList<String>();
-			JPanel initialCategoryPanel = new JPanel();
-			initialCategoryPanel.setLayout(new GridLayout(2, 0));
-			JTextField catNameEntry = new JTextField(15);
-			JTextField catWeightEntry = new JTextField(15);
-			initialCategoryPanel.add(new JLabel("Enter Category Name"));
-			initialCategoryPanel.add(catNameEntry);
-			initialCategoryPanel.add(new JLabel("Enter Category Weight"));
-			initialCategoryPanel.add(catWeightEntry);
 			
-			int initialCategoryResult = JOptionPane.showConfirmDialog(null, initialCategoryPanel, 
-					"Course Master", JOptionPane.OK_CANCEL_OPTION);
-			
-			if(initialCategoryResult == JOptionPane.OK_OPTION) {
-				if(catNameEntry.getText().isEmpty() || catWeightEntry.getText().isEmpty()) {
-					Errors.ML1.displayErrorMsg();
-					return;
-				}
-			
-				if(isNumbers(catNameEntry.getText())) {
-					Errors.AER3.displayErrorMsg();
-					return;
-				}
-				try {
-					double testError = Double.parseDouble(catWeightEntry.getText());
-				} catch (NumberFormatException e) {
-					Errors.ML2.displayErrorMsg();
-					return;
-				}
-				catsAndWeights.add(catNameEntry.getText());
-				catsAndWeights.add(catWeightEntry.getText());
+			if(weightEntry.getSelectedItem().equals("Total Points")) {
+				catsAndWeights.add("Total Points");
+				catsAndWeights.add("100");
 			}
+			
 			else {
-				displayCancelMsg();
-				return;
-			}
-
-			int keepEntering = 0;
-			while(keepEntering == 0) {
-				keepEntering = JOptionPane.showConfirmDialog(null, "Enter Another Category?", "Course Master", 
-						JOptionPane.YES_NO_CANCEL_OPTION);
-				if(keepEntering == 0) {
-					JPanel categoryPanel2 = new JPanel();
-					categoryPanel2.setLayout(new GridLayout(2, 0));
-					JTextField catNameEntry2 = new JTextField(15);
-					JTextField catWeightEntry2 = new JTextField(15);
-					catNameEntry2.setText("");
-					catWeightEntry2.setText("");
-					categoryPanel2.add(new JLabel("Enter Category Name"));
-					categoryPanel2.add(catNameEntry2);
-					categoryPanel2.add(new JLabel("Enter Category Weight"));
-					categoryPanel2.add(catWeightEntry2);
+				ArrayList<JTextField> catNameEntries = new ArrayList<JTextField>();
+				ArrayList<JTextField> catWeightEntries = new ArrayList<JTextField>();
+				JPanel categoryPanel = new JPanel();
+				categoryPanel.setLayout(new GridLayout(16, 2));
+				
+				categoryPanel.add(new JLabel("Category Names"));
+				categoryPanel.add(new JLabel("Category Weights"));
+				
+				for(int i = 0; i < 15; i++) {
+					catNameEntries.add(new JTextField(15));
+					catWeightEntries.add(new JTextField(15));
+					categoryPanel.add(catNameEntries.get(i));
+					categoryPanel.add(catWeightEntries.get(i));
+				}
+				
+				int categoryResult = JOptionPane.showConfirmDialog(null, categoryPanel, 
+						"Course Master", JOptionPane.OK_CANCEL_OPTION);
+				
+				if(categoryResult == JOptionPane.OK_OPTION) {
 					
-					int additionalCategoryResult = JOptionPane.showConfirmDialog(null, categoryPanel2, 
-							"Course Master", JOptionPane.OK_CANCEL_OPTION);
-					
-					if(additionalCategoryResult == JOptionPane.OK_OPTION) {
-						if(catNameEntry.getText().isEmpty() || catWeightEntry.getText().isEmpty()) {
-							Errors.ML1.displayErrorMsg();
-							return;
-						}
-					
-						if(isNumbers(catNameEntry2.getText())) {
+					for(int i = 0; i < catNameEntries.size(); i++) {
+						if(!catNameEntries.get(i).getText().isEmpty() && isNumbers(catNameEntries.get(i).getText())) {
+							System.out.println(catNameEntries.get(i).getText());
+							System.out.println(catWeightEntries.get(i).getText());
 							Errors.AER3.displayErrorMsg();
 							return;
 						}
-						try {
-							double testError = Double.parseDouble(catWeightEntry2.getText());
-						} catch (NumberFormatException e) {
-							Errors.ML2.displayErrorMsg();
-							return;
+						if(!catNameEntries.get(i).getText().isEmpty()) {
+							try {
+								double testError = Double.parseDouble(catWeightEntries.get(i).getText());
+							} catch (NumberFormatException e) {
+								Errors.ML2.displayErrorMsg();
+								return;
+							}
+							catsAndWeights.add(catNameEntries.get(i).getText());
+							catsAndWeights.add(catWeightEntries.get(i).getText());
 						}
-						catsAndWeights.add(catNameEntry2.getText());
-						catsAndWeights.add(catWeightEntry2.getText());
 					}
-					else {
-						displayCancelMsg();
+					
+					if(catsAndWeights.size() == 0) {
+						Errors.ML1.displayErrorMsg();
 						return;
 					}
 				}
-				else if(keepEntering == JOptionPane.CANCEL_OPTION){
+				else {
 					displayCancelMsg();
 					return;
 				}
@@ -2116,7 +2107,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		String[] apHonorsChoices = {"No", "Yes"};
 		
 		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(6, 0));
+		p.setLayout(new GridLayout(7, 0));
 		
 		JComboBox aPlusEntry = new JComboBox(aPlusChoices);
 		JComboBox decimalEntry = new JComboBox(decimalChoices);
@@ -2129,8 +2120,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		deleteGradeScale.addActionListener(this);
 		JButton addNewGradeScale = new JButton("Add Grade Scale");
 		addNewGradeScale.addActionListener(this);
-		JButton editGradeScale = new JButton("Edit Grade Scale");
-		editGradeScale.addActionListener(this);
+		JButton viewGradeScale = new JButton("View Grade Scale");
+		viewGradeScale.addActionListener(this);
 		
 		p.add(new JLabel("Is A+ Allowed?"));
 		p.add(aPlusEntry);
@@ -2163,6 +2154,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		p.add(addNewGradeScale);
 		p.add(deleteGradeScale);
+		p.add(viewGradeScale);
+		p.add(setDefaults);
 		
 		if(cdtm.getRowCount() > 0) {
 			aPlusEntry.setEnabled(false);
@@ -2251,31 +2244,31 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		p.add(new JLabel("Enter Name for Grade Scale"));
 		p.add(name);
-		p.add(new JLabel("Min Grade for A+"));
+		p.add(new JLabel("Minimum Grade for A+"));
 		p.add(minAp);
-		p.add(new JLabel("Min Grade for A"));
+		p.add(new JLabel("Minimum Grade for A"));
 		p.add(minA);
-		p.add(new JLabel("Min Grade for A-"));
+		p.add(new JLabel("Minimum Grade for A-"));
 		p.add(minAm);
-		p.add(new JLabel("Min Grade for B+"));
+		p.add(new JLabel("Minimum Grade for B+"));
 		p.add(minBp);
-		p.add(new JLabel("Min Grade for B"));
+		p.add(new JLabel("Minimum Grade for B"));
 		p.add(minB);
-		p.add(new JLabel("Min Grade for B-"));
+		p.add(new JLabel("Minimum Grade for B-"));
 		p.add(minBm);
-		p.add(new JLabel("Min Grade for C+"));
+		p.add(new JLabel("Minimum Grade for C+"));
 		p.add(minCp);
-		p.add(new JLabel("Min Grade for C"));
+		p.add(new JLabel("Minimum Grade for C"));
 		p.add(minC);
-		p.add(new JLabel("Min Grade for C-"));
+		p.add(new JLabel("Minimum Grade for C-"));
 		p.add(minCm);
-		p.add(new JLabel("Min Grade for D+"));
+		p.add(new JLabel("Minimum Grade for D+"));
 		p.add(minDp);
-		p.add(new JLabel("Min Grade for D"));
+		p.add(new JLabel("Minimum Grade for D"));
 		p.add(minD);
-		p.add(new JLabel("Min Grade for D-"));
+		p.add(new JLabel("Minimum Grade for D-"));
 		p.add(minDm);
-		p.add(new JLabel("Min Grade for Pass"));
+		p.add(new JLabel("Minimum Grade for Pass"));
 		p.add(minP);
 		
 		int result = JOptionPane.showConfirmDialog(null, p, "Settings Master", JOptionPane.OK_CANCEL_OPTION);
@@ -2427,6 +2420,60 @@ public class Gradebook extends JFrame implements ActionListener {
 	}
 	
 	/**
+	 * Allows user to view minimum grade required for each tier in a grade scale
+	 */
+	public void viewGradeScale() {
+		
+		if(gradeScales.size() == 0) {
+			Errors.SS3.displayErrorMsg();
+			return;
+		}
+		
+		String[] choices = new String[gradeScales.size()];
+		for(int i = 0; i < gradeScales.size(); i++)
+			choices[i] = (String) gradeScales.get(i).get("Name");
+		
+		String view = (String) JOptionPane.showInputDialog(null, "Select Grade Scale to View", "Settings Master", 
+				JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
+		
+		for(int i = 0; i < gradeScales.size(); i++) {
+			if(isAPluses && gradeScales.get(i).get("Name").equals(view)) {
+				JOptionPane.showMessageDialog(null, "Grade Scale Name: " + gradeScales.get(i).get("Name") + "\n"
+						+ "Minimum Grade for [A+]: " + gradeScales.get(i).get("A+") + "\n"
+						+ "Minimum Grade for [A]: " + gradeScales.get(i).get("A") + "\n"
+						+ "Minimum Grade for [A-]: " + gradeScales.get(i).get("A-") + "\n"
+						+ "Minimum Grade for [B+]: " + gradeScales.get(i).get("B+") + "\n"
+						+ "Minimum Grade for [B]: " + gradeScales.get(i).get("B") + "\n"
+						+ "Minimum Grade for [B-]: " + gradeScales.get(i).get("B-") + "\n"
+						+ "Minimum Grade for [C+]: " + gradeScales.get(i).get("C+") + "\n"
+						+ "Minimum Grade for [C]: " + gradeScales.get(i).get("C") + "\n"
+						+ "Minimum Grade for [C-]: " + gradeScales.get(i).get("C-") + "\n"
+						+ "Minimum Grade for [D+]: " + gradeScales.get(i).get("D+") + "\n"
+						+ "Minimum Grade for [D]: " + gradeScales.get(i).get("D") + "\n"
+						+ "Minimum Grade for [D-]: " + gradeScales.get(i).get("D-") + "\n"
+						+ "Minimum Grade for [Pass]: " + gradeScales.get(i).get("P") + "\n",
+						"Settings Master", JOptionPane.INFORMATION_MESSAGE);
+			}
+			else {
+				JOptionPane.showMessageDialog(null, "Grade Scale Name: " + gradeScales.get(i).get("Name") + "\n"
+						+ "Minimum Grade for [A]: " + gradeScales.get(i).get("A") + "\n"
+						+ "Minimum Grade for [A-]: " + gradeScales.get(i).get("A-") + "\n"
+						+ "Minimum Grade for [B+]: " + gradeScales.get(i).get("B+") + "\n"
+						+ "Minimum Grade for [B]: " + gradeScales.get(i).get("B") + "\n"
+						+ "Minimum Grade for [B-]: " + gradeScales.get(i).get("B-") + "\n"
+						+ "Minimum Grade for [C+]: " + gradeScales.get(i).get("C+") + "\n"
+						+ "Minimum Grade for [C]: " + gradeScales.get(i).get("C") + "\n"
+						+ "Minimum Grade for [C-]: " + gradeScales.get(i).get("C-") + "\n"
+						+ "Minimum Grade for [D+]: " + gradeScales.get(i).get("D+") + "\n"
+						+ "Minimum Grade for [D]: " + gradeScales.get(i).get("D") + "\n"
+						+ "Minimum Grade for [D-]: " + gradeScales.get(i).get("D-") + "\n"
+						+ "Minimum Grade for [Pass]: " + gradeScales.get(i).get("P") + "\n",
+						"Settings Master", JOptionPane.INFORMATION_MESSAGE);
+			}
+		}
+	}
+	
+	/**
 	 * Gets the name of a grade scale
 	 * @param the grade scale
 	 * @return the name of a grade scale
@@ -2570,7 +2617,7 @@ public class Gradebook extends JFrame implements ActionListener {
 						+ "SS2. Invalid Grade Scale. Occurs if negative values have been entered or if the scale does not make sense.\n"
 						+ "For example, a scale cannot contain a minimum grade of 90 for an A and 95 for a B because 95 > 90 but an A is a better grade.\n"
 						+ "Also occurs if the name of the grade scale is already taken. Two grade scales cannot exist with the same name.\n\n"
-						+ "SS3. No Grade Scales to Delete. There are no grade scales left to be deleted.\n\n"
+						+ "SS3. No Grade Scales Available. There are no grade scales left to view or delete.\n\n"
 						+ "SS4. Grade Scale In Use. A grade scale cannot be deleted if it is currently being used by a course to calculate grades.\n"
 						+ "All courses linked to that grade scale must be changed to a different grade scale before it can be deleted.\n\n"
 						+ "SS5. Check Settings Before Adding Course. User must check settings before using Grade Calculator v5.\n"
@@ -2716,6 +2763,10 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		if(s.equals("Delete Grade Scale")) {
 			deleteGradeScale();
+		}
+		
+		if(s.equals("View Grade Scale")) {
+			viewGradeScale();
 		}
 			
 	}

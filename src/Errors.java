@@ -19,7 +19,7 @@ public enum Errors {
 	FG2("FG2", "All Courses Finalized"),
 	SS1("SS1", "Cannot Have Negative Bonus"),
 	SS2("SS2", "Invalid Grade Scale"),
-	SS3("SS3", "No Grade Scales to Delete"),
+	SS3("SS3", "No Grade Scales Available"),
 	SS4("SS4", "Grade Scale In Use"),
 	SS5("SS5", "Check Settings Before Adding Course"),
 	ML1("ML1", "Missing Information"),
