@@ -1760,16 +1760,23 @@ public class Gradebook extends JFrame implements ActionListener {
 			return;
 		}
 		
-		String[] identifierChoices = new String[identifiers.size()];
-		for(int i = 0; i < identifiers.size(); i++)
-			identifierChoices[i] = identifiers.get(i);
-
-		String identifier = (String) JOptionPane.showInputDialog(null, "Select Identifier", "Grade Master", 
-				JOptionPane.QUESTION_MESSAGE, null, identifierChoices, identifierChoices[0]);
+		String identifier = "";
 		
-		if(identifier == null) {
-			displayCancelMsg();
-			return;
+		if(identifiers.contains(identifierInput.getText()))
+			identifier = identifierInput.getText();
+		
+		else {
+			String[] identifierChoices = new String[identifiers.size()];
+			for(int i = 0; i < identifiers.size(); i++)
+				identifierChoices[i] = identifiers.get(i);
+	
+			identifier = (String) JOptionPane.showInputDialog(null, "Select Identifier", "Grade Master", 
+					JOptionPane.QUESTION_MESSAGE, null, identifierChoices, identifierChoices[0]);
+			
+			if(identifier == null) {
+				displayCancelMsg();
+				return;
+			}
 		}
 		
 		String courseTitle = "";

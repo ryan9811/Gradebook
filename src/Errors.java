@@ -4,7 +4,7 @@ public enum Errors {
 	
 	AER1("AER1", "Entered Term is Finalized"),
 	AER2("AER2", "Must Finalize Previous Term"),
-	AER3("AER3", "Category Name Cannot Contain Numbers"),
+	AER3("AER3", "Category Name Cannot Be Numbers"),
 	AER4("AER4", "Category Name Already Exists"),
 	AER5("AER5", "Cannot Have Negative Weight"),
 	AER6("AER6", "Must Create a Grade Scale"),
