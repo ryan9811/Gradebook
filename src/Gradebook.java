@@ -1623,7 +1623,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				}
 				
 				if(Double.parseDouble(pointsEarned) < 0 || Double.parseDouble(totalPoints) < 0) {
-					Errors.EG1.displayErrorMsg();
+					Errors.AM1.displayErrorMsg();
 					return;
 				}
 				
@@ -1792,7 +1792,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				identifiers.add(cdtm.getValueAt(i, 3) + "");
 		
 		if(identifiers.size() == 0) {
-			Errors.EG2.displayErrorMsg();
+			Errors.AM2.displayErrorMsg();
 			return;
 		}
 		
@@ -1841,7 +1841,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			categoryChoices[i] = categories.get(identifier).get(i * 2);
 		
 		if(categoryChoices.length == 0) {
-			Errors.EG3.displayErrorMsg();
+			Errors.AM3.displayErrorMsg();
 			return;
 		}
 		
@@ -1921,7 +1921,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			
 			if(Double.parseDouble(pointsEarned) < 0 || Double.parseDouble(totalPoints) < 0) {
-				Errors.EG1.displayErrorMsg();
+				Errors.AM1.displayErrorMsg();
 				return;
 			}
 		}
@@ -2773,7 +2773,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(choice.equals("Error Details")) {
-			String[] errorOptions = {"AER", "EG", "FG", "SS", "ML"};
+			String[] errorOptions = {"AER", "AM", "FG", "SS", "ML"};
 			String choice2 = (String) JOptionPane.showInputDialog(null, "Select Error Type", "Help Master", 
 					JOptionPane.QUESTION_MESSAGE, null, errorOptions, errorOptions[0]);
 			
@@ -2804,12 +2804,12 @@ public class Gradebook extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);	
 			}
 			
-			if(choice2.equals("EG")) {
-				String s = "EG: Grade Entering Errors\n\n"
-						+ "EG1. Negative Values Not Accepted. Cannot use negative values when entering a grade.\n\n"
-						+ "EG2. No Courses Available. There are no courses available for which grades can be entered.\n"
+			if(choice2.equals("AM")) {
+				String s = "AM: Assignment Errors\n\n"
+						+ "AM1. Negative Values Not Accepted. Cannot use negative values when entering a grade.\n\n"
+						+ "AM2. No Courses Available. There are no courses available for which grades can be entered.\n"
 						+ "Courses must have Status = In Progress to be eligible to have grades entered.\n\n"
-						+ "EG3. Must Add Category. If all categories have been deleted, a new one must be added in order to enter a grade.";
+						+ "AM3. Must Add Category. If all categories have been deleted, a new one must be added in order to enter a grade.";
 				JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);	
 			}
 			
