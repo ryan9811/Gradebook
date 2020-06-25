@@ -414,8 +414,10 @@ public class Gradebook extends JFrame implements ActionListener {
 					categoryWeight = Double.parseDouble(gdtm.getValueAt(j, 4) + "");
 				}
 				if(gdtm.getValueAt(j,1).equals(identifier) && finishedCats.get(i).equals(gdtm.getValueAt(j, 3))) {
-					sumPointsEarned += Double.parseDouble(gdtm.getValueAt(j, 5) + "");
-					sumTotalPoints += Double.parseDouble(gdtm.getValueAt(j, 6) + "");
+					if(!(gdtm.getValueAt(j, 5) + "").equals("Ungraded")) {
+						sumPointsEarned += Double.parseDouble(gdtm.getValueAt(j, 5) + "");
+						sumTotalPoints += Double.parseDouble(gdtm.getValueAt(j, 6) + "");
+					}
 				}
 			}	
 			finalGrade += (sumPointsEarned / sumTotalPoints) * (categoryWeight / sumCategoryWeightsUsed) * 100;
@@ -1752,6 +1754,11 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 		}
 		
+		String[] assignmentChoices = {"Graded Assignment", "Ungraded Assignment"};
+		
+		String assnChoice = (String) JOptionPane.showInputDialog(null, "Select Assignment Type", "Grade Master", 
+				JOptionPane.QUESTION_MESSAGE, null, assignmentChoices, assignmentChoices[0]);
+		
 		String courseTitle = "";
 		for(int i = 0; i < cdtm.getRowCount(); i++)
 			if(identifier.equals(cdtm.getValueAt(i, 3))) {
@@ -1773,7 +1780,10 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(4, 0));
+		if(assnChoice.equals("Graded Assignment"))
+			p.setLayout(new GridLayout(4, 0));
+		else
+			p.setLayout(new GridLayout(3, 0));
 		String pointsEarned, totalPoints, category, comment;
 		pointsEarned = totalPoints = category = comment = "";
 		
@@ -1785,8 +1795,10 @@ public class Gradebook extends JFrame implements ActionListener {
 		p.add(new JLabel("Select Category"));
 		p.add(categoryEntry);
 		
-		p.add(new JLabel("Enter Points Earned"));
-		p.add(pointsEarnedEntry);
+		if(assnChoice.equals("Graded Assignment")) {
+			p.add(new JLabel("Enter Points Earned"));
+			p.add(pointsEarnedEntry);
+		}
 		
 		p.add(new JLabel("Enter Total Points"));
 		p.add(totalPointsEntry);
@@ -1798,14 +1810,23 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		if(result == JOptionPane.OK_OPTION) {
 			category = (String) categoryEntry.getSelectedItem();
-			pointsEarned = pointsEarnedEntry.getText();
-			totalPoints = totalPointsEntry.getText();
-			comment = commentEntry.getText();
-			
-			if(pointsEarned.isEmpty() || totalPoints.isEmpty()) {
-				Errors.ML1.displayErrorMsg();
-				return;
+			if(assnChoice.equals("Graded Assignment")) {
+				pointsEarned = pointsEarnedEntry.getText();
+				totalPoints = totalPointsEntry.getText();
+				
+				if(pointsEarned.isEmpty() || totalPoints.isEmpty()) {
+					Errors.ML1.displayErrorMsg();
+					return;
+				}
 			}
+			else {
+				totalPoints = totalPointsEntry.getText();
+				if(totalPoints.isEmpty()) {
+					Errors.ML1.displayErrorMsg();
+					return;
+				}
+			}
+			comment = commentEntry.getText();
 		}
 		
 		else {
@@ -1825,25 +1846,43 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String grade = "";
 		
+		if(assnChoice.equals("Graded Assignment")) {
+			try {
+				grade = rounder.format(Double.parseDouble(pointsEarned) / Double.parseDouble(totalPoints) * 100);
+			} catch (NumberFormatException e) {
+				Errors.ML2.displayErrorMsg();
+				return;
+			}
+			
+			if(Double.parseDouble(pointsEarned) < 0 || Double.parseDouble(totalPoints) < 0) {
+				Errors.EG1.displayErrorMsg();
+				return;
+			}
+		}
+		else {
+			pointsEarned = "Ungraded";
+			grade = "Ungraded";
+		}
+		
+		if(assnChoice.equals("Graded Assignment"))
+			pointsEarned = rounder.format(Double.parseDouble(pointsEarned));
+		
 		try {
-			grade = rounder.format(Double.parseDouble(pointsEarned) / Double.parseDouble(totalPoints) * 100);
+			totalPoints = rounder.format(Double.parseDouble(totalPoints));
 		} catch (NumberFormatException e) {
 			Errors.ML2.displayErrorMsg();
 			return;
 		}
-
-		if(Double.parseDouble(pointsEarned) < 0 || Double.parseDouble(totalPoints) < 0) {
-			Errors.EG1.displayErrorMsg();
-			return;
-		}
 		
-		pointsEarned = rounder.format(Double.parseDouble(pointsEarned));
-		totalPoints = rounder.format(Double.parseDouble(totalPoints));
-
-		gdtm.addRow(new Object[] {courseTitle, identifier, code, category, catWeight, rounder.format(Double.parseDouble(pointsEarned)),
+		if(assnChoice.equals("Graded Assignment"))
+			gdtm.addRow(new Object[] {courseTitle, identifier, code, category, catWeight, rounder.format(Double.parseDouble(pointsEarned)),
 				rounder.format(Double.parseDouble(totalPoints)), rounder.format(Double.parseDouble(grade)), comment});
+		else
+			gdtm.addRow(new Object[] {courseTitle, identifier, code, category, catWeight, pointsEarned,
+					rounder.format(Double.parseDouble(totalPoints)), grade, comment});
 		
-		calculateGrade(identifier);
+		if(assnChoice.equals("Graded Assignment"))
+			calculateGrade(identifier);
 		
 		JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 	}
