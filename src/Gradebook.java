@@ -156,14 +156,14 @@ public class Gradebook extends JFrame implements ActionListener {
         JButton addCourse = new JButton("Add Course");
         addCourse.addActionListener(this);
         
+        JButton addAssignment = new JButton("Add Assignment");
+        addAssignment.addActionListener(this);
+        
         JButton removeCourse = new JButton("Remove Element");
         removeCourse.addActionListener(this);
         
         JButton editElement = new JButton("Edit Element");
         editElement.addActionListener(this);
-        
-        JButton enterGrade = new JButton("Enter Grade");
-        enterGrade.addActionListener(this);
         
         viewBreakdown = new JButton("Analyze Grades");
         viewBreakdown.addActionListener(this);
@@ -193,9 +193,9 @@ public class Gradebook extends JFrame implements ActionListener {
         
         // Add the buttons to the panel
         buttons.add(addCourse);
+        buttons.add(addAssignment);
         buttons.add(removeCourse);
         buttons.add(editElement);
-        buttons.add(enterGrade);
         buttons.add(viewBreakdown);
         buttons.add(finalizeGrades);
         buttons.add(importExport);
@@ -403,8 +403,15 @@ public class Gradebook extends JFrame implements ActionListener {
 				countUngraded++;
 		}
 		
-		if(countGrades == countUngraded)
-			return;
+		if(countGrades == countUngraded) {
+			for(int i = 0; i < cdtm.getRowCount(); i++)
+				if(cdtm.getValueAt(i, 3).equals(identifier)) {
+					cdtm.setValueAt("n/a", i, 5);
+					cdtm.setValueAt("In Progress", i, 7);
+					return;
+				}
+		}
+		
 			
 		double sumCategoryWeightsUsed = 0;
 		double categoryWeight = 0;
@@ -415,7 +422,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		ArrayList<String> finishedCats = new ArrayList<String>();
 		String category = "";
 		for(int i = 0; i < gdtm.getRowCount(); i++)
-			if(gdtm.getValueAt(i,1).equals(identifier) && !finishedCats.contains(gdtm.getValueAt(i, 3))) {
+			if(gdtm.getValueAt(i,1).equals(identifier) && !finishedCats.contains(gdtm.getValueAt(i, 3)) && !gdtm.getValueAt(i, 5).equals("Ungraded")) {
 				category = gdtm.getValueAt(i, 3) + "";
 				sumCategoryWeightsUsed += Double.parseDouble(gdtm.getValueAt(i, 4) + "");
 				finishedCats.add(category);
@@ -981,7 +988,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			if(cdtm.getValueAt(i, 3).equals(identifierInput.getText())) {
 				String courseName = (String) cdtm.getValueAt(i, 0);
 				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete [" + 
-						courseName + "]? \nThis action cannot be reversed.") == 0) {
+						courseName + "]? \nThis action cannot be reversed.", "Course Master", JOptionPane.YES_NO_CANCEL_OPTION) == 0) {
 					removeAssociatedGrades(identifierInput.getText());
 					cdtm.removeRow(i);
 					JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
@@ -997,7 +1004,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			if(gdtm.getValueAt(i, 2).equals(identifierInput.getText())) {
 				String assignmentCode = (String) gdtm.getValueAt(i, 2);
 				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to delete assignment [" + 
-						assignmentCode + "]? \nThis action cannot be reversed.") == 0) {
+						assignmentCode + "]? \nThis action cannot be reversed.", "Course Master", JOptionPane.YES_NO_CANCEL_OPTION) == 0) {
 					String id = gdtm.getValueAt(i, 1) + "";
 					gdtm.removeRow(i);
 					calculateGrade(id);
@@ -1286,7 +1293,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					}
 					
 					if(JOptionPane.showConfirmDialog(null, "Are you sure you wish to delete the category [" + 
-							nameSelection + "]?\nThis action cannot be reversed.") != 0) {
+							nameSelection + "]?\nThis action cannot be reversed.", "Course Master", JOptionPane.YES_NO_CANCEL_OPTION) != 0) {
 						displayCancelMsg();
 						return;
 					}
@@ -1525,18 +1532,32 @@ public class Gradebook extends JFrame implements ActionListener {
 					row = i;
 			
 			String id = gdtm.getValueAt(row, 1) + "";
+			
+			String[] catEditChoices1 = {"Mark Ungraded", "Regrade", "Change Category", "Edit Comment"};
+			
+			String[] catEditChoices2 = {"Grade Assignment", "Change Category", "Edit Comment"};
+			
+			String catEditChoice;
+			if(isAssignmentGraded(identifierInput.getText())) {
+				catEditChoice = (String) JOptionPane.showInputDialog(null, "Select Action to Perform", "Assignment Master", 
+					JOptionPane.QUESTION_MESSAGE, null, catEditChoices1, catEditChoices1[0]);
+			}
+			else {
+				catEditChoice = (String) JOptionPane.showInputDialog(null, "Select Action to Perform", "Assignment Master", 
+						JOptionPane.QUESTION_MESSAGE, null, catEditChoices2, catEditChoices2[0]);
+			}
+			if(catEditChoice == null) {
+				displayCancelMsg();
+				return;
+			}
 					
-			String[] catEditChoices = {"Category", "Grade", "Comment"};
-			String catEditChoice = (String) JOptionPane.showInputDialog(null, "Select Field for Edit", "Grade Master", 
-					JOptionPane.QUESTION_MESSAGE, null, catEditChoices, catEditChoices[0]);
-					
-			if(catEditChoice.equals("Category")) {
+			if(catEditChoice.equals("Change Category")) {
 				ArrayList<String> names = getCategoryNames(categories.get(id));
 				String[] categoryNames = new String[names.size()];
 				for(int i = 0; i < categoryNames.length; i++)
 					categoryNames[i] = names.get(i);
 						
-				String category = (String) JOptionPane.showInputDialog(null, "Select New Category", "Grade Master", 
+				String category = (String) JOptionPane.showInputDialog(null, "Select New Category", "Assignment Master", 
 						JOptionPane.QUESTION_MESSAGE, null, categoryNames, categoryNames[0]);
 				
 				gdtm.setValueAt(category, row, 3);
@@ -1546,7 +1567,21 @@ public class Gradebook extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
-			else if(catEditChoice.equals("Grade")) {
+			else if(catEditChoice.equals("Mark Ungraded")) {
+				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to mark [" + identifierInput.getText() + "] "
+						+ "Ungraded?\nThis action cannot be reversed.\n","Assignment Master", JOptionPane.YES_NO_CANCEL_OPTION) == 0) {
+					gdtm.setValueAt("Ungraded", row, 5);
+					gdtm.setValueAt("Ungraded", row, 7);
+					
+					calculateGrade(id);
+				}
+				else {
+					displayCancelMsg();
+					return;
+				}
+			}
+			
+			else if(catEditChoice.equals("Regrade") || catEditChoice.equals("Grade Assignment")) {
 				
 				JPanel p = new JPanel();
 				p.setLayout(new GridLayout(2, 0));
@@ -1562,7 +1597,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				p.add(new JLabel("Enter Total Points"));
 				p.add(totalPointsEntry);
 				
-				int result = JOptionPane.showConfirmDialog(null, p, "Grade Master", JOptionPane.OK_CANCEL_OPTION);
+				int result = JOptionPane.showConfirmDialog(null, p, "Assignment Master", JOptionPane.OK_CANCEL_OPTION);
 				
 				if(result == JOptionPane.OK_OPTION) {
 					pointsEarned = pointsEarnedEntry.getText();
@@ -1603,12 +1638,25 @@ public class Gradebook extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
-			else if(catEditChoice.equals("Comment")) {
-				String comment = JOptionPane.showInputDialog(null, "Enter New Comment", "Grade Master", JOptionPane.INFORMATION_MESSAGE);
+			else if(catEditChoice.equals("Edit Comment")) {
+				String comment = JOptionPane.showInputDialog(null, "Enter New Comment", "Assignment Master", JOptionPane.INFORMATION_MESSAGE);
 				gdtm.setValueAt(comment, row, 8);
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
+	}
+	
+	/**
+	 * Tells whether or not a specified assignment has a grade (i.e. not "Ungraded")
+	 * @param code the assignment code for the specified grade
+	 * @return whether or not the assignment is graded
+	 */
+	public boolean isAssignmentGraded(String code) {
+		for(int i = 0; i < gdtm.getRowCount(); i++) {
+			if(gdtm.getValueAt(i, 2).equals(code) && gdtm.getValueAt(i, 5).equals("Ungraded"))
+				return false;
+		}
+		return true;
 	}
 	
 	/**
@@ -1758,7 +1806,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			for(int i = 0; i < identifiers.size(); i++)
 				identifierChoices[i] = identifiers.get(i);
 	
-			identifier = (String) JOptionPane.showInputDialog(null, "Select Identifier", "Grade Master", 
+			identifier = (String) JOptionPane.showInputDialog(null, "Select Identifier", "Assignment Master", 
 					JOptionPane.QUESTION_MESSAGE, null, identifierChoices, identifierChoices[0]);
 			
 			if(identifier == null) {
@@ -1769,7 +1817,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String[] assignmentChoices = {"Graded Assignment", "Ungraded Assignment"};
 		
-		String assnChoice = (String) JOptionPane.showInputDialog(null, "Select Assignment Type", "Grade Master", 
+		String assnChoice = (String) JOptionPane.showInputDialog(null, "Select Assignment Type", "Assignment Master", 
 				JOptionPane.QUESTION_MESSAGE, null, assignmentChoices, assignmentChoices[0]);
 		
 		if(assnChoice == null) {
@@ -1824,7 +1872,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		p.add(new JLabel("Enter Comment"));
 		p.add(commentEntry);
 		
-		int result = JOptionPane.showConfirmDialog(null, p, "Grade Master", JOptionPane.OK_CANCEL_OPTION);
+		int result = JOptionPane.showConfirmDialog(null, p, "Assignment Master", JOptionPane.OK_CANCEL_OPTION);
 		
 		if(result == JOptionPane.OK_OPTION) {
 			category = (String) categoryEntry.getSelectedItem();
@@ -2709,7 +2757,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					+ "entered into the textfield.\n\n"
 					+ "Edit Element. Used to edit a course or an assignment, based on the Identifier or Assignment Code entered into\n"
 					+ "the textfield.\n\n"
-					+ "Enter Grade. Used to enter a grade into the bottom table. Upon entering a grade, the course that the grade is\n"
+					+ "Add Assignment. Used to enter an assignment into the bottom table. Upon entering a grade, the course that the grade is\n"
 					+ "for will have its numeric grade and final grade recalculated.\n\n"
 					+ "Analyze Grades. Used to view more detailed information about grades for a course. Displays the average for\n"
 					+ "each individual grade category and tells you the minimum grade necessary to attain each threshold.\n\n"
@@ -2842,7 +2890,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			}
 			
 			else if(JOptionPane.showConfirmDialog(null, "Are you sure you want to finalize grades?\nThis action cannot be reversed.\n"
-					+ "Note: It is advised to export before finalizing.\nGrades will be cleared.") == 0) {
+					+ "Note: It is advised to export before finalizing.\nGrades will be cleared.", "Grade Master", JOptionPane.YES_NO_CANCEL_OPTION) == 0) {
 				int counter = 0;
 				for(int i = 0; i < cdtm.getRowCount(); i++)
 					if(cdtm.getValueAt(i, 9).equals("In Progress") || cdtm.getValueAt(i, 9).equals("Manual Entry"))
@@ -2863,7 +2911,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		if(s.equals("Manual Override")) {
 			if(!courseList.isEnabled()) {
 				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to enter Manual Override mode? \n"
-						+ "It is highly recommended to use the Edit Course function.\nNote: Reclick Manual Override to return to Automatic.") == 0) {
+						+ "It is highly recommended to use the Edit Course function.\nNote: Reclick Manual Override to return to Automatic.",
+						"Settings Master", JOptionPane.YES_NO_CANCEL_OPTION) == 0) {
 					courseList.setEnabled(true);
 					gradeList.setEnabled(true);
 				}
@@ -2886,7 +2935,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			editElement();
 		}
 		
-		if(s.equals("Enter Grade")) {
+		if(s.equals("Add Assignment")) {
 			hideBreakdown();
 			enterGrade();
 		}
