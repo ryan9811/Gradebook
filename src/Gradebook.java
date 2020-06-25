@@ -2591,7 +2591,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					+ "Notation - I. Incomplete. An incomplete has been granted, meaning the student has provided a valid reason\n"
 					+ "for why they could not complete their work on time.\n\n"
 					+ "Notation - W. Withdrawal. The course has been withdrawn from.\n\n"
-					+ "Notation - Z. Assigned when a student has registered for a course but has not attended class or done any graded work."
+					+ "Notation - Z. Assigned when a student has registered for a course but has not attended class or done any graded work.\n\n"
 					+ "Grading Method. How the course is graded, either by weighted averages or by total points earned / total points attempted.";		
 			JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);
 		}
