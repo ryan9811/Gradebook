@@ -392,6 +392,19 @@ public class Gradebook extends JFrame implements ActionListener {
 					cdtm.setValueAt("In Progress", i, 7);
 					return;
 				}
+		
+		int countGrades = 0;
+		int countUngraded = 0;
+		
+		for(int i = 0; i < gdtm.getRowCount(); i++) {
+			if(gdtm.getValueAt(i, 1).equals(identifier))
+				countGrades++;
+			if(gdtm.getValueAt(i, 1).equals(identifier) && gdtm.getValueAt(i, 5).equals("Ungraded"))
+				countUngraded++;
+		}
+		
+		if(countGrades == countUngraded)
+			return;
 			
 		double sumCategoryWeightsUsed = 0;
 		double categoryWeight = 0;
@@ -1759,6 +1772,11 @@ public class Gradebook extends JFrame implements ActionListener {
 		String assnChoice = (String) JOptionPane.showInputDialog(null, "Select Assignment Type", "Grade Master", 
 				JOptionPane.QUESTION_MESSAGE, null, assignmentChoices, assignmentChoices[0]);
 		
+		if(assnChoice == null) {
+			displayCancelMsg();
+			return;
+		}
+		
 		String courseTitle = "";
 		for(int i = 0; i < cdtm.getRowCount(); i++)
 			if(identifier.equals(cdtm.getValueAt(i, 3))) {
@@ -1975,155 +1993,180 @@ public class Gradebook extends JFrame implements ActionListener {
 			ArrayList<String> titles = new ArrayList<String>();
 			ArrayList<String> weights = new ArrayList<String>();
 			ArrayList<String> courseTitles = new ArrayList<String>();
-			String term = getUnfinalizedTerm();
 			
 			double minPossibleGrade = 0;
-			double remCatTotals = 0;
-			double minRemAvgA = 0;
+			double totalPercentUngraded = 0;
 			
-			for(int i = 0; i < cdtm.getRowCount(); i++) {
-				if(cdtm.getValueAt(i, 9).equals("In Progress") && cdtm.getValueAt(i, 3).equals(id)) {
-					identifiers.add(cdtm.getValueAt(i, 3) + "");
-					if(!cdtm.getValueAt(i, 1).equals(""))
-						courseTitles.add(cdtm.getValueAt(i, 1) + "");
-					else
-						courseTitles.add(cdtm.getValueAt(i, 0) + "");
-				}
-			}
-			for(int i = 0; i < identifiers.size(); i++) {
-				String courseTitle = courseTitles.get(i);
-				String identifier = identifiers.get(i);
-				double pointsEarned = 0;
-				double totalPoints = 0;
-				titles = getCategoryNames(categories.get(identifiers.get(i)));
-				weights = getCategoryValues(categories.get(identifiers.get(i)));
-				
-				for(int j = 0; j < titles.size(); j++) {
-					for(int k = 0; k < gdtm.getRowCount(); k++) 
-						if(gdtm.getValueAt(k, 1).equals(identifier) && gdtm.getValueAt(k, 3).equals(titles.get(j))) {
-							pointsEarned += Double.parseDouble(gdtm.getValueAt(k, 5) + "");
-							totalPoints += Double.parseDouble(gdtm.getValueAt(k, 6) + "");
-						}
-					double grade = pointsEarned / totalPoints * 100;
-
-					if(totalPoints == 0) {
-						gdtm.addRow(new Object[] {courseTitle,identifier,"",titles.get(j),weights.get(j),rounder.format(pointsEarned),
-							rounder.format(totalPoints), grade, "Category Average"});
-						remCatTotals += Double.parseDouble(weights.get(j));
+			if(true) {
+			
+				for(int i = 0; i < cdtm.getRowCount(); i++) {
+					if(cdtm.getValueAt(i, 9).equals("In Progress") && cdtm.getValueAt(i, 3).equals(id)) {
+						identifiers.add(cdtm.getValueAt(i, 3) + "");
+						if(!cdtm.getValueAt(i, 1).equals(""))
+							courseTitles.add(cdtm.getValueAt(i, 1) + "");
+						else
+							courseTitles.add(cdtm.getValueAt(i, 0) + "");
 					}
-					else
-						gdtm.addRow(new Object[] {courseTitle,identifier,"",titles.get(j),weights.get(j),rounder.format(pointsEarned),
-								rounder.format(totalPoints), rounder.format(grade), "Category Average"});
+				}
+				for(int i = 0; i < identifiers.size(); i++) {
+					String courseTitle = courseTitles.get(i);
+					String identifier = identifiers.get(i);
+					double pointsEarned = 0;
+					double totalPoints = 0;
+					double totalPointsUngraded = 0;
+					titles = getCategoryNames(categories.get(identifiers.get(i)));
+					weights = getCategoryValues(categories.get(identifiers.get(i)));
 					
-					if(totalPoints != 0)
-						minPossibleGrade += pointsEarned / totalPoints * (Double.parseDouble(weights.get(j)) / getSumWeights(id)) * 100;
-					pointsEarned = 0;
-					totalPoints = 0;
+					for(int j = 0; j < titles.size(); j++) {
+						for(int k = 0; k < gdtm.getRowCount(); k++) 
+							if(gdtm.getValueAt(k, 1).equals(identifier) && gdtm.getValueAt(k, 3).equals(titles.get(j))) {
+								if(!gdtm.getValueAt(k, 5).equals("Ungraded")) {
+									pointsEarned += Double.parseDouble(gdtm.getValueAt(k, 5) + "");
+									totalPoints += Double.parseDouble(gdtm.getValueAt(k, 6) + "");
+								}
+								else {
+									totalPointsUngraded += Double.parseDouble(gdtm.getValueAt(k, 6) + "");
+									totalPoints += Double.parseDouble(gdtm.getValueAt(k, 6) + "");
+								}
+							}
+						double grade = pointsEarned / totalPoints * 100;
+	
+						if(totalPoints == 0) {
+							gdtm.addRow(new Object[] {courseTitle,identifier,"",titles.get(j),weights.get(j),rounder.format(pointsEarned),
+								rounder.format(totalPoints), grade, "Category Average"});
+							totalPercentUngraded += Double.parseDouble(weights.get(j));
+						}
+						else {
+							gdtm.addRow(new Object[] {courseTitle,identifier,"",titles.get(j),weights.get(j),rounder.format(pointsEarned),
+									rounder.format(totalPoints), rounder.format(grade), "Category Average"});
+							
+							totalPercentUngraded += totalPointsUngraded / totalPoints * Double.parseDouble(weights.get(j));
+						}
+						
+						if(totalPoints != 0)
+							minPossibleGrade += pointsEarned / totalPoints * (Double.parseDouble(weights.get(j)) / getSumWeights(id)) * 100;
+						pointsEarned = 0;
+						totalPoints = 0;
+						totalPointsUngraded = 0;
+					}
+					
+					gdtm.addRow(new Object[] {"","","","","","","","",""});
+					
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Minimum Grade Possible","","","",rounder.format(minPossibleGrade),"Assumes Static Grades"});
+					
+					gdtm.addRow(new Object[] {"","","","","","","","",""});
+					
+					boolean printedAp, printedA, printedAm, printedBp, printedB, printedBm, printedCp, printedC, printedCm,
+						printedDp, printedD, printedDm, printedP;
+					
+					printedAp = printedA = printedAm = printedBp = printedB = printedBm = printedCp = printedC = printedCm = printedDp = 
+							printedD = printedDm = printedP = false;
+					
+					double tAp, tA, tAm, tBp, tB, tBm, tCp, tC, tCm, tDp, tD, tDm, tP;
+					
+					tAp = tA = tAm = tBp = tB = tBm = tCp = tC = tCm = tDp = tD = tDm = tP = -1;
+					
+					for(double x = 0; x < 200; x+= 0.125) {
+						if(!printedAp && isAPluses && (minPossibleGrade + totalPercentUngraded / getSumWeights(id) * x) >= Double.parseDouble(scale.get("A+") + "")) {
+							printedAp = true;
+							tAp = x;
+						}
+						if(!printedA && (minPossibleGrade + totalPercentUngraded / getSumWeights(id) * x) >= Double.parseDouble(scale.get("A") + "")) {
+							printedA = true;
+							tA = x;
+						}
+						if(!printedAm && (minPossibleGrade + totalPercentUngraded / getSumWeights(id) * x) >= Double.parseDouble(scale.get("A-") + "")) {
+							printedAm = true;
+							tAm = x;
+						}
+						if(!printedBp && (minPossibleGrade + totalPercentUngraded / getSumWeights(id) * x) >= Double.parseDouble(scale.get("B+") + "")) {
+							printedBp = true;
+							tBp = x;
+						}
+						if(!printedB && (minPossibleGrade + totalPercentUngraded / getSumWeights(id) * x) >= Double.parseDouble(scale.get("B") + "")) {
+							printedB = true;
+							tB = x;
+						}
+						if(!printedBm && (minPossibleGrade + totalPercentUngraded / getSumWeights(id) * x) >= Double.parseDouble(scale.get("B-") + "")) {
+							printedBm = true;
+							tBm = x;
+						}
+						if(!printedCp && (minPossibleGrade + totalPercentUngraded / getSumWeights(id) * x) >= Double.parseDouble(scale.get("C+") + "")) {
+							printedCp = true;
+							tCp = x;
+						}
+						if(!printedC && (minPossibleGrade + totalPercentUngraded / getSumWeights(id) * x) >= Double.parseDouble(scale.get("C") + "")) {
+							printedC = true;
+							tC = x;
+						}
+						if(!printedCm && (minPossibleGrade + totalPercentUngraded / getSumWeights(id) * x) >= Double.parseDouble(scale.get("C-") + "")) {
+							printedCm = true;
+							tCm = x;
+						}
+						if(!printedDp && (minPossibleGrade + totalPercentUngraded / getSumWeights(id) * x) >= Double.parseDouble(scale.get("D+") + "")) {
+							printedDp = true;
+							tDp = x;
+						}
+						if(!printedD && (minPossibleGrade + totalPercentUngraded / getSumWeights(id) * x) >= Double.parseDouble(scale.get("D") + "")) {
+							printedD = true;
+							tD = x;
+						}
+						if(!printedDm && (minPossibleGrade + totalPercentUngraded / getSumWeights(id) * x) >= Double.parseDouble(scale.get("D-") + "")) {
+							printedDm = true;
+							tDm = x;
+						}
+						if(!printedP && (minPossibleGrade + totalPercentUngraded / getSumWeights(id) * x) >= Double.parseDouble(scale.get("P") + "")) {
+							printedP = true;
+							tP = x;
+						}
+					}
+					
+					if(isAPluses)
+						gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tAp),"Rem Avg Req for [A+]"});
+					
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tA),"Rem Avg Req for [A]"});
+					
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tAm),"Rem Avg Req for [A-]"});
+					
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tBp),"Rem Avg Req for [B+]"});
+					
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tB),"Rem Avg Req for [B]"});
+					
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tBm),"Rem Avg Req for [B-]"});
+					
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tCp),"Rem Avg Req for [C+]"});
+					
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tC),"Rem Avg Req for [C]"});
+					
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tCm),"Rem Avg Req for [C-]"});
+					
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tDp),"Rem Avg Req for [D+]"});
+					
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tD),"Rem Avg Req for [D]"});
+					
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tDm),"Rem Avg Req for [D-]"});
+					
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tP),"Rem Avg Req for [Pass]"});
+					
+					gdtm.addRow(new Object[] {"","","","","","","","",""});
 				}
-				
-				gdtm.addRow(new Object[] {"","","","","","","","",""});
-				
-				gdtm.addRow(new Object[] {courseTitle,identifier,"","Minimum Grade Possible","","","",rounder.format(minPossibleGrade),"Assumes Static Grades"});
-				
-				gdtm.addRow(new Object[] {"","","","","","","","",""});
-				
-				boolean printedAp, printedA, printedAm, printedBp, printedB, printedBm, printedCp, printedC, printedCm,
-					printedDp, printedD, printedDm, printedP;
-				
-				printedAp = printedA = printedAm = printedBp = printedB = printedBm = printedCp = printedC = printedCm = printedDp = 
-						printedD = printedDm = printedP = false;
-				
-				double tAp, tA, tAm, tBp, tB, tBm, tCp, tC, tCm, tDp, tD, tDm, tP;
-				
-				tAp = tA = tAm = tBp = tB = tBm = tCp = tC = tCm = tDp = tD = tDm = tP = -1;
-				
-				for(double x = 0; x < 200; x+= 0.125) {
-					if(!printedAp && isAPluses && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("A+") + "")) {
-						printedAp = true;
-						tAp = x;
-					}
-					if(!printedA && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("A") + "")) {
-						printedA = true;
-						tA = x;
-					}
-					if(!printedAm && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("A-") + "")) {
-						printedAm = true;
-						tAm = x;
-					}
-					if(!printedBp && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("B+") + "")) {
-						printedBp = true;
-						tBp = x;
-					}
-					if(!printedB && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("B") + "")) {
-						printedB = true;
-						tB = x;
-					}
-					if(!printedBm && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("B-") + "")) {
-						printedBm = true;
-						tBm = x;
-					}
-					if(!printedCp && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("C+") + "")) {
-						printedCp = true;
-						tCp = x;
-					}
-					if(!printedC && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("C") + "")) {
-						printedC = true;
-						tC = x;
-					}
-					if(!printedCm && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("C-") + "")) {
-						printedCm = true;
-						tCm = x;
-					}
-					if(!printedDp && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("D+") + "")) {
-						printedDp = true;
-						tDp = x;
-					}
-					if(!printedD && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("D") + "")) {
-						printedD = true;
-						tD = x;
-					}
-					if(!printedDm && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("D-") + "")) {
-						printedDm = true;
-						tDm = x;
-					}
-					if(!printedP && (minPossibleGrade + remCatTotals / getSumWeights(id) * x) >= Double.parseDouble(scale.get("P") + "")) {
-						printedP = true;
-						tP = x;
-					}
-				}
-				
-				if(isAPluses)
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tAp),"Rem Avg Req for [A+]"});
-				
-				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tA),"Rem Avg Req for [A]"});
-				
-				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tAm),"Rem Avg Req for [A-]"});
-				
-				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tBp),"Rem Avg Req for [B+]"});
-				
-				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tB),"Rem Avg Req for [B]"});
-				
-				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tBm),"Rem Avg Req for [B-]"});
-				
-				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tCp),"Rem Avg Req for [C+]"});
-				
-				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tC),"Rem Avg Req for [C]"});
-				
-				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tCm),"Rem Avg Req for [C-]"});
-				
-				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tDp),"Rem Avg Req for [D+]"});
-				
-				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tD),"Rem Avg Req for [D]"});
-				
-				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tDm),"Rem Avg Req for [D-]"});
-				
-				gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tP),"Rem Avg Req for [Pass]"});
-				
-				gdtm.addRow(new Object[] {"","","","","","","","",""});
+			}	
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
 				viewBreakdown.setText("Hide Analyzer");
-			}
 		}
+	}
+	
+	/**
+	 * Tells whether there exists ungraded assignments for a specified course
+	 * @param id the identifier of the course
+	 * @return whether or not a course has ungraded assignments
+	 */
+	public boolean hasUngradedAssignments(String id) {
+		for(int i = 0; i < gdtm.getRowCount(); i++) {
+			if(gdtm.getValueAt(i, 1).equals(id) && gdtm.getValueAt(i, 5).equals("Ungraded"))
+				return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -2765,8 +2808,10 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		String s = e.getActionCommand();
 		
+		hideBreakdown();
+		viewBreakdown.setText("Analyze Grades");
+		
 		if(s.equals("Add Course")) {
-			
 			if(gradeScales.size() == 0) {
 				Errors.AER6.displayErrorMsg();
 				return;
@@ -2837,6 +2882,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(s.equals("Edit Element")) {
+			hideBreakdown();
 			editElement();
 		}
 		
