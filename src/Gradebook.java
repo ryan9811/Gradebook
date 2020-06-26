@@ -236,6 +236,84 @@ public class Gradebook extends JFrame implements ActionListener {
 
 	}
 	
+	public void displayWhatIfGPA() {
+	
+		String term = getUnfinalizedTerm();
+		
+		double creditSum = 0;
+		double qualitySum = 0;
+		double nonGpaSum = 0;
+		double failCreditSum = 0;
+		double tempTotalFCreditSum = totalFCreditSum;
+		double tempNonGpaCreditTotal = nonGpaCreditTotal;
+		
+		for(int i = 0; i < cdtm.getRowCount(); i++) {
+			if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("Letter") && !cdtm.getValueAt(i, 7).equals("F")) {
+				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual(cdtm.getValueAt(i, 3)+"",(String)cdtm.getValueAt(i, 7));
+				creditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
+			}
+			
+			else if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("Letter") && cdtm.getValueAt(i, 7).equals("F")) {
+				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual(cdtm.getValueAt(i, 3)+"",(String)cdtm.getValueAt(i, 7));
+				failCreditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
+				totalFCreditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
+			}
+			
+			else if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("P/NP") && cdtm.getValueAt(i, 7).equals("P")) {
+				creditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
+				nonGpaSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
+				nonGpaCreditTotal += Double.parseDouble((String)cdtm.getValueAt(i, 4));
+			}
+			
+			else if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("Notation") && cdtm.getValueAt(i, 7).equals("TR")) {
+				creditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
+				nonGpaSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
+				nonGpaCreditTotal += Double.parseDouble((String)cdtm.getValueAt(i, 4));
+			}
+		}
+			
+		DecimalFormat rounder = new DecimalFormat("#.####");
+		rounder.setRoundingMode(RoundingMode.HALF_UP);
+			
+		gdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});		
+		String gpa = rounder.format(qualitySum / (creditSum + failCreditSum - nonGpaSum)) + "";
+				
+		if(!gpa.contains("."))
+			gpa = gpa + ".0";
+				
+		String creditSumString = rounder.format(creditSum) + "";
+				
+		String qualitySumString = rounder.format(qualitySum) + "";
+				
+		gdtm.addRow(new Object[] {"Term Credits Earned", creditSumString, "", 
+					"General Information", "Term Quality Points", qualitySumString, "Term GPA", gpa, "What If GPA (If Finalized)"});
+				
+//		double allQualitySum = 0;
+//		double allCreditSum = 0;
+//		for(int i = 0; i < cdtm.getRowCount(); i++)
+//			if(((String) cdtm.getValueAt(i, 0)).equals("Term Credits Earned") && ((String) cdtm.getValueAt(i, 4)).equals("")) {
+//				allQualitySum += Double.parseDouble(cdtm.getValueAt(i, 3) + "");
+//				allCreditSum += Double.parseDouble(cdtm.getValueAt(i, 1) + "");
+//			}
+//				
+//		String allCreditSumString = rounder.format(allCreditSum) + "";
+//				
+//		String allQualitySumString = rounder.format(allQualitySum) + "";
+//				
+//		String totalGpa = rounder.format(allQualitySum / (allCreditSum + totalFCreditSum - nonGpaCreditTotal)) + "";
+//				
+//		if(!totalGpa.contains("."))
+//			totalGpa = totalGpa + ".0";
+//				
+//		gdtm.addRow(new Object[] {"Total Credits Earned", allCreditSumString, "", "General Information", 
+//					"Total Quality Points", allQualitySumString, "Cumulative GPA", totalGpa, "What If GPA (If Finalized)"});	
+				
+		gdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});
+				
+		nonGpaCreditTotal = tempNonGpaCreditTotal;
+		totalFCreditSum = tempTotalFCreditSum;
+	}
+	
 	/**
 	 * Resets the table settings so that it cannot be edited except through the buttons.
 	 */
@@ -2219,8 +2297,6 @@ public class Gradebook extends JFrame implements ActionListener {
 					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tDm),"Rem Avg Required for [D-]"});
 					
 					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tP),"Rem Avg Required for [Pass]"});
-					
-					gdtm.addRow(new Object[] {"","","","","","","","",""});
 				}
 			}	
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
@@ -2874,7 +2950,8 @@ public class Gradebook extends JFrame implements ActionListener {
 						+ "ML1. Missing Information. If any text fields are left blank other than a comment, this error will arise.\n\n"
 						+ "ML2. Number Format Exception. Arises when anything other than a number has been entered into a text field\n"
 						+ "that is only meant to accept numbers.\n\n" 
-						+ "ML3. No Breakdown to Formulate. Arises when no grades have been inputted for the identified course.";
+						+ "ML3. No Breakdown to Formulate. Arises when no grades have been inputted for the identified course.\n\n"
+						+ "ML4. No Grades for Calculation. Arises when trying to calculate What-If GPA when no grades have been entered.";
 				JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
@@ -2987,12 +3064,25 @@ public class Gradebook extends JFrame implements ActionListener {
 		}
 		
 		if(s.equals("Analyze Grades")) {
-			if(isIdentifierFound()) {
+			
+			String[] analyzeChoices = {"Analyze Course Grades", "View What-If GPA"};
+			
+			String analyze = (String) JOptionPane.showInputDialog(null, "Select Action to Perform", "Grade Master", 
+					JOptionPane.QUESTION_MESSAGE, null, analyzeChoices, analyzeChoices[0]);
+			
+			if(analyze.equals("Analyze Course Grades") && isIdentifierFound()) {
 				viewParticularBreakdown(identifierInput.getText());
 			}
-			else {
+			
+			else if(analyze.equals("Analyze Course Grades") && !isIdentifierFound()) {
 				Errors.AER7.displayErrorMsg();
 			}
+			
+			if(analyze.equals("View What-If GPA") && gdtm.getRowCount() > 0)
+				displayWhatIfGPA();
+			
+			else if(analyze.equals("View What-If GPA") && gdtm.getRowCount() <= 0)
+				Errors.ML4.displayErrorMsg();
 		}
 		
 		if(s.equals("Hide Analyzer")) {
