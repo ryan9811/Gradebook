@@ -2132,7 +2132,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			Hashtable scale = courseScales.get(id);
 			
 			gdtm.addRow(new Object[] {"","","","","","","","",""});
-			gdtm.addRow(new Object[] {"~~GRADE ANALYZER~~","","","","","","","",""});
+			gdtm.addRow(new Object[] {"~~GRADE ANALYZER~~","Z99-ANALYTICS","","","","","","",""});
 			gdtm.addRow(new Object[] {"","","","","","","","",""});
 			ArrayList<String> identifiers = new ArrayList<String>();
 			ArrayList<String> titles = new ArrayList<String>();
@@ -2174,15 +2174,15 @@ public class Gradebook extends JFrame implements ActionListener {
 									totalPoints += Double.parseDouble(gdtm.getValueAt(k, 6) + "");
 								}
 							}
-						double grade = pointsEarned / totalPoints * 100;
+						double grade = pointsEarned / (totalPoints - totalPointsUngraded) * 100;
 	
 						if(totalPoints == 0) {
-							gdtm.addRow(new Object[] {courseTitle,identifier,"",titles.get(j),weights.get(j),rounder.format(pointsEarned),
-								rounder.format(totalPoints), grade, "Category Average"});
+							gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","",titles.get(j),weights.get(j),rounder.format(pointsEarned),
+								rounder.format(totalPoints - totalPointsUngraded), grade, "Category Average"});
 							totalPercentUngraded += Double.parseDouble(weights.get(j));
 						}
 						else {
-							gdtm.addRow(new Object[] {courseTitle,identifier,"",titles.get(j),weights.get(j),rounder.format(pointsEarned),
+							gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","",titles.get(j),weights.get(j),rounder.format(pointsEarned),
 									rounder.format(totalPoints), rounder.format(grade), "Category Average"});
 							
 							totalPercentUngraded += totalPointsUngraded / totalPoints * Double.parseDouble(weights.get(j));
@@ -2197,7 +2197,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					
 					gdtm.addRow(new Object[] {"","","","","","","","",""});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","General Information","","","",rounder.format(minPossibleGrade),"Minimum Grade Possible"});
+					gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","","General Information","","","",rounder.format(minPossibleGrade),"Minimum Grade Possible"});
 					
 					gdtm.addRow(new Object[] {"","","","","","","","",""});
 					
@@ -2267,31 +2267,31 @@ public class Gradebook extends JFrame implements ActionListener {
 					}
 					
 					if(isAPluses)
-						gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tAp),"Rem Avg Required for [A+]"});
+						gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","","Qualification Analyzer","","","",rounder.format(tAp),"Rem Avg Required for [A+]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tA),"Rem Avg Required for [A]"});
+					gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","","Qualification Analyzer","","","",rounder.format(tA),"Rem Avg Required for [A]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tAm),"Rem Avg Required for [A-]"});
+					gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","","Qualification Analyzer","","","",rounder.format(tAm),"Rem Avg Required for [A-]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tBp),"Rem Avg Required for [B+]"});
+					gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","","Qualification Analyzer","","","",rounder.format(tBp),"Rem Avg Required for [B+]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tB),"Rem Avg Required for [B]"});
+					gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","","Qualification Analyzer","","","",rounder.format(tB),"Rem Avg Required for [B]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tBm),"Rem Avg Required for [B-]"});
+					gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","","Qualification Analyzer","","","",rounder.format(tBm),"Rem Avg Required for [B-]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tCp),"Rem Avg Required for [C+]"});
+					gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","","Qualification Analyzer","","","",rounder.format(tCp),"Rem Avg Required for [C+]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tC),"Rem Avg Required for [C]"});
+					gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","","Qualification Analyzer","","","",rounder.format(tC),"Rem Avg Required for [C]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tCm),"Rem Avg Required for [C-]"});
+					gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","","Qualification Analyzer","","","",rounder.format(tCm),"Rem Avg Required for [C-]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tDp),"Rem Avg Required for [D+]"});
+					gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","","Qualification Analyzer","","","",rounder.format(tDp),"Rem Avg Required for [D+]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tD),"Rem Avg Required for [D]"});
+					gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","","Qualification Analyzer","","","",rounder.format(tD),"Rem Avg Required for [D]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tDm),"Rem Avg Required for [D-]"});
+					gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","","Qualification Analyzer","","","",rounder.format(tDm),"Rem Avg Required for [D-]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tP),"Rem Avg Required for [Pass]"});
+					gdtm.addRow(new Object[] {courseTitle,"Z99-ANALYTICS","","Qualification Analyzer","","","",rounder.format(tP),"Rem Avg Required for [Pass]"});
 				}
 			}	
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
