@@ -79,6 +79,8 @@ public class Gradebook extends JFrame implements ActionListener {
 			e.printStackTrace();
 		}
 		
+//		UIManager.getLookAndFeelDefaults().replace("Panel.background", new ColorUIResource(0, 10, 75));
+//		UIManager.getLookAndFeelDefaults().replace("OptionPane.background", new ColorUIResource(0, 10, 75));
 		UIManager.getLookAndFeelDefaults().replace("Panel.background", new ColorUIResource(242, 236, 228));
 		UIManager.getLookAndFeelDefaults().replace("OptionPane.background", new ColorUIResource(242, 236, 228));
 
@@ -203,13 +205,13 @@ public class Gradebook extends JFrame implements ActionListener {
         for(int i = 0; i < buttons.length; i++) {
         	buttonPanel.add(buttons[i]);
         	buttons[i].setSelected(false);
-        	buttons[i].setBackground(new Color(93, 201, 247));
+        	buttons[i].setBackground(new Color(115,213,255));
+        	//buttons[i].setBackground(new Color(225, 136, 52));
         }
         
         buttonPanel.add(identifier);
         buttonPanel.add(identifierInput);
         buttonPanel.setBackground(new Color(242, 236, 228));
-        buttonPanel.setBounds(0,0,1250, 75);
         buttonPanel.setPreferredSize(new Dimension((int) screenWidth,40));
         
         // Add the panel to the frame
