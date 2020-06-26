@@ -71,15 +71,16 @@ public class Gradebook extends JFrame implements ActionListener {
 	
 	public Gradebook() {
 		
+		UIManager UI = new UIManager();
+		
 		try {
 			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 		
-		UIManager UI = new UIManager();
-		UI.put("OptionPane.background", new ColorUIResource(242, 236, 228));
-		UI.put("Panel.background", new ColorUIResource(242, 236, 228));
+		UIManager.getLookAndFeelDefaults().replace("Panel.background", new ColorUIResource(242, 236, 228));
+		UIManager.getLookAndFeelDefaults().replace("OptionPane.background", new ColorUIResource(242, 236, 228));
 
 		// Frame that holds everything
         frame = new JFrame();
@@ -318,16 +319,6 @@ public class Gradebook extends JFrame implements ActionListener {
 	 * Resets the table settings so that it cannot be edited except through the buttons.
 	 */
 	public void revertTableSettings() {
-		
-		try {
-			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-		
-		UIManager UI = new UIManager();
-		UI.put("OptionPane.background", new ColorUIResource(242, 236, 228));
-		UI.put("Panel.background", new ColorUIResource(242, 236, 228));
 		
 		courseList.setShowGrid(false);
         courseList.setColumnSelectionAllowed(false);
