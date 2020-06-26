@@ -1,6 +1,9 @@
 import javax.swing.*;
+import javax.swing.plaf.ColorUIResource;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -14,6 +17,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Vector;
@@ -66,9 +70,19 @@ public class Gradebook extends JFrame implements ActionListener {
 	private JFileChooser fileChooser; // Selects file for import/export
 	
 	public Gradebook() {
+		
+		try {
+			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		UIManager UI = new UIManager();
+		UI.put("OptionPane.background", new ColorUIResource(242, 236, 228));
+		UI.put("Panel.background", new ColorUIResource(242, 236, 228));
 
 		// Frame that holds everything
-        frame = new JFrame(); 
+        frame = new JFrame();
         
         frame.setTitle("Grade Calculator v5"); 
         
@@ -126,31 +140,15 @@ public class Gradebook extends JFrame implements ActionListener {
         cdtm.setColumnIdentifiers(courseHeader);
         courseList.setModel(cdtm);
         courseCode = 11111;
-        
-        courseList.setShowVerticalLines(true);
-        courseList.setColumnSelectionAllowed(false);
-        courseList.getTableHeader().setReorderingAllowed(false);
-        courseList.getTableHeader().setResizingAllowed(false);
-        courseList.setEnabled(false);
   
         // adding it to JScrollPane 
         JScrollPane spc = new JScrollPane(courseList); 
+        spc.getViewport().setBackground(Color.WHITE);
         frame.add(spc, BorderLayout.NORTH); 
-        courseList.getColumnModel().getColumn(0).setPreferredWidth(150);
-        courseList.getColumnModel().getColumn(1).setPreferredWidth(200);
-        courseList.getColumnModel().getColumn(2).setPreferredWidth(200);
-        courseList.getColumnModel().getColumn(3).setPreferredWidth(100);
-        courseList.getColumnModel().getColumn(4).setPreferredWidth(100);
-        courseList.getColumnModel().getColumn(5).setPreferredWidth(100);
-        courseList.getColumnModel().getColumn(6).setPreferredWidth(100);
-        courseList.getColumnModel().getColumn(7).setPreferredWidth(100);
-        courseList.getColumnModel().getColumn(8).setPreferredWidth(100);
-        courseList.getColumnModel().getColumn(9).setPreferredWidth(100);
-        System.out.println(courseList.getColumnModel().getColumn(1).getWidth());
         
         // ------------------------Creating the panel for the buttons------------------------
-        JPanel buttons = new JPanel();
-        buttons.setVisible(true);
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setVisible(true);
         
         // Initialize buttons and add action listeners
         JButton addCourse = new JButton("Add Course");
@@ -186,26 +184,31 @@ public class Gradebook extends JFrame implements ActionListener {
         // Create the textfield for allowing edits
         JLabel identifier = new JLabel("Identifier/Code: ");
         identifierInput = new JTextField();
-        identifierInput.setPreferredSize(new Dimension(150,20));
+        identifierInput.setPreferredSize(new Dimension(125,25));
         identifierInput.setEditable(true);
         identifierInput.setBounds(10,10,300,50);
         identifierInput.setSize(200, 20);
         
         // Add the buttons to the panel
-        buttons.add(addCourse);
-        buttons.add(addAssignment);
-        buttons.add(removeCourse);
-        buttons.add(editElement);
-        buttons.add(viewBreakdown);
-        buttons.add(finalizeGrades);
-        buttons.add(importExport);
-        buttons.add(settings);
-        buttons.add(help);
-        buttons.add(identifier);
-        buttons.add(identifierInput);
+        double screenWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+        Dimension preferredSize = new Dimension((int) ((screenWidth - 250) / 11), 25);
+        JButton[] buttons = {addCourse, addAssignment, removeCourse, editElement, viewBreakdown, finalizeGrades,
+        		importExport, settings, help};
+        
+        for(int i = 0; i < buttons.length; i++) {
+        	buttons[i].setPreferredSize(preferredSize);
+        	buttonPanel.add(buttons[i]);
+        	buttons[i].setSelected(false);
+        	buttons[i].setBackground(new Color(93, 201, 247));
+        }
+        
+        buttonPanel.add(identifier);
+        buttonPanel.add(identifierInput);
+        buttonPanel.setBackground(new Color(242, 236, 228));
+        buttonPanel.setBounds(0,0,1250, 75);
         
         // Add the panel to the frame
-        frame.add(buttons);
+        frame.add(buttonPanel);
         
         // ------------------------Creating the table for the list of grades/assignments------------------------
         gradeList = new JTable();
@@ -221,12 +224,60 @@ public class Gradebook extends JFrame implements ActionListener {
         gdtm.setColumnIdentifiers(gradeHeader);
         gradeList.setModel(gdtm);
         
-        gradeList.setShowVerticalLines(true);
-        gradeList.setAutoCreateRowSorter(true);
+        JScrollPane spg = new JScrollPane(gradeList); 
+        frame.add(spg, BorderLayout.SOUTH);
+        spg.getViewport().setBackground(Color.WHITE);
+        
+        revertTableSettings();
+        
+        buttonPanel.setPreferredSize(new Dimension((int) (screenWidth - 150), 40));
+        
+        frame.pack();
+
+	}
+	
+	/**
+	 * Resets the table settings so that it cannot be edited except through the buttons.
+	 */
+	public void revertTableSettings() {
+		
+		try {
+			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		UIManager UI = new UIManager();
+		UI.put("OptionPane.background", new ColorUIResource(242, 236, 228));
+		UI.put("Panel.background", new ColorUIResource(242, 236, 228));
+		
+		courseList.setShowGrid(false);
+        courseList.setColumnSelectionAllowed(false);
+        courseList.getTableHeader().setReorderingAllowed(false);
+        courseList.getTableHeader().setResizingAllowed(false);
+        courseList.setEnabled(false);
+        courseList.setSelectionBackground(new Color(250, 246, 212));
+        courseList.setSelectionForeground(Color.BLACK);
+        courseList.setBackground(Color.WHITE);
+        
+        courseList.getColumnModel().getColumn(0).setPreferredWidth(150);
+        courseList.getColumnModel().getColumn(1).setPreferredWidth(200);
+        courseList.getColumnModel().getColumn(2).setPreferredWidth(200);
+        courseList.getColumnModel().getColumn(3).setPreferredWidth(100);
+        courseList.getColumnModel().getColumn(4).setPreferredWidth(100);
+        courseList.getColumnModel().getColumn(5).setPreferredWidth(100);
+        courseList.getColumnModel().getColumn(6).setPreferredWidth(100);
+        courseList.getColumnModel().getColumn(7).setPreferredWidth(100);
+        courseList.getColumnModel().getColumn(8).setPreferredWidth(100);
+        courseList.getColumnModel().getColumn(9).setPreferredWidth(100);
+		
+        gradeList.setShowGrid(false);
         gradeList.setColumnSelectionAllowed(false);
         gradeList.getTableHeader().setReorderingAllowed(false);
         gradeList.getTableHeader().setResizingAllowed(false);
         gradeList.setEnabled(false);
+        gradeList.setSelectionBackground(new Color(250, 246, 212));
+        gradeList.setSelectionForeground(Color.BLACK);
         
         gradeList.getColumnModel().getColumn(0).setPreferredWidth(180);
         gradeList.getColumnModel().getColumn(1).setPreferredWidth(100);
@@ -237,12 +288,6 @@ public class Gradebook extends JFrame implements ActionListener {
         gradeList.getColumnModel().getColumn(6).setPreferredWidth(100);
         gradeList.getColumnModel().getColumn(7).setPreferredWidth(100);
         gradeList.getColumnModel().getColumn(8).setPreferredWidth(180);
-        
-        JScrollPane spg = new JScrollPane(gradeList); 
-        frame.add(spg, BorderLayout.SOUTH);
-        
-        frame.pack();
-
 	}
 	
 	/**
@@ -1037,7 +1082,7 @@ public class Gradebook extends JFrame implements ActionListener {
 	 */
 	public void finalizeGrades() {
 		
-		String year = getUnfinalizedTerm();
+		String term = getUnfinalizedTerm();
 		
 		double creditSum = 0;
 		double qualitySum = 0;
@@ -1045,31 +1090,31 @@ public class Gradebook extends JFrame implements ActionListener {
 		double failCreditSum = 0;
 		
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
-			if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && !cdtm.getValueAt(i, 7).equals("F")) {
+			if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("Letter") && !cdtm.getValueAt(i, 7).equals("F")) {
 				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual(cdtm.getValueAt(i, 3)+"",(String)cdtm.getValueAt(i, 7));
 				creditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 			
-			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && cdtm.getValueAt(i, 7).equals("NP")) {
+			else if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("Letter") && cdtm.getValueAt(i, 7).equals("NP")) {
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 			
-			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Letter") && cdtm.getValueAt(i, 7).equals("F")) {
+			else if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("Letter") && cdtm.getValueAt(i, 7).equals("F")) {
 				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual(cdtm.getValueAt(i, 3)+"",(String)cdtm.getValueAt(i, 7));
 				failCreditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				totalFCreditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 			
-			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("P/NP") && cdtm.getValueAt(i, 7).equals("P")) {
+			else if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("P/NP") && cdtm.getValueAt(i, 7).equals("P")) {
 				creditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				nonGpaSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				nonGpaCreditTotal += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 			
-			else if(cdtm.getValueAt(i, 8).equals(year + "") && cdtm.getValueAt(i, 6).equals("Notation") && cdtm.getValueAt(i, 7).equals("TR")) {
+			else if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("Notation") && cdtm.getValueAt(i, 7).equals("TR")) {
 				creditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				nonGpaSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				nonGpaCreditTotal += Double.parseDouble((String)cdtm.getValueAt(i, 4));
@@ -1097,7 +1142,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				String qualitySumString = rounder.format(qualitySum) + "";
 				
 				cdtm.addRow(new Object[] {"Term Credits Earned", creditSumString, "Term Quality Points", 
-						qualitySumString, "", "", "", "", "GPA", gpa});
+						qualitySumString, "", "", "", "", "Term GPA", gpa});
 				
 				double allQualitySum = 0;
 				double allCreditSum = 0;
@@ -1117,7 +1162,12 @@ public class Gradebook extends JFrame implements ActionListener {
 					totalGpa = totalGpa + ".0";
 				
 				cdtm.addRow(new Object[] {"Total Credits Earned", allCreditSumString, "Total Quality Points", 
-						allQualitySumString, "", "", "", "", "GPA", totalGpa});	
+						allQualitySumString, "", "", "", "", "Cumulative GPA", totalGpa});	
+				
+				for(int i = 0; i < cdtm.getRowCount(); i++) {
+					if(cdtm.getValueAt(i, 0).equals("Total Credits Earned") || cdtm.getValueAt(i, 0).equals("Term Credits Earned"))
+						courseList.addRowSelectionInterval(i, i);
+				}
 				
 				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});
 				
@@ -1967,32 +2017,6 @@ public class Gradebook extends JFrame implements ActionListener {
 	}
 	
 	/**
-	 * Resets the table settings so that it cannot be edited except through the buttons.
-	 */
-	public void revertTableSettings() {
-		
-		courseList.getColumnModel().getColumn(0).setPreferredWidth(125);
-        courseList.getColumnModel().getColumn(1).setPreferredWidth(200);
-        courseList.getColumnModel().getColumn(2).setPreferredWidth(200);
-        courseList.getColumnModel().getColumn(3).setPreferredWidth(100);
-        courseList.getColumnModel().getColumn(4).setPreferredWidth(50);
-        courseList.getColumnModel().getColumn(5).setPreferredWidth(100);
-        courseList.getColumnModel().getColumn(6).setPreferredWidth(75);
-        courseList.getColumnModel().getColumn(7).setPreferredWidth(50);
-        courseList.getColumnModel().getColumn(8).setPreferredWidth(75);
-        courseList.getColumnModel().getColumn(9).setPreferredWidth(125);
-        courseList.setShowVerticalLines(true);
-        courseList.setColumnSelectionAllowed(false);
-        courseList.getTableHeader().setReorderingAllowed(false);
-        courseList.setEnabled(false);
-        
-        gradeList.setShowVerticalLines(true);
-        gradeList.setColumnSelectionAllowed(false);
-        gradeList.getTableHeader().setReorderingAllowed(false);
-        gradeList.setEnabled(false);
-	}
-	
-	/**
 	 * Tells whether or not there is a course in progress
 	 * @return whether or not any courses are in progress
 	 */
@@ -2100,7 +2124,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					
 					gdtm.addRow(new Object[] {"","","","","","","","",""});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Minimum Grade Possible","","","",rounder.format(minPossibleGrade),"Assumes Static Grades"});
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","General Information","","","",rounder.format(minPossibleGrade),"Minimum Grade Possible"});
 					
 					gdtm.addRow(new Object[] {"","","","","","","","",""});
 					
@@ -2170,31 +2194,31 @@ public class Gradebook extends JFrame implements ActionListener {
 					}
 					
 					if(isAPluses)
-						gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tAp),"Rem Avg Req for [A+]"});
+						gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tAp),"Rem Avg Required for [A+]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tA),"Rem Avg Req for [A]"});
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tA),"Rem Avg Required for [A]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tAm),"Rem Avg Req for [A-]"});
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tAm),"Rem Avg Required for [A-]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tBp),"Rem Avg Req for [B+]"});
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tBp),"Rem Avg Required for [B+]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tB),"Rem Avg Req for [B]"});
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tB),"Rem Avg Required for [B]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tBm),"Rem Avg Req for [B-]"});
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tBm),"Rem Avg Required for [B-]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tCp),"Rem Avg Req for [C+]"});
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tCp),"Rem Avg Required for [C+]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tC),"Rem Avg Req for [C]"});
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tC),"Rem Avg Required for [C]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tCm),"Rem Avg Req for [C-]"});
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tCm),"Rem Avg Required for [C-]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tDp),"Rem Avg Req for [D+]"});
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tDp),"Rem Avg Required for [D+]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tD),"Rem Avg Req for [D]"});
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tD),"Rem Avg Required for [D]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tDm),"Rem Avg Req for [D-]"});
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tDm),"Rem Avg Required for [D-]"});
 					
-					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tP),"Rem Avg Req for [Pass]"});
+					gdtm.addRow(new Object[] {courseTitle,identifier,"","Qualification Analyzer","","","",rounder.format(tP),"Rem Avg Required for [Pass]"});
 					
 					gdtm.addRow(new Object[] {"","","","","","","","",""});
 				}
@@ -2262,14 +2286,23 @@ public class Gradebook extends JFrame implements ActionListener {
 		JComboBox isAPHonorsEntry = new JComboBox(apHonorsChoices);
 		JTextField honorsBonusEntry = new JTextField(15);
 		JTextField apBonusEntry = new JTextField(15);
+		
+		
 		JButton setDefaults = new JButton("Set Defaults");
 		setDefaults.addActionListener(this);
+		setDefaults.setBackground(new Color(93, 201, 247));
+		
 		JButton deleteGradeScale = new JButton("Delete Grade Scale");
 		deleteGradeScale.addActionListener(this);
+		deleteGradeScale.setBackground(new Color(93, 201, 247));
+		
 		JButton addNewGradeScale = new JButton("Add Grade Scale");
 		addNewGradeScale.addActionListener(this);
+		addNewGradeScale.setBackground(new Color(93, 201, 247));
+		
 		JButton viewGradeScale = new JButton("View Grade Scale");
 		viewGradeScale.addActionListener(this);
+		viewGradeScale.setBackground(new Color(93, 201, 247));
 		
 		p.add(new JLabel("Is A+ Allowed?"));
 		p.add(aPlusEntry);
@@ -2938,6 +2971,19 @@ public class Gradebook extends JFrame implements ActionListener {
 		if(s.equals("Add Assignment")) {
 			hideBreakdown();
 			enterGrade();
+			
+			TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(gradeList.getModel());
+			gradeList.setRowSorter(sorter);
+			List<RowSorter.SortKey> sortKeys = new ArrayList<>();
+			
+			int columnIndexToSort = 1;
+			sortKeys.add(new RowSorter.SortKey(columnIndexToSort, SortOrder.ASCENDING));
+			
+			sorter.setSortKeys(sortKeys);
+			sorter.sort();
+			
+			for(int i = 0; i < gdtm.getColumnCount(); i++)
+				sorter.setSortable(i, false);
 		}
 		
 		if(s.equals("Analyze Grades")) {
