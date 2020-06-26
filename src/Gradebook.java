@@ -183,21 +183,24 @@ public class Gradebook extends JFrame implements ActionListener {
         manualOverride.addActionListener(this);
         
         // Create the textfield for allowing edits
-        JLabel identifier = new JLabel("Identifier/Code: ");
+        JLabel identifier = new JLabel("     Identifier/Code: ");
         identifierInput = new JTextField();
-        identifierInput.setPreferredSize(new Dimension(125,25));
+        identifierInput.setPreferredSize(new Dimension(100,25));
         identifierInput.setEditable(true);
         identifierInput.setBounds(10,10,300,50);
         identifierInput.setSize(200, 20);
         
         // Add the buttons to the panel
         double screenWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
-        Dimension preferredSize = new Dimension((int) ((screenWidth - 250) / 11), 25);
+        Dimension preferredSize = new Dimension(115, 25);
         JButton[] buttons = {addCourse, addAssignment, removeCourse, editElement, viewBreakdown, finalizeGrades,
         		importExport, settings, help};
         
+        JLabel calcLabel = new JLabel("Grade Calculator v5     ");
+        calcLabel.setFont(new Font("Courier", Font.ITALIC, 14));
+        buttonPanel.add(calcLabel);
+        
         for(int i = 0; i < buttons.length; i++) {
-        	buttons[i].setPreferredSize(preferredSize);
         	buttonPanel.add(buttons[i]);
         	buttons[i].setSelected(false);
         	buttons[i].setBackground(new Color(93, 201, 247));
@@ -207,6 +210,7 @@ public class Gradebook extends JFrame implements ActionListener {
         buttonPanel.add(identifierInput);
         buttonPanel.setBackground(new Color(242, 236, 228));
         buttonPanel.setBounds(0,0,1250, 75);
+        buttonPanel.setPreferredSize(new Dimension((int) screenWidth,40));
         
         // Add the panel to the frame
         frame.add(buttonPanel);
@@ -231,7 +235,7 @@ public class Gradebook extends JFrame implements ActionListener {
         
         revertTableSettings();
         
-        buttonPanel.setPreferredSize(new Dimension((int) (screenWidth - 150), 40));
+        buttonPanel.setPreferredSize(new Dimension(1400, 40));
         
         frame.pack();
 
@@ -2805,7 +2809,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			String s = "Subject/Course Number. Also known as a course code.\nExamples: ENGL 1011, CSCI 2113, BISC 1112, etc.\n\n"
 					+ "Course Title. What is the course called?\nExamples: Introduction to Psychology, Single-Variable Calculus I, etc.\n\n" 
 					+ "Comment. Anything you wish to put as additional information for the course.\nSuggestions: teacher name, course time/day, "
-					+ "course location, or, if it’s a grade, what the assignment/grade is for, etc.\n\n" 
+					+ "course location, or, if itâ€™s a grade, what the assignment/grade is for, etc.\n\n" 
 					+ "Identifier. A unique, system-generated ID for the course.\n"
 					+ "This is what you will enter into the Identifier/Code textfield to make any deletions or edits. \n"
 					+ "Note: You can tell if you correctly input a course as Honors/AP by the Identifier, which will end\n"
