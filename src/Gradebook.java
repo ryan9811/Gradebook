@@ -1256,7 +1256,8 @@ public class Gradebook extends JFrame implements ActionListener {
 				DecimalFormat rounder = new DecimalFormat("#.####");
 				rounder.setRoundingMode(RoundingMode.HALF_UP);
 			
-				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});		
+				cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});
+				
 				String gpa = rounder.format(qualitySum / (creditSum + failCreditSum - nonGpaSum)) + "";
 				
 				if(!gpa.contains("."))
@@ -1265,6 +1266,30 @@ public class Gradebook extends JFrame implements ActionListener {
 				String creditSumString = rounder.format(creditSum) + "";
 				
 				String qualitySumString = rounder.format(qualitySum) + "";
+				
+				double highestCreditsRow = 0;
+				double highestCredits = 0;
+				for(int i = 0; i < cdtm.getRowCount(); i++) {
+					if(cdtm.getValueAt(i, 0).equals("Total Credits Earned") && Double.parseDouble(cdtm.getValueAt(i, 1) + "") > highestCredits)
+						highestCreditsRow = i;
+				}
+
+				if(creditSum == 0) {
+					cdtm.addRow(new Object[] {"Term Credits Earned", creditSumString, "Term Quality Points", 
+							qualitySumString, "", "", "", "", "Term GPA", "n/a"});
+					
+					cdtm.addRow(new Object[] {"Total Credits Earned", cdtm.getValueAt((int)highestCreditsRow, 1), "Total Quality Points", 
+							cdtm.getValueAt((int)highestCreditsRow, 3), "", "", "", "", "Cumulative GPA", cdtm.getValueAt((int)highestCreditsRow, 9)});
+					
+					for(int i = 0; i < cdtm.getRowCount(); i++) {
+						if(cdtm.getValueAt(i, 0).equals("Total Credits Earned") || cdtm.getValueAt(i, 0).equals("Term Credits Earned"))
+							courseList.addRowSelectionInterval(i, i);
+					}
+					
+					cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});
+					
+					return;
+				}
 				
 				if(!allNotation) {
 					termGpas.add(Double.parseDouble(gpa));
