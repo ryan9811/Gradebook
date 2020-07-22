@@ -286,6 +286,11 @@ public class Gradebook extends JFrame implements ActionListener {
 				nonGpaCreditTotal += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 			}
 		}
+		
+		if(creditSum == 0) {
+			Errors.ML5.displayErrorMsg();
+			return;
+		}
 			
 		DecimalFormat rounder = new DecimalFormat("#.####");
 		rounder.setRoundingMode(RoundingMode.HALF_UP);
@@ -472,6 +477,11 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		if(fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
 			loadTable(fileChooser.getSelectedFile());
+		
+		for(int i = 0; i < cdtm.getRowCount(); i++) {
+			if(cdtm.getValueAt(i, 0).equals("Total Credits Earned") || cdtm.getValueAt(i, 0).equals("Term Credits Earned"))
+				courseList.addRowSelectionInterval(i, i);
+		}
 	}
 	
 	/**
@@ -1752,7 +1762,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			
 			else if(catEditChoice.equals("Mark Ungraded")) {
 				if(JOptionPane.showConfirmDialog(null, "Are you sure you want to mark [" + identifierInput.getText() + "] "
-						+ "Ungraded?\nThis action cannot be reversed.\n","Assignment Master", JOptionPane.YES_NO_CANCEL_OPTION) == 0) {
+						+ "Ungraded?\n","Assignment Master", JOptionPane.YES_NO_CANCEL_OPTION) == 0) {
 					gdtm.setValueAt("Ungraded", row, 5);
 					gdtm.setValueAt("Ungraded", row, 7);
 					
@@ -2237,12 +2247,12 @@ public class Gradebook extends JFrame implements ActionListener {
 	
 						if(totalPoints == 0) {
 							analyzerInfo += "Category Title: " + titles.get(j) + "\nWeight: " + weights.get(j) + "\nCategory Points: " + rounder.format(pointsEarned) + " / "
-									+ rounder.format(totalPoints - totalPointsUngraded) + "\nCategory Average: " + grade;
+									+ rounder.format(totalPoints - totalPointsUngraded) + "\nCategory Average: " + rounder.format(grade);
 							totalPercentUngraded += Double.parseDouble(weights.get(j));
 						}
 						else {
 							analyzerInfo += "Category Title: " + titles.get(j) + "\nWeight: " + weights.get(j) + "\nCategory Points: " + rounder.format(pointsEarned) + " / "
-									+ rounder.format(totalPoints - totalPointsUngraded) + "\nCategory Average: " + grade + "\n\n";
+									+ rounder.format(totalPoints - totalPointsUngraded) + "\nCategory Average: " + rounder.format(grade) + "\n\n";
 							
 							totalPercentUngraded += totalPointsUngraded / totalPoints * Double.parseDouble(weights.get(j));
 						}
@@ -2255,7 +2265,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					}
 					
 					
-					analyzerInfo += "~~Minimum Grade Possible~~\n\nYou will earn a " + minPossibleGrade + " for the course\nif no additional "
+					analyzerInfo += "~~Minimum Grade Possible~~\n\nYou will earn a " + rounder.format(minPossibleGrade) + " for the course\nif no additional "
 							+ "work is completed\n(assuming all assignments have been entered).\n\n";
 					
 					boolean printedAp, printedA, printedAm, printedBp, printedB, printedBm, printedCp, printedC, printedCm,
@@ -3005,7 +3015,8 @@ public class Gradebook extends JFrame implements ActionListener {
 						+ "ML2. Number Format Exception. Arises when anything other than a number has been entered into a text field\n"
 						+ "that is only meant to accept numbers.\n\n" 
 						+ "ML3. No Breakdown to Formulate. Arises when no grades have been inputted for the identified course.\n\n"
-						+ "ML4. No Grades for Calculation. Arises when trying to calculate What-If GPA when no grades have been entered.";
+						+ "ML4. No Grades for Calculation. Arises when trying to calculate What-If GPA when no grades have been entered.\n\n"
+						+ "ML5. Zero Credit Total. Cannot Calculate What-If GPA if the sum of the term credits is zero.";
 				JOptionPane.showMessageDialog(null, s, "Help Master", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}

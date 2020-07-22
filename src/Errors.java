@@ -28,7 +28,8 @@ public enum Errors {
 	ML1("ML1", "Missing Information"),
 	ML2("ML2", "Number Format Exception"),
 	ML3("ML3", "No Breakdown to Formulate"),
-	ML4("ML4", "No Grades for Calculation");
+	ML4("ML4", "No Grades for Calculation"),
+	ML5("ML5", "Zero Credit Total");
 	
 	private final String code, msg;
 	
