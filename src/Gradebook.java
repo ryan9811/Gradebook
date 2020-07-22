@@ -260,6 +260,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		double tempTotalFCreditSum = totalFCreditSum;
 		double tempNonGpaCreditTotal = nonGpaCreditTotal;
 		
+		String gpaDisplayer = "~~What-If GPA~~\n\n";
+		
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
 			if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("Letter") && !cdtm.getValueAt(i, 7).equals("F")) {
 				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual(cdtm.getValueAt(i, 3)+"",(String)cdtm.getValueAt(i, 7));
@@ -288,7 +290,6 @@ public class Gradebook extends JFrame implements ActionListener {
 		DecimalFormat rounder = new DecimalFormat("#.####");
 		rounder.setRoundingMode(RoundingMode.HALF_UP);
 			
-		gdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});		
 		String gpa = rounder.format(qualitySum / (creditSum + failCreditSum - nonGpaSum)) + "";
 				
 		if(!gpa.contains("."))
@@ -297,9 +298,9 @@ public class Gradebook extends JFrame implements ActionListener {
 		String creditSumString = rounder.format(creditSum) + "";
 				
 		String qualitySumString = rounder.format(qualitySum) + "";
-				
-		gdtm.addRow(new Object[] {"Term Credits Earned", creditSumString, "", 
-					"General Information", "", "", "Term GPA", gpa, "What If GPA (If Finalized)"});
+		
+		gpaDisplayer += "Current Term Credits Earned: " + creditSumString + "\n";
+		gpaDisplayer += "Current Term GPA: " + gpa + "\n\n";
 		
 		double totalGpa = 0;
 		for(int i = 0; i < termGpas.size(); i++) {
@@ -317,8 +318,8 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		totalGpa /= termCreditSummation;
 		
-		gdtm.addRow(new Object[] {"Total Credits Earned", rounder.format(termCreditSummation), "", 
-				"General Information", "", "", "Cumulative GPA", rounder.format(totalGpa), "What If GPA (If Finalized)"});
+		gpaDisplayer += "Cumulative Credits Earned: " + rounder.format(termCreditSummation) + "\n";
+		gpaDisplayer += "Cumulative GPA: " + rounder.format(totalGpa);
 				
 //		double allQualitySum = 0;
 //		double allCreditSum = 0;
@@ -339,9 +340,9 @@ public class Gradebook extends JFrame implements ActionListener {
 //				
 //		gdtm.addRow(new Object[] {"Total Credits Earned", allCreditSumString, "", "General Information", 
 //					"Total Quality Points", allQualitySumString, "Cumulative GPA", totalGpa, "What If GPA (If Finalized)"});	
-				
-		gdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});
-				
+		
+		JOptionPane.showMessageDialog(null, gpaDisplayer, "Grade Master", JOptionPane.INFORMATION_MESSAGE);
+		
 		nonGpaCreditTotal = tempNonGpaCreditTotal;
 		totalFCreditSum = tempTotalFCreditSum;
 	}
@@ -2192,9 +2193,6 @@ public class Gradebook extends JFrame implements ActionListener {
 			
 			String analyzerInfo = "Grade Analysis for Course [" + id + "]\n\n~~Category Breakdown~~\n\n";
 			
-			gdtm.addRow(new Object[] {"","","","","","","","",""});
-			gdtm.addRow(new Object[] {"~~GRADE ANALYZER~~","Z99","","","","","","",""});
-			gdtm.addRow(new Object[] {"","","","","","","","",""});
 			ArrayList<String> identifiers = new ArrayList<String>();
 			ArrayList<String> titles = new ArrayList<String>();
 			ArrayList<String> weights = new ArrayList<String>();
@@ -2240,15 +2238,11 @@ public class Gradebook extends JFrame implements ActionListener {
 						if(totalPoints == 0) {
 							analyzerInfo += "Category Title: " + titles.get(j) + "\nWeight: " + weights.get(j) + "\nCategory Points: " + rounder.format(pointsEarned) + " / "
 									+ rounder.format(totalPoints - totalPointsUngraded) + "\nCategory Average: " + grade;
-							gdtm.addRow(new Object[] {courseTitle,"Z99","",titles.get(j),weights.get(j),rounder.format(pointsEarned),
-								rounder.format(totalPoints - totalPointsUngraded), grade, "Category Average"});
 							totalPercentUngraded += Double.parseDouble(weights.get(j));
 						}
 						else {
 							analyzerInfo += "Category Title: " + titles.get(j) + "\nWeight: " + weights.get(j) + "\nCategory Points: " + rounder.format(pointsEarned) + " / "
 									+ rounder.format(totalPoints - totalPointsUngraded) + "\nCategory Average: " + grade + "\n\n";
-							gdtm.addRow(new Object[] {courseTitle,"Z99","",titles.get(j),weights.get(j),rounder.format(pointsEarned),
-									rounder.format(totalPoints), rounder.format(grade), "Category Average"});
 							
 							totalPercentUngraded += totalPointsUngraded / totalPoints * Double.parseDouble(weights.get(j));
 						}
@@ -2263,12 +2257,6 @@ public class Gradebook extends JFrame implements ActionListener {
 					
 					analyzerInfo += "~~Minimum Grade Possible~~\n\nYou will earn a " + minPossibleGrade + " for the course\nif no additional "
 							+ "work is completed\n(assuming all assignments have been entered).\n\n";
-					
-					gdtm.addRow(new Object[] {"","","","","","","","",""});
-					
-					gdtm.addRow(new Object[] {courseTitle,"Z99","","General Information","","","",rounder.format(minPossibleGrade),"Minimum Grade Possible"});
-					
-					gdtm.addRow(new Object[] {"","","","","","","","",""});
 					
 					boolean printedAp, printedA, printedAm, printedBp, printedB, printedBm, printedCp, printedC, printedCm,
 						printedDp, printedD, printedDm, printedP;
@@ -2339,48 +2327,34 @@ public class Gradebook extends JFrame implements ActionListener {
 					
 					if(isAPluses) {
 						analyzerInfo += "Remaining Average Required for [A+]: " + rounder.format(tAp) + "\n";
-						gdtm.addRow(new Object[] {courseTitle,"Z99","","Qualification Analyzer","","","",rounder.format(tAp),"Rem Avg Required for [A+]"});
 					}
 					
-					gdtm.addRow(new Object[] {courseTitle,"Z99","","Qualification Analyzer","","","",rounder.format(tA),"Rem Avg Required for [A]"});
 					analyzerInfo += "Remaining Average Required for [A]: " + rounder.format(tA) + "\n";
 					
-					gdtm.addRow(new Object[] {courseTitle,"Z99","","Qualification Analyzer","","","",rounder.format(tAm),"Rem Avg Required for [A-]"});
 					analyzerInfo += "Remaining Average Required for [A-]: " + rounder.format(tAm) + "\n";
 					
-					gdtm.addRow(new Object[] {courseTitle,"Z99","","Qualification Analyzer","","","",rounder.format(tBp),"Rem Avg Required for [B+]"});
 					analyzerInfo += "Remaining Average Required for [B+]: " + rounder.format(tBp) + "\n";
 					
-					gdtm.addRow(new Object[] {courseTitle,"Z99","","Qualification Analyzer","","","",rounder.format(tB),"Rem Avg Required for [B]"});
 					analyzerInfo += "Remaining Average Required for [B]: " + rounder.format(tB) + "\n";
 					
-					gdtm.addRow(new Object[] {courseTitle,"Z99","","Qualification Analyzer","","","",rounder.format(tBm),"Rem Avg Required for [B-]"});
 					analyzerInfo += "Remaining Average Required for [B-]: " + rounder.format(tBm) + "\n";
 					
-					gdtm.addRow(new Object[] {courseTitle,"Z99","","Qualification Analyzer","","","",rounder.format(tCp),"Rem Avg Required for [C+]"});
 					analyzerInfo += "Remaining Average Required for [C+]: " + rounder.format(tCp) + "\n";
 					
-					gdtm.addRow(new Object[] {courseTitle,"Z99","","Qualification Analyzer","","","",rounder.format(tC),"Rem Avg Required for [C]"});
 					analyzerInfo += "Remaining Average Required for [C]: " + rounder.format(tC) + "\n";
 					
-					gdtm.addRow(new Object[] {courseTitle,"Z99","","Qualification Analyzer","","","",rounder.format(tCm),"Rem Avg Required for [C-]"});
 					analyzerInfo += "Remaining Average Required for [C-]: " + rounder.format(tCm) + "\n";
 					
-					gdtm.addRow(new Object[] {courseTitle,"Z99","","Qualification Analyzer","","","",rounder.format(tDp),"Rem Avg Required for [D+]"});
 					analyzerInfo += "Remaining Average Required for [D+]: " + rounder.format(tDp) + "\n";
 					
-					gdtm.addRow(new Object[] {courseTitle,"Z99","","Qualification Analyzer","","","",rounder.format(tD),"Rem Avg Required for [D]"});
 					analyzerInfo += "Remaining Average Required for [D]: " + rounder.format(tD) + "\n";
 					
-					gdtm.addRow(new Object[] {courseTitle,"Z99","","Qualification Analyzer","","","",rounder.format(tDm),"Rem Avg Required for [D-]"});
 					analyzerInfo += "Remaining Average Required for [D-]: " + rounder.format(tDm) + "\n";
 					
-					gdtm.addRow(new Object[] {courseTitle,"Z99","","Qualification Analyzer","","","",rounder.format(tP),"Rem Avg Required for [Pass]"});
 					analyzerInfo += "Remaining Average Required for [Pass]: " + rounder.format(tP);
 				}
 			}	
-				JOptionPane.showMessageDialog(null, analyzerInfo, "Grade Master", JOptionPane.INFORMATION_MESSAGE);
-				viewBreakdown.setText("Hide Analyzer");
+			JOptionPane.showMessageDialog(null, analyzerInfo, "Grade Master", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 	
@@ -3149,6 +3123,11 @@ public class Gradebook extends JFrame implements ActionListener {
 			
 			String analyze = (String) JOptionPane.showInputDialog(null, "Select Action to Perform", "Grade Master", 
 					JOptionPane.QUESTION_MESSAGE, null, analyzeChoices, analyzeChoices[0]);
+			
+			if(analyze == null) {
+				displayCancelMsg();
+				return;
+			}
 			
 			if(analyze.equals("Analyze Course Grades") && isIdentifierFound()) {
 				viewParticularBreakdown(identifierInput.getText());
