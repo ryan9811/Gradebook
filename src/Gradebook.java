@@ -1269,9 +1269,33 @@ public class Gradebook extends JFrame implements ActionListener {
 				
 				double highestCreditsRow = 0;
 				double highestCredits = 0;
+				boolean everFinalized = false;
+				
+				for(int i = 0; i < cdtm.getRowCount(); i++) {
+					if(cdtm.getValueAt(i, 0).equals("Total Credits Earned"))
+						everFinalized = true;
+				}
+				
 				for(int i = 0; i < cdtm.getRowCount(); i++) {
 					if(cdtm.getValueAt(i, 0).equals("Total Credits Earned") && Double.parseDouble(cdtm.getValueAt(i, 1) + "") > highestCredits)
 						highestCreditsRow = i;
+				}
+				
+				if(!everFinalized && (highestCreditsRow == 0 || highestCredits == 0)) {
+					cdtm.addRow(new Object[] {"Term Credits Earned", creditSumString, "Term Quality Points", 
+							qualitySumString, "", "", "", "", "Term GPA", "n/a"});
+					
+					cdtm.addRow(new Object[] {"Total Credits Earned", creditSumString, "Total Quality Points", 
+							qualitySumString, "", "", "", "", "Cumulative GPA", "n/a"});
+					
+					for(int i = 0; i < cdtm.getRowCount(); i++) {
+						if(cdtm.getValueAt(i, 0).equals("Total Credits Earned") || cdtm.getValueAt(i, 0).equals("Term Credits Earned"))
+							courseList.addRowSelectionInterval(i, i);
+					}
+					
+					cdtm.addRow(new Object[] {"", "", "", "", "", "", "", "", "", ""});
+					
+					return;
 				}
 
 				if(creditSum == 0) {
