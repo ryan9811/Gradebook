@@ -1777,7 +1777,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			
 			String[] catEditChoices1 = {"Mark Ungraded", "Regrade", "Change Category", "Edit Comment"};
 			
-			String[] catEditChoices2 = {"Grade Assignment", "Change Category", "Edit Comment"};
+			String[] catEditChoices2 = {"Grade Assignment", "Change Point Value", "Change Category", "Edit Comment"};
 			
 			String catEditChoice;
 			if(isAssignmentGraded(identifierInput.getText())) {
@@ -1807,6 +1807,19 @@ public class Gradebook extends JFrame implements ActionListener {
 				
 				calculateGrade(id);
 				JOptionPane.showMessageDialog(null, "Successfully Updated", "System Notification", JOptionPane.INFORMATION_MESSAGE);
+			}
+			
+			else if(catEditChoice.equals("Change Point Value")) {
+				String totalPoints = JOptionPane.showInputDialog(null, "Enter New Point Value", "Assignment Master", JOptionPane.INFORMATION_MESSAGE);
+				try {
+					double test = Double.parseDouble(totalPoints);
+				} catch (NumberFormatException e) {
+					Errors.ML2.displayErrorMsg();
+					return;
+				}
+				DecimalFormat rounder = new DecimalFormat("#.####");
+				rounder.setRoundingMode(RoundingMode.HALF_UP);
+				gdtm.setValueAt(rounder.format(Double.parseDouble(totalPoints)), row, 6);
 			}
 			
 			else if(catEditChoice.equals("Mark Ungraded")) {
