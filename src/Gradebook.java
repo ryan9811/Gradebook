@@ -2426,7 +2426,13 @@ public class Gradebook extends JFrame implements ActionListener {
 					analyzerInfo += "Remaining Average Required for [Pass]: " + rounder.format(tP);
 				}
 			}	
-			JOptionPane.showMessageDialog(null, analyzerInfo, "Grade Master", JOptionPane.INFORMATION_MESSAGE);
+			
+			JTextArea a = new JTextArea(analyzerInfo, 30, 25);
+			JScrollPane sp = new JScrollPane(a);
+			sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+			sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			JOptionPane.showMessageDialog(null, sp, "Grade Master", JOptionPane.INFORMATION_MESSAGE);
+			// JOptionPane.showMessageDialog(null, analyzerInfo, "Grade Master", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 	
