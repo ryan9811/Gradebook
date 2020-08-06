@@ -2857,7 +2857,7 @@ public class Gradebook extends JFrame implements ActionListener {
 						+ "Minimum Grade for [Pass]: " + gradeScales.get(i).get("P") + "\n",
 						"Settings Master", JOptionPane.INFORMATION_MESSAGE);
 			}
-			else {
+			else if(!isAPluses && gradeScales.get(i).get("Name").equals(view)) {
 				JOptionPane.showMessageDialog(null, "Grade Scale Name: " + gradeScales.get(i).get("Name") + "\n"
 						+ "Minimum Grade for [A]: " + gradeScales.get(i).get("A") + "\n"
 						+ "Minimum Grade for [A-]: " + gradeScales.get(i).get("A-") + "\n"
