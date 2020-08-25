@@ -1207,16 +1207,23 @@ public class Gradebook extends JFrame implements ActionListener {
 		boolean allNotation = true;
 		
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
+			System.out.println(allNotation);
 			if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("Letter") && !cdtm.getValueAt(i, 7).equals("F")) {
 				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual(cdtm.getValueAt(i, 3)+"",(String)cdtm.getValueAt(i, 7));
 				creditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
-				allNotation = false;
+				if(Integer.parseInt(cdtm.getValueAt(i, 4) + "") != 0) {
+					allNotation = false;
+					System.out.println("At stage 1");
+				}
 			}
 			
 			else if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("Letter") && cdtm.getValueAt(i, 7).equals("NP")) {
 				cdtm.setValueAt("Finalized", i, 9);
-				allNotation = false;
+				if(Integer.parseInt(cdtm.getValueAt(i, 4) + "") != 0) {
+					allNotation = false;
+					System.out.println("At stage 2");
+				}
 			}
 			
 			else if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("Letter") && cdtm.getValueAt(i, 7).equals("F")) {
@@ -1224,7 +1231,10 @@ public class Gradebook extends JFrame implements ActionListener {
 				failCreditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				totalFCreditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
-				allNotation = false;
+				if(Integer.parseInt(cdtm.getValueAt(i, 4) + "") != 0) {
+					allNotation = false;
+					System.out.println("At stage 3");
+				}
 			}
 			
 			else if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("P/NP") && cdtm.getValueAt(i, 7).equals("P")) {
@@ -1232,7 +1242,10 @@ public class Gradebook extends JFrame implements ActionListener {
 				nonGpaSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				nonGpaCreditTotal += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
-				allNotation = false;
+				if(Integer.parseInt(cdtm.getValueAt(i, 4) + "") != 0) {
+					allNotation = false;
+					System.out.println("At stage 4");
+				}
 			}
 			
 			else if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("Notation") && cdtm.getValueAt(i, 7).equals("TR")) {
@@ -1242,10 +1255,13 @@ public class Gradebook extends JFrame implements ActionListener {
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 			
-			else if(!cdtm.getValueAt(i, 7).equals("")) {
-				cdtm.setValueAt("Finalized", i, 9);
-				allNotation = false;
-			}
+//			else if(!cdtm.getValueAt(i, 7).equals("")) {
+//				cdtm.setValueAt("Finalized", i, 9);
+//				if(Integer.parseInt(cdtm.getValueAt(i, 4) + "") != 0) {
+//					allNotation = false;
+//					System.out.println("At stage 5");
+//				}
+//			}
 		}
 		
 		if(((String) cdtm.getValueAt(cdtm.getRowCount() - 1, 9)).equals("Finalized")) {
@@ -1352,8 +1368,12 @@ public class Gradebook extends JFrame implements ActionListener {
 				}
 				
 				else {
-					cdtm.addRow(new Object[] {"Total Credits Earned", allCreditSumString, "Total Quality Points", 
-							allQualitySumString, "", "", "", "", "Cumulative GPA", "n/a"});
+					if(termGpas.size() > 1)
+						cdtm.addRow(new Object[] {"Total Credits Earned", allCreditSumString, "Total Quality Points", 
+								allQualitySumString, "", "", "", "", "Cumulative GPA", totalGpa});
+					else
+						cdtm.addRow(new Object[] {"Total Credits Earned", allCreditSumString, "Total Quality Points", 
+								allQualitySumString, "", "", "", "", "Cumulative GPA", "n/a"});
 				}
 				
 				for(int i = 0; i < cdtm.getRowCount(); i++) {
