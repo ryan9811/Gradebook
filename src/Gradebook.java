@@ -590,7 +590,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		for(int i = 0; i < finishedCats.size(); i++) {
 			for(int j = 0; j < gdtm.getRowCount(); j++) {
-				if(gdtm.getValueAt(j, 3).equals(finishedCats.get(i))) {
+				if(gdtm.getValueAt(j, 3).equals(finishedCats.get(i)) && gdtm.getValueAt(j, 1).equals(identifier)) {
 					categoryWeight = Double.parseDouble(gdtm.getValueAt(j, 4) + "");
 				}
 				if(gdtm.getValueAt(j,1).equals(identifier) && finishedCats.get(i).equals(gdtm.getValueAt(j, 3))) {
@@ -599,7 +599,7 @@ public class Gradebook extends JFrame implements ActionListener {
 						sumTotalPoints += Double.parseDouble(gdtm.getValueAt(j, 6) + "");
 					}
 				}
-			}	
+			}
 			finalGrade += (sumPointsEarned / sumTotalPoints) * (categoryWeight / sumCategoryWeightsUsed) * 100;
 			sumPointsEarned = 0;
 			sumTotalPoints = 0;
@@ -2328,12 +2328,12 @@ public class Gradebook extends JFrame implements ActionListener {
 						double grade = pointsEarned / (totalPoints - totalPointsUngraded) * 100;
 	
 						if(totalPoints == 0) {
-							analyzerInfo += "Category Title: " + titles.get(j) + "\nWeight: " + weights.get(j) + "\nCategory Points: " + rounder.format(pointsEarned) + " / "
+							analyzerInfo += "\nCategory Title: " + titles.get(j) + "\nWeight: " + weights.get(j) + "\nCategory Points: " + rounder.format(pointsEarned) + " / "
 									+ rounder.format(totalPoints - totalPointsUngraded) + "\nCategory Average: " + rounder.format(grade);
 							totalPercentUngraded += Double.parseDouble(weights.get(j));
 						}
 						else {
-							analyzerInfo += "Category Title: " + titles.get(j) + "\nWeight: " + weights.get(j) + "\nCategory Points: " + rounder.format(pointsEarned) + " / "
+							analyzerInfo += "\nCategory Title: " + titles.get(j) + "\nWeight: " + weights.get(j) + "\nCategory Points: " + rounder.format(pointsEarned) + " / "
 									+ rounder.format(totalPoints - totalPointsUngraded) + "\nCategory Average: " + rounder.format(grade) + "\n\n";
 							
 							totalPercentUngraded += totalPointsUngraded / totalPoints * Double.parseDouble(weights.get(j));
