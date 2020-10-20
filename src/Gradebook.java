@@ -2329,7 +2329,7 @@ public class Gradebook extends JFrame implements ActionListener {
 	
 						if(totalPoints == 0) {
 							analyzerInfo += "\nCategory Title: " + titles.get(j) + "\nWeight: " + weights.get(j) + "\nCategory Points: " + rounder.format(pointsEarned) + " / "
-									+ rounder.format(totalPoints - totalPointsUngraded) + "\nCategory Average: " + rounder.format(grade);
+									+ rounder.format(totalPoints - totalPointsUngraded) + "\nCategory Average: " + rounder.format(grade) + "\n\n";
 							totalPercentUngraded += Double.parseDouble(weights.get(j));
 						}
 						else {
