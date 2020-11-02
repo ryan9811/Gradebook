@@ -600,7 +600,14 @@ public class Gradebook extends JFrame implements ActionListener {
 					}
 				}
 			}
+			System.out.println("sumPointsEarned: " + sumPointsEarned);
+			System.out.println("sumTotalPoints: " + sumTotalPoints);
+			System.out.println("categoryWeight: " + categoryWeight);
+			System.out.println("sumCategoryWeightsUsed: " + sumCategoryWeightsUsed);
+			System.out.println("sumPointsEarned / sumTotalPoints: " + sumPointsEarned / sumTotalPoints * 100);
+			System.out.println("categoryWeight / sumCategoryWeightsUsed: " + categoryWeight / sumCategoryWeightsUsed * 100);
 			finalGrade += (sumPointsEarned / sumTotalPoints) * (categoryWeight / sumCategoryWeightsUsed) * 100;
+			System.out.println(finalGrade);
 			sumPointsEarned = 0;
 			sumTotalPoints = 0;
 		}
@@ -2415,6 +2422,15 @@ public class Gradebook extends JFrame implements ActionListener {
 						}
 					}
 					
+					double moreDetailedGrade = minPossibleGrade/(getSumWeights(id)-totalPercentUngraded) * 100;
+					String roundDetailedGrade = rounder.format(moreDetailedGrade);
+					
+					analyzerInfo += "~~More Detailed Average~~\n" + roundDetailedGrade + 
+							"\nThis grade is more representative of the\n"
+							+ "courseworkthat has been completed thus far\n"
+							+ "and calculates based on individual assignments\n"
+							+ "rather than full categories.\n\n";
+					
 					analyzerInfo += "~~Grade Qualification Analysis~~\n\n";
 					
 					if(isAPluses) {
@@ -2448,6 +2464,7 @@ public class Gradebook extends JFrame implements ActionListener {
 			}	
 			
 			JTextArea a = new JTextArea(analyzerInfo, 30, 25);
+			a.setEditable(false);
 			JScrollPane sp = new JScrollPane(a);
 			sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 			sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
