@@ -304,7 +304,7 @@ public class Gradebook extends JFrame implements ActionListener {
 				
 		String qualitySumString = rounder.format(qualitySum) + "";
 		
-		gpaDisplayer += "Current Term Credits Earned: " + creditSumString + "\n";
+		//gpaDisplayer += "Current Term Credits Earned: " + creditSumString + "\n";
 		gpaDisplayer += "Current Term GPA: " + gpa + "\n\n";
 		
 		double totalGpa = 0;
@@ -323,7 +323,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		
 		totalGpa /= termCreditSummation;
 		
-		gpaDisplayer += "Cumulative Credits Earned: " + rounder.format(termCreditSummation) + "\n";
+		//gpaDisplayer += "Cumulative Credits Earned: " + rounder.format(termCreditSummation) + "\n";
 		gpaDisplayer += "Cumulative GPA: " + rounder.format(totalGpa);
 				
 //		double allQualitySum = 0;
