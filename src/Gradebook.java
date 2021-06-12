@@ -1300,16 +1300,19 @@ public class Gradebook extends JFrame implements ActionListener {
 				}
 				
 				for(int i = 0; i < cdtm.getRowCount(); i++) {
-					if(cdtm.getValueAt(i, 0).equals("Total Credits Earned") && Double.parseDouble(cdtm.getValueAt(i, 1) + "") > highestCredits)
+					if(cdtm.getValueAt(i, 0).equals("Total Credits Earned") && Double.parseDouble(cdtm.getValueAt(i, 1) + "") > highestCredits) {
 						highestCreditsRow = i;
+						highestCredits = Double.parseDouble(cdtm.getValueAt(i, 1) + "");
+					}
 				}
 				
 				if(!everFinalized && (highestCreditsRow == 0 || highestCredits == 0)) {
+					System.out.println("in hereeeeee");
 					cdtm.addRow(new Object[] {"Term Credits Earned", creditSumString, "Term Quality Points", 
-							qualitySumString, "", "", "", "", "Term GPA", "n/a"});
+							qualitySumString, "", "", "", "", "Term GPA", gpa});
 					
 					cdtm.addRow(new Object[] {"Total Credits Earned", creditSumString, "Total Quality Points", 
-							qualitySumString, "", "", "", "", "Cumulative GPA", "n/a"});
+							qualitySumString, "", "", "", "", "Cumulative GPA", gpa});
 					
 					for(int i = 0; i < cdtm.getRowCount(); i++) {
 						if(cdtm.getValueAt(i, 0).equals("Total Credits Earned") || cdtm.getValueAt(i, 0).equals("Term Credits Earned"))
@@ -1370,6 +1373,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					totalGpa = totalGpa + ".0";
 				
 				if(!allNotation) {
+					System.out.println("in here");
 					cdtm.addRow(new Object[] {"Total Credits Earned", allCreditSumString, "Total Quality Points", 
 							allQualitySumString, "", "", "", "", "Cumulative GPA", totalGpa});
 				}
