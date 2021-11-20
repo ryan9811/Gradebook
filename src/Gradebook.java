@@ -322,27 +322,7 @@ public class Gradebook extends JFrame implements ActionListener {
 		totalGpa /= termCreditSummation;
 		
 		//gpaDisplayer += "Cumulative Credits Earned: " + rounder.format(termCreditSummation) + "\n";
-		gpaDisplayer += "Cumulative GPA: " + rounder.format(totalGpa);
-				
-//		double allQualitySum = 0;
-//		double allCreditSum = 0;
-//		for(int i = 0; i < cdtm.getRowCount(); i++)
-//			if(((String) cdtm.getValueAt(i, 0)).equals("Term Credits Earned") && ((String) cdtm.getValueAt(i, 4)).equals("")) {
-//				allQualitySum += Double.parseDouble(cdtm.getValueAt(i, 3) + "");
-//				allCreditSum += Double.parseDouble(cdtm.getValueAt(i, 1) + "");
-//			}
-//				
-//		String allCreditSumString = rounder.format(allCreditSum) + "";
-//				
-//		String allQualitySumString = rounder.format(allQualitySum) + "";
-//				
-//		String totalGpa = rounder.format(allQualitySum / (allCreditSum + totalFCreditSum - nonGpaCreditTotal)) + "";
-//				
-//		if(!totalGpa.contains("."))
-//			totalGpa = totalGpa + ".0";
-//				
-//		gdtm.addRow(new Object[] {"Total Credits Earned", allCreditSumString, "", "General Information", 
-//					"Total Quality Points", allQualitySumString, "Cumulative GPA", totalGpa, "What If GPA (If Finalized)"});	
+		gpaDisplayer += "Cumulative GPA: " + rounder.format(totalGpa);	
 		
 		JOptionPane.showMessageDialog(null, gpaDisplayer, "Grade Master", JOptionPane.INFORMATION_MESSAGE);
 		
