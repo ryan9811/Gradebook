@@ -83,8 +83,6 @@ public class Gradebook extends JFrame implements ActionListener {
 			e.printStackTrace();
 		}
 		
-//		UIManager.getLookAndFeelDefaults().replace("Panel.background", new ColorUIResource(0, 10, 75));
-//		UIManager.getLookAndFeelDefaults().replace("OptionPane.background", new ColorUIResource(0, 10, 75));
 		UIManager.getLookAndFeelDefaults().replace("Panel.background", new ColorUIResource(242, 236, 228));
 		UIManager.getLookAndFeelDefaults().replace("OptionPane.background", new ColorUIResource(242, 236, 228));
 
@@ -600,14 +598,7 @@ public class Gradebook extends JFrame implements ActionListener {
 					}
 				}
 			}
-			System.out.println("sumPointsEarned: " + sumPointsEarned);
-			System.out.println("sumTotalPoints: " + sumTotalPoints);
-			System.out.println("categoryWeight: " + categoryWeight);
-			System.out.println("sumCategoryWeightsUsed: " + sumCategoryWeightsUsed);
-			System.out.println("sumPointsEarned / sumTotalPoints: " + sumPointsEarned / sumTotalPoints * 100);
-			System.out.println("categoryWeight / sumCategoryWeightsUsed: " + categoryWeight / sumCategoryWeightsUsed * 100);
 			finalGrade += (sumPointsEarned / sumTotalPoints) * (categoryWeight / sumCategoryWeightsUsed) * 100;
-			System.out.println(finalGrade);
 			sumPointsEarned = 0;
 			sumTotalPoints = 0;
 		}
@@ -845,8 +836,6 @@ public class Gradebook extends JFrame implements ActionListener {
 					
 					for(int i = 0; i < catNameEntries.size(); i++) {
 						if(!catNameEntries.get(i).getText().isEmpty() && isNumbers(catNameEntries.get(i).getText())) {
-							System.out.println(catNameEntries.get(i).getText());
-							System.out.println(catWeightEntries.get(i).getText());
 							Errors.AER3.displayErrorMsg();
 							return;
 						}
@@ -1053,8 +1042,6 @@ public class Gradebook extends JFrame implements ActionListener {
 					
 					for(int i = 0; i < catNameEntries.size(); i++) {
 						if(!catNameEntries.get(i).getText().isEmpty() && isNumbers(catNameEntries.get(i).getText())) {
-							System.out.println(catNameEntries.get(i).getText());
-							System.out.println(catWeightEntries.get(i).getText());
 							Errors.AER3.displayErrorMsg();
 							return;
 						}
@@ -1214,14 +1201,12 @@ public class Gradebook extends JFrame implements ActionListener {
 		boolean allNotation = true;
 		
 		for(int i = 0; i < cdtm.getRowCount(); i++) {
-			System.out.println(allNotation);
 			if(cdtm.getValueAt(i, 8).equals(term + "") && cdtm.getValueAt(i, 6).equals("Letter") && !cdtm.getValueAt(i, 7).equals("F")) {
 				qualitySum += Double.parseDouble((String)cdtm.getValueAt(i, 4)) * letToQual(cdtm.getValueAt(i, 3)+"",(String)cdtm.getValueAt(i, 7));
 				creditSum += Double.parseDouble((String)cdtm.getValueAt(i, 4));
 				cdtm.setValueAt("Finalized", i, 9);
 				if(Integer.parseInt(cdtm.getValueAt(i, 4) + "") != 0) {
 					allNotation = false;
-					System.out.println("At stage 1");
 				}
 			}
 			
@@ -1229,7 +1214,6 @@ public class Gradebook extends JFrame implements ActionListener {
 				cdtm.setValueAt("Finalized", i, 9);
 				if(Integer.parseInt(cdtm.getValueAt(i, 4) + "") != 0) {
 					allNotation = false;
-					System.out.println("At stage 2");
 				}
 			}
 			
@@ -1240,7 +1224,6 @@ public class Gradebook extends JFrame implements ActionListener {
 				cdtm.setValueAt("Finalized", i, 9);
 				if(Integer.parseInt(cdtm.getValueAt(i, 4) + "") != 0) {
 					allNotation = false;
-					System.out.println("At stage 3");
 				}
 			}
 			
@@ -1251,7 +1234,6 @@ public class Gradebook extends JFrame implements ActionListener {
 				cdtm.setValueAt("Finalized", i, 9);
 				if(Integer.parseInt(cdtm.getValueAt(i, 4) + "") != 0) {
 					allNotation = false;
-					System.out.println("At stage 4");
 				}
 			}
 			
@@ -1262,19 +1244,12 @@ public class Gradebook extends JFrame implements ActionListener {
 				cdtm.setValueAt("Finalized", i, 9);
 			}
 			
-//			else if(!cdtm.getValueAt(i, 7).equals("")) {
-//				cdtm.setValueAt("Finalized", i, 9);
-//				if(Integer.parseInt(cdtm.getValueAt(i, 4) + "") != 0) {
-//					allNotation = false;
-//					System.out.println("At stage 5");
-//				}
-//			}
+			else if(cdtm.getValueAt(i, 6).equals("Notation")) {
+				cdtm.setValueAt("Finalized", i, 9);
+			}
 		}
 		
 		if(((String) cdtm.getValueAt(cdtm.getRowCount() - 1, 9)).equals("Finalized")) {
-			
-			
-				System.out.println("worked");
 			
 				DecimalFormat rounder = new DecimalFormat("#.####");
 				rounder.setRoundingMode(RoundingMode.HALF_UP);
@@ -1307,7 +1282,6 @@ public class Gradebook extends JFrame implements ActionListener {
 				}
 				
 				if(!everFinalized && (highestCreditsRow == 0 || highestCredits == 0)) {
-					System.out.println("in hereeeeee");
 					cdtm.addRow(new Object[] {"Term Credits Earned", creditSumString, "Term Quality Points", 
 							qualitySumString, "", "", "", "", "Term GPA", gpa});
 					
@@ -1373,7 +1347,6 @@ public class Gradebook extends JFrame implements ActionListener {
 					totalGpa = totalGpa + ".0";
 				
 				if(!allNotation) {
-					System.out.println("in here");
 					cdtm.addRow(new Object[] {"Total Credits Earned", allCreditSumString, "Total Quality Points", 
 							allQualitySumString, "", "", "", "", "Cumulative GPA", totalGpa});
 				}
